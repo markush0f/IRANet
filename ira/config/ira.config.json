@@ -1,0 +1,17 @@
+{
+  "paths": {
+    "proc": "/host/proc",
+    "logs": "/host/logs",
+    "etc": "/host/etc",
+    "docker_socket": "/var/run/docker.sock"
+  },
+  "modules": {
+    "system": true,
+    "services": true,
+    "docker": true,
+    "nginx": true
+  },
+  "server": {
+    "refresh_interval_seconds": 5
+  }
+}
