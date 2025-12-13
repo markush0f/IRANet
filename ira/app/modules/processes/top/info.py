@@ -57,3 +57,39 @@ def get_process_state_extended(value: str) -> str:
     extended = state_map.get(value, "Unknown")
     logger.debug("Extended state for value %s: %s", value, extended)
     return str(extended)
+
+
+def get_process_threads(pid: str) -> int:
+    """
+    Return the number of threads of the given process.
+    """
+    try:
+        with (PROC_PATH / pid / "status").open() as f:
+            for line in f:
+                if line.startswith("Threads:"):
+                    return int(line.split()[1])
+    except Exception:
+        pass
+    return 0
+
+
+def get_process_nice(pid: str) -> int:
+    """
+    Return the nice value of the process.
+    """
+    try:
+        with (PROC_PATH / pid / "stat").open() as f:
+            return int(f.readline().split()[18])
+    except Exception:
+        return 0
+
+def get_process_session_id(pid: str) -> int:
+    """
+    Return the session ID (SID) of the process.
+    """
+    try:
+        with (PROC_PATH / pid / "stat").open() as f:
+            return int(f.readline().split()[5])
+    except Exception:
+        return -1
+

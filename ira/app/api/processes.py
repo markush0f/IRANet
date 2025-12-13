@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Query
 from app.services.processes import (
-    get_process_state_info,
+    get_process_stat_extended,
+    get_process_stat_field,
+    get_process_state_label,
     list_top_cpu_processes,
     get_processes_overview,
 )
@@ -22,4 +24,9 @@ def top_processes_summary(limit: int = Query(5, ge=1, le=20)):
 
 @router.get("/process/{pid}/state")
 def process_state(pid: int):
-    return get_process_state_info(str(pid))
+    return get_process_state_label(str(pid))
+
+
+@router.get("/process/{pid}/stat")
+def build_process_stat(pid: int):
+    return get_process_stat_extended(str(pid))
