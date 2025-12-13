@@ -5,7 +5,10 @@ CPU-related process metrics, based on Linux /proc.
 from typing import List, Dict, Any
 import time
 
+from app.modules.processes.top.time import get_process_cpu_time
+
 from .base import (
+    CLK_TCK,
     PROC_PATH,
     iter_pids,
     read_process_memory,
@@ -18,20 +21,6 @@ def _read_total_cpu_time() -> int:
     with (PROC_PATH / "stat").open() as f:
         parts = f.readline().split()
     return sum(map(int, parts[1:8]))
-
-
-def _read_process_cpu_time(pid: str) -> int:
-    """
-    Read the CPU time consumed by a specific process.
-
-    :param pid: Process identifier as a string.
-    :return: Sum of user and system time (ticks).
-    """
-    with (PROC_PATH / pid / "stat").open() as f:
-        parts = f.readline().split()
-    utime = int(parts[13])
-    stime = int(parts[14])
-    return utime + stime
 
 
 def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
@@ -47,7 +36,7 @@ def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
     # keeps only entries that are numbers (PIDs)
     for pid in iter_pids():
         try:
-            snapshot_1[pid] = _read_process_cpu_time(pid)
+            snapshot_1[pid] = get_process_cpu_time(pid)
         except Exception:
             continue
 
@@ -60,7 +49,7 @@ def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
     # avoid “new processes” that appear later (so that the calculation is consistent)
     for pid in snapshot_1:
         try:
-            snapshot_2[pid] = _read_process_cpu_time(pid)
+            snapshot_2[pid] = get_process_cpu_time(pid)
         except Exception:
             continue
 
@@ -97,4 +86,3 @@ def get_top_cpu_processes(limit: int = 5) -> List[Dict[str, Any]]:
     Alias for get_top_processes kept for clarity when importing CPU-specific data.
     """
     return get_top_processes(limit)
-

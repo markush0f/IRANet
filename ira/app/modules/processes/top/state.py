@@ -4,8 +4,8 @@ from pathlib import Path
 import pwd
 
 from app.core.logger import get_logger
+from app.modules.processes.top.base import PROC_PATH
 
-PROC_PATH = Path("/proc")
 
 logger = get_logger(__name__)
 

@@ -2,7 +2,7 @@
 
 from app.modules.processes.top.memory import get_top_memory_processes
 from app.modules.processes.top.cpu import get_top_cpu_processes
-from app.modules.processes.top.info import (
+from app.modules.processes.top.state import (
     get_process_nice,
     get_process_session_id,
     get_process_state,
