@@ -6,6 +6,11 @@ from pathlib import Path
 from typing import Dict, Any
 import time
 
+from app.core.logger import get_logger
+
+
+logger = get_logger(__name__)
+
 
 PROC_PATH = Path("/proc")
 
@@ -22,12 +27,16 @@ def read_cpu_stat() -> Dict[str, Any]:
         Dict[str, Any]: Dictionary with the accumulated total time under
         the key ``"total"`` and the idle time under the key ``"idle"``.
     """
+    logger.debug("Reading CPU statistics from %s", PROC_PATH / "stat")
+
     with (PROC_PATH / "stat").open() as f:
         parts = f.readline().split()
 
     values = list(map(int, parts[1:8]))
     total = sum(values)
     idle = values[3]
+
+    logger.debug("CPU stats read: total=%s idle=%s", total, idle)
 
     return {"total": total, "idle": idle}
 
@@ -47,6 +56,8 @@ def read_memory_info() -> Dict[str, Any]:
     """
     meminfo = {}
 
+    logger.debug("Reading memory information from %s", PROC_PATH / "meminfo")
+
     with (PROC_PATH / "meminfo").open() as f:
         for line in f:
             key, value = line.split(":")
@@ -56,6 +67,8 @@ def read_memory_info() -> Dict[str, Any]:
     free = meminfo["MemAvailable"]
 
     used = total - free
+
+    logger.debug("Memory info read: total=%s used=%s free=%s", total, used, free)
 
     return {"total_kb": total, "used_kb": used, "free_kb": free}
 
@@ -71,10 +84,16 @@ def read_load_average() -> Dict[str, Any]:
         Dict[str, Any]: Dictionary with the keys ``"1m"``, ``"5m"`` and
         ``"15m"`` representing the load averages over those intervals.
     """
+    logger.debug("Reading load average from %s", PROC_PATH / "loadavg")
+
     with (PROC_PATH / "loadavg").open() as f:
         one, five, fifteen, *_ = f.read().split()
 
-    return {"1m": float(one), "5m": float(five), "15m": float(fifteen)}
+    load = {"1m": float(one), "5m": float(five), "15m": float(fifteen)}
+
+    logger.debug("Load averages read: %s", load)
+
+    return load
 
 
 def read_uptime() -> float:
@@ -87,8 +106,12 @@ def read_uptime() -> float:
     Returns:
         float: System uptime in seconds.
     """
+    logger.debug("Reading system uptime from %s", PROC_PATH / "uptime")
+
     with (PROC_PATH / "uptime").open() as f:
         uptime_seconds = float(f.read().split()[0])
+
+    logger.debug("System uptime read: %s seconds", uptime_seconds)
 
     return uptime_seconds
 
@@ -130,15 +153,21 @@ def _unit_metrics_json():
         ~ timestamp: Unix timestamp when metrics were collected
     """
 
+    logger.info("Collecting system metrics")
+
     cpu = read_cpu_stat()
     memory = read_memory_info()
     load = read_load_average()
     uptime = read_uptime()
 
-    return {
+    metrics = {
         "cpu": cpu,
         "memory": memory,
         "load": load,
         "uptime_seconds": uptime,
         "timestamp": int(time.time()),
     }
+
+    logger.debug("System metrics collected: %s", metrics)
+
+    return metrics
