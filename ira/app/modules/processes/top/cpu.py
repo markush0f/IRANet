@@ -5,7 +5,7 @@ CPU-related process metrics, based on Linux /proc.
 from typing import List, Dict, Any
 import time
 
-from app.modules.processes.top.time import get_process_cpu_time
+from app.modules.processes.top.time import get_process_cpu_time_ticks
 
 from .base import (
     CLK_TCK,
@@ -36,7 +36,7 @@ def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
     # keeps only entries that are numbers (PIDs)
     for pid in iter_pids():
         try:
-            snapshot_1[pid] = get_process_cpu_time(pid)
+            snapshot_1[pid] = get_process_cpu_time_ticks(pid)
         except Exception:
             continue
 
@@ -49,7 +49,7 @@ def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
     # avoid “new processes” that appear later (so that the calculation is consistent)
     for pid in snapshot_1:
         try:
-            snapshot_2[pid] = get_process_cpu_time(pid)
+            snapshot_2[pid] = get_process_cpu_time_ticks(pid)
         except Exception:
             continue
 
