@@ -2,9 +2,9 @@ from fastapi import FastAPI
 
 from app.api.health import router as health_router
 from app.api.system import router as system_router
+from app.api.processes import router as processes_router
 from app.core.config import load_config
 from app.core.logger import get_logger
-
 
 logger = get_logger(__name__)
 
@@ -20,7 +20,7 @@ config = load_config()
 
 app.include_router(health_router)
 app.include_router(system_router)
-
+app.include_router(processes_router)
 
 @app.get("/config")
 def get_config():
