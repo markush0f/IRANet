@@ -5,6 +5,13 @@ import pwd
 
 from app.core.logger import get_logger
 from app.modules.processes.top.base import PROC_PATH
+from app.modules.processes.top.time import (
+    get_process_cpu_time_ticks,
+    get_process_cpu_time_seconds,
+    get_process_cpu_time_milliseconds,
+    get_process_cpu_time_minutes,
+)
+
 
 
 logger = get_logger(__name__)
@@ -83,7 +90,7 @@ def get_process_nice(pid: str) -> int:
     except Exception:
         return 0
 
-def get_process_session_id(pid: str) -> int:
+def get_process_session_id(pid: str, ) -> int:
     """
     Return the session ID (SID) of the process.
     """

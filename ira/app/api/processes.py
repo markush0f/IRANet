@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Query
+from app.common.TIME_TYPES import TimeType
 from app.services.processes import (
+    get_process_cpu_time,
     get_process_stat_extended,
     get_process_stat_field,
     get_process_state_label,
@@ -30,3 +32,8 @@ def process_state(pid: int):
 @router.get("/process/{pid}/stat")
 def build_process_stat(pid: int):
     return get_process_stat_extended(str(pid))
+
+
+@router.get("/process/cpu/time/{pid}")
+def process_cpu_time(pid: int, time_type: TimeType = TimeType.TICKS):
+    return get_process_cpu_time(str(pid), time_type)
