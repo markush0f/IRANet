@@ -6,4 +6,5 @@ router = APIRouter(prefix="/processes", tags=["processes"])
 
 @router.get("/top")
 def top_processes(limit: int = Query(5, ge=1, le=20)):
+    """Get the top CPU-consuming processes."""
     return get_top_processes(limit)

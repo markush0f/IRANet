@@ -66,29 +66,43 @@ def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
     Calculates CPU percentage and memory used for each process, sorts by CPU
     usage in descending order and returns the first ones.
 
+    CPU usage is calculated using two snapshots of accumulated CPU counters:
+    values read from /proc are cumulative since system or process start, so
+    the actual CPU usage is derived from the difference between two readings
+    taken in a short time window.
+
     :param limit: Maximum number of processes to return.
     :return: List of dicts with pid, name, cpu_percent and memory_kb.
     """
+    # accumulated CPU
+    # /proc provides cumulative CPU counters since boot (system) or process start.
+    # To calculate real CPU usage, two snapshots are taken and the delta between
+    # them represents the CPU consumed during this short interval.
     snapshot_1 = {}
     total_cpu_1 = _read_total_cpu_time()
 
+    # keeps only entries that are numbers (PIDs)
     for pid in filter(str.isdigit, os.listdir(PROC_PATH)):
         try:
             snapshot_1[pid] = _read_process_cpu_time(pid)
         except Exception:
             continue
 
+    # wait 100 ms to measure differences between snapshot 1 and snapshot 2
     time.sleep(0.1)
 
+    # save CPU per process at the second instant
     snapshot_2 = {}
     total_cpu_2 = _read_total_cpu_time()
 
+    # avoid “new processes” that appear later (so that the calculation is consistent)
     for pid in snapshot_1:
         try:
             snapshot_2[pid] = _read_process_cpu_time(pid)
         except Exception:
             continue
 
+    # calculate how much the total system CPU counter “advanced” during the interval
     total_delta = total_cpu_2 - total_cpu_1
 
     processes = []
@@ -98,6 +112,7 @@ def get_top_processes(limit: int = 5) -> List[Dict[str, Any]]:
         if cpu_2 is None:
             continue
 
+        # amount of CPU consumed by that process during the interval
         cpu_delta = cpu_2 - cpu_1
         if cpu_delta <= 0 or total_delta <= 0:
             continue
