@@ -7,7 +7,7 @@
 ## 1. Cabecera completa del sistema
 
 La cabecera ocupa varias líneas y resume el estado global del sistema.
-
+****
 ---
 
 ### 1.1 Primera línea — Estado general
