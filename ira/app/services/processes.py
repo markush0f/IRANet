@@ -6,6 +6,8 @@ from app.modules.processes.top.memory import get_top_memory_processes
 from app.modules.processes.top.cpu import get_top_cpu_processes
 from app.modules.processes.top.state import (
     get_process_nice,
+    get_process_ppid,
+    get_process_priority,
     get_process_session_id,
     get_process_state,
     get_process_state_extended as get_state_label,
@@ -133,3 +135,14 @@ def get_process_cpu_time(pid: str, tyme_type: TimeType = TimeType.TICKS) -> floa
         return get_process_cpu_time_formatted(pid)
     else:
         raise ValueError(f"Unsupported time type: {tyme_type}")
+    
+    
+def get_process_ppid_info(pid: str) -> int:
+    """Return the parent PID of the process."""
+    return get_process_ppid(pid)
+
+
+def get_process_priority_info(pid: str) -> int:
+    """Return the priority of the process."""
+    logger.debug("Getting priority info for pid %s", pid)
+    return get_process_priority(pid)

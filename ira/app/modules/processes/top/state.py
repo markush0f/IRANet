@@ -1,18 +1,8 @@
 """Get information about top processes."""
 
-from pathlib import Path
 import pwd
-
 from app.core.logger import get_logger
 from app.modules.processes.top.base import PROC_PATH
-from app.modules.processes.top.time import (
-    get_process_cpu_time_ticks,
-    get_process_cpu_time_seconds,
-    get_process_cpu_time_milliseconds,
-    get_process_cpu_time_minutes,
-)
-
-
 
 logger = get_logger(__name__)
 
@@ -90,7 +80,10 @@ def get_process_nice(pid: str) -> int:
     except Exception:
         return 0
 
-def get_process_session_id(pid: str, ) -> int:
+
+def get_process_session_id(
+    pid: str,
+) -> int:
     """
     Return the session ID (SID) of the process.
     """
@@ -100,3 +93,24 @@ def get_process_session_id(pid: str, ) -> int:
     except Exception:
         return -1
 
+
+def get_process_ppid(pid: str) -> int:
+    """
+    Return the parent process ID (PPID) of the process.
+    """
+    try:
+        with (PROC_PATH / pid / "stat").open() as f:
+            return int(f.readline().split()[3])
+    except Exception:
+        return -1
+
+
+def get_process_priority(pid: str) -> int:
+    """
+    Return the scheduling priority (PRI) of the process.
+    """
+    try:
+        with (PROC_PATH / pid / "stat").open() as f:
+            return int(f.readline().split()[17])
+    except Exception:
+        return -1

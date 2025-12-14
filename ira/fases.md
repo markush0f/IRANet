@@ -19,10 +19,10 @@ Esta checklist está pensada para evolucionar tu script actual **por fases**, pr
 
 Campos básicos que cualquier administrador espera ver.
 
-* [ ] `USER` → propietario del proceso (`stat().st_uid`)
+* [x] `USER` → propietario del proceso (`stat().st_uid`)
 * [x] `STAT` → estado del proceso (`/proc/<pid>/stat` campo 3)
-* [ ] `TIME+` → tiempo total de CPU consumido
-* [ ] `PPID` → padre del proceso
+* [x] `TIME+` → tiempo total de CPU consumido
+* [x] `PPID` → padre del proceso
 * [ ] `NI` → nice value
 * [ ] `PRI` → prioridad de scheduling
 
