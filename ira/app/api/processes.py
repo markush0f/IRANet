@@ -49,3 +49,8 @@ def process_ppid(pid: int):
 @router.get("/process/{pid}/priority")
 def process_priority(pid: int):
     return get_process_priority_info(str(pid))
+
+
+@router.get("/process/{pid}/nice")
+def process_nice(pid: int):
+    return get_process_nice(str(pid))

@@ -146,3 +146,8 @@ def get_process_priority_info(pid: str) -> int:
     """Return the priority of the process."""
     logger.debug("Getting priority info for pid %s", pid)
     return get_process_priority(pid)
+
+def get_process_nice_info(pid: str) -> int:
+    """Return the nice value of the process."""
+    logger.debug("Getting nice info for pid %s", pid)
+    return get_process_nice(pid)
