@@ -38,3 +38,16 @@ def get_cpu_global_top_percent_info(interval: float = 0.1) -> dict[str, float]:
     Return global CPU usage percentages (top-like).
     """
     return get_cpu_global_top_percent(interval)
+
+
+def get_system_header() -> dict:
+    """
+    Return the full system header information (top-like).
+    """
+
+    return {
+        "uptime": get_system_uptime_formatted(),
+        "load_average": get_load_average(),
+        "tasks": get_tasks_summary_named(),
+        "cpu": get_cpu_global_top_percent(),
+    }

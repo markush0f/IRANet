@@ -14,6 +14,7 @@ from app.services.processes.processes_state import (
 )
 from app.services.processes.processes_table import get_processes_table
 from app.services.processes.processes_header import (
+    get_system_header,
     get_system_uptime_formatted,
     get_load_average_info,
     get_tasks_summary_named_info,
@@ -80,3 +81,8 @@ def header_load():
 def header_tasks():
     """Return a summary of tasks grouped by named states."""
     return get_tasks_summary_named_info()
+
+
+@router.get("/header/full")
+def header_full():
+    return get_system_header()
