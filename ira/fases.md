@@ -23,8 +23,8 @@ Campos básicos que cualquier administrador espera ver.
 * [x] `STAT` → estado del proceso (`/proc/<pid>/stat` campo 3)
 * [x] `TIME+` → tiempo total de CPU consumido
 * [x] `PPID` → padre del proceso
-* [ ] `NI` → nice value
-* [ ] `PRI` → prioridad de scheduling
+* [x] `NI` → nice value
+* [x] `PRI` → prioridad de scheduling
 
 Resultado: tabla de procesos ya comparable con `top` real.
 

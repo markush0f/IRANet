@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query
 from app.common.TIME_TYPES import TimeType
+from app.modules.processes.top.state import get_process_nice
 from app.services.processes import (
     get_process_cpu_time,
     get_process_ppid_info,
