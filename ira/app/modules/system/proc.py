@@ -1,16 +1,12 @@
 """
-Generic system metrics readers.
-
-This module contains low-level helpers to read global system metrics
-directly from the Linux /proc filesystem. These metrics are not related
-to specific processes (PIDs) and are meant to be aggregated later by
-higher-level builders such as the system header or snapshots.
+System-wide memory information helpers.
 """
 
 import os
+from app.modules.common.base import PROC_PATH
 from typing import Dict
 
-from app.modules.common.base import PROC_PATH
+
 
 
 def read_uptime_seconds() -> float:
