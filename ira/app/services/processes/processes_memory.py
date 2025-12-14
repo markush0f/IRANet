@@ -14,6 +14,7 @@ from app.modules.processes.top.memory import (
     get_process_memory_shared_kb,
 )
 from app.modules.processes.top.system import get_total_memory_kb
+from app.modules.system.meminfo import read_memory_info
 
 logger = get_logger(__name__)
 
@@ -66,7 +67,7 @@ def get_process_memory_percent(pid: str) -> float:
 
     :param pid: Process identifier as a string.
     :return: Memory usage percentage, rounded to two decimal places, or
-        ``0.0`` if the total memory cannot be determined.
+        ``0.0`` if the total memory cannot be determined.`
     """
     total_mem = get_total_memory_kb()
     if total_mem <= 0:
@@ -76,5 +77,8 @@ def get_process_memory_percent(pid: str) -> float:
     return round((res_kb / total_mem) * 100, 2)
 
 
-
-
+def get_memory_info() -> dict[str, int]:
+    """
+    Return system memory information.
+    """
+    return read_memory_info()

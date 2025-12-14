@@ -48,9 +48,9 @@ Resultado: visibilidad real del impacto en memoria.
 Información global del sistema.
 
 * [x] Uptime (`/proc/uptime`)
-* [ ] Load average 1m / 5m / 15m (`/proc/loadavg`)
-* [ ] Número de tareas (running / total)
-* [ ] CPU global (`%us`, `%sy`, `%id`, `%wa`, etc.)
+* [x] Load average 1m / 5m / 15m (`/proc/loadavg`)
+* [x] Número de tareas (running / total)
+* [x] CPU global (`%us`, `%sy`, `%id`, `%wa`, etc.)
 
 Resultado: cabecera equivalente a `top`.
 

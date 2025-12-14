@@ -8,6 +8,8 @@ from ``/proc/<pid>`` entries and expose it in kilobytes.
 import os
 from typing import List, Dict, Any
 
+from app.modules.common.TOP_MEMORY_FIELDS import TOP_MEMORY_FIELDS
+
 from .base import PROC_PATH, iter_pids, read_process_memory, read_process_name
 
 PAGE_SIZE_KB = os.sysconf("SC_PAGE_SIZE") // 1024
@@ -105,3 +107,8 @@ def get_process_memory_res_kb(pid: str) -> int:
         pass
 
     return 0
+
+
+
+
+

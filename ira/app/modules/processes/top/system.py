@@ -3,40 +3,12 @@ System-wide memory information helpers.
 """
 
 import os
-from typing import Literal
 
 from app.modules.processes.top.base import PROC_PATH
+from app.modules.system.meminfo import get_total_memory
 
-MemoryUnit = Literal["kb", "mb", "gb"]
 
 
-def get_total_memory(unit: MemoryUnit = "kb") -> int:
-    """
-    Return total system memory in the requested unit.
-
-    The value is read from ``/proc/meminfo`` (``MemTotal`` entry),
-    which is expressed in kilobytes by the kernel.
-
-    :param unit: Target unit for the result: ``\"kb\"`` (default),
-        ``\"mb\"`` or ``\"gb\"``.
-    :return: Total system memory converted to the requested unit. On
-        failure, ``0`` is returned.
-    """
-    try:
-        with (PROC_PATH / "meminfo").open() as f:
-            for line in f:
-                if line.startswith("MemTotal:"):
-                    value_kb = int(line.split()[1])
-                    if unit == "kb":
-                        return value_kb
-                    if unit == "mb":
-                        return value_kb // 1024
-                    if unit == "gb":
-                        return value_kb // (1024 * 1024)
-    except Exception:
-        pass
-
-    return 0
 
 
 def get_total_memory_kb() -> int:

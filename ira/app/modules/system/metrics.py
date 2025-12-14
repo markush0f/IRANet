@@ -7,6 +7,7 @@ from typing import Dict, Any
 import time
 
 from app.core.logger import get_logger
+from app.modules.system.meminfo import read_memory_and_swap_status, read_memory_info
 
 
 logger = get_logger(__name__)
@@ -41,36 +42,6 @@ def read_cpu_stat() -> Dict[str, Any]:
     return {"total": total, "idle": idle}
 
 
-def read_memory_info() -> Dict[str, Any]:
-    """
-    Retrieve system memory information from ``/proc/meminfo``.
-
-    It iterates over all lines of the file, building a dictionary with
-    the numeric values (in kilobytes) reported by the kernel, and then
-    computes total, used and available memory.
-
-    Returns:
-        Dict[str, Any]: Dictionary with the keys ``"total_kb"``,
-        ``"used_kb"`` and ``"free_kb"``, representing respectively total,
-        used and free memory in kilobytes.
-    """
-    meminfo = {}
-
-    logger.debug("Reading memory information from %s", PROC_PATH / "meminfo")
-
-    with (PROC_PATH / "meminfo").open() as f:
-        for line in f:
-            key, value = line.split(":")
-            meminfo[key] = int(value.strip().split()[0])
-
-    total = meminfo["MemTotal"]
-    free = meminfo["MemAvailable"]
-
-    used = total - free
-
-    logger.debug("Memory info read: total=%s used=%s free=%s", total, used, free)
-
-    return {"total_kb": total, "used_kb": used, "free_kb": free}
 
 
 def read_load_average() -> Dict[str, Any]:
@@ -156,13 +127,15 @@ def _unit_metrics_json():
     logger.info("Collecting system metrics")
 
     cpu = read_cpu_stat()
-    memory = read_memory_info()
+    memory_basic = read_memory_info()
     load = read_load_average()
     uptime = read_uptime()
+    memory_extended = read_memory_and_swap_status()
 
     metrics = {
         "cpu": cpu,
-        "memory": memory,
+        "memory": memory_basic,
+        "memory_status": memory_extended,
         "load": load,
         "uptime_seconds": uptime,
         "timestamp": int(time.time()),
@@ -171,3 +144,4 @@ def _unit_metrics_json():
     logger.debug("System metrics collected: %s", metrics)
 
     return metrics
+

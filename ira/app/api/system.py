@@ -11,6 +11,7 @@ from app.modules.system.services import (
     start_service,
     stop_service,
 )
+from app.services.processes.processes_memory import get_memory_info
 
 
 logger = get_logger(__name__)
@@ -86,3 +87,9 @@ def service_restart(service_name: str):
     """Restart a system service."""
     logger.info("POST /system/services/%s/restart called", service_name)
     return restart_service(service_name)
+
+@router.get("/memory/info")
+def memory_info():
+    """Get system memory information."""
+    logger.debug("GET /system/memory/info called")
+    return get_memory_info()
