@@ -8,37 +8,6 @@ from app.modules.common.base import PROC_PATH
 from app.modules.system.meminfo import get_total_memory
 
 
-
-def get_total_memory_kb() -> int:
-    """
-    Return total system memory in kilobytes.
-
-    This is a convenience wrapper around :func:`get_total_memory` that
-    always returns the value in kilobytes.
-    """
-    return get_total_memory("kb")
-
-
-def get_total_memory_mb() -> int:
-    """
-    Return total system memory in megabytes.
-
-    This is a convenience wrapper around :func:`get_total_memory` that
-    always returns the value in megabytes.
-    """
-    return get_total_memory("mb")
-
-
-def get_total_memory_gb() -> int:
-    """
-    Return total system memory in gigabytes.
-
-    This is a convenience wrapper around :func:`get_total_memory` that
-    always returns the value in gigabytes.
-    """
-    return get_total_memory("gb")
-
-
 def get_system_uptime_seconds() -> float:
     """
     Return system uptime in seconds.

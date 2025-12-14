@@ -2,7 +2,6 @@ from fastapi import APIRouter
 
 from app.core.logger import get_logger
 from app.modules.system.docker import get_docker_containers, stop_docker_container
-from app.modules.system.metrics import get_system_metrics
 from app.modules.system.nginx import get_nginx_status, reload_nginx
 from app.services.system import (
     get_service_status,
@@ -19,11 +18,11 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/system", tags=["system"])
 
 
-@router.get("/metrics")
-def system_metrics():
-    """Get aggregated system metrics."""
-    logger.debug("GET /system/metrics called")
-    return get_system_metrics()
+# @router.get("/metrics")
+# def system_metrics():
+#     """Get aggregated system metrics."""
+#     logger.debug("GET /system/metrics called")
+#     return get_system_metrics()
 
 
 @router.get("/containers")

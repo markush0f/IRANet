@@ -1,146 +1,84 @@
 """
-System metrics collection and reporting.
+Generic system metrics readers.
+
+This module contains low-level helpers to read global system metrics
+directly from the Linux /proc filesystem. These metrics are not related
+to specific processes (PIDs) and are meant to be aggregated later by
+higher-level builders such as the system header or snapshots.
 """
 
-from pathlib import Path
-from typing import Dict, Any
-import time
+import os
+from typing import Dict
 
-from app.core.logger import get_logger
 from app.modules.common.base import PROC_PATH
-from app.modules.system.meminfo import read_memory_and_swap_status, read_memory_info
 
 
-logger = get_logger(__name__)
-
-
-
-def read_cpu_stat() -> Dict[str, Any]:
+def read_uptime_seconds() -> float:
     """
-    Read aggregated CPU statistics from ``/proc/stat``.
+    Read the system uptime in seconds.
 
-    It reads the first line corresponding to the CPU, extracts the first
-    seven numeric fields and computes the total and idle CPU time in
-    jiffies.
-
-    Returns:
-        Dict[str, Any]: Dictionary with the accumulated total time under
-        the key ``"total"`` and the idle time under the key ``"idle"``.
+    The value is obtained from /proc/uptime and represents the number
+    of seconds since the system was last booted.
     """
-    logger.debug("Reading CPU statistics from %s", PROC_PATH / "stat")
-
-    with (PROC_PATH / "stat").open() as f:
-        parts = f.readline().split()
-
-    values = list(map(int, parts[1:8]))
-    total = sum(values)
-    idle = values[3]
-
-    logger.debug("CPU stats read: total=%s idle=%s", total, idle)
-
-    return {"total": total, "idle": idle}
+    try:
+        with (PROC_PATH / "uptime").open() as f:
+            return float(f.readline().split()[0])
+    except Exception:
+        return 0.0
 
 
-
-
-def read_load_average() -> Dict[str, Any]:
+def read_load_average() -> Dict[str, float]:
     """
-    Read the system load averages from ``/proc/loadavg``.
+    Read system load averages.
 
-    It extracts the load averages for 1, 5 and 15 minutes and returns
-    them as floating-point values.
-
-    Returns:
-        Dict[str, Any]: Dictionary with the keys ``"1m"``, ``"5m"`` and
-        ``"15m"`` representing the load averages over those intervals.
+    Returns the 1, 5 and 15 minute load averages as reported by
+    /proc/loadavg.
     """
-    logger.debug("Reading load average from %s", PROC_PATH / "loadavg")
+    try:
+        with (PROC_PATH / "loadavg").open() as f:
+            one, five, fifteen, *_ = f.readline().split()
+            return {
+                "load_1m": float(one),
+                "load_5m": float(five),
+                "load_15m": float(fifteen),
+            }
+    except Exception:
+        return {
+            "load_1m": 0.0,
+            "load_5m": 0.0,
+            "load_15m": 0.0,
+        }
 
-    with (PROC_PATH / "loadavg").open() as f:
-        one, five, fifteen, *_ = f.read().split()
 
-    load = {"1m": float(one), "5m": float(five), "15m": float(fifteen)}
-
-    logger.debug("Load averages read: %s", load)
-
-    return load
-
-
-def read_uptime() -> float:
+def read_tasks_summary_named() -> Dict[str, int]:
     """
-    Get the system uptime from ``/proc/uptime``.
+    Read a summary of system tasks grouped by human-readable state.
 
-    It reads the first value in the file, which indicates the number of
-    seconds elapsed since the system was last booted.
-
-    Returns:
-        float: System uptime in seconds.
+    The process state is read from /proc/<pid>/stat and mapped to
+    aggregated categories similar to those shown by the `top` command.
     """
-    logger.debug("Reading system uptime from %s", PROC_PATH / "uptime")
+    state_counts: Dict[str, int] = {}
 
-    with (PROC_PATH / "uptime").open() as f:
-        uptime_seconds = float(f.read().split()[0])
+    for pid in os.listdir(PROC_PATH):
+        if not pid.isdigit():
+            continue
 
-    logger.debug("System uptime read: %s seconds", uptime_seconds)
+        try:
+            with (PROC_PATH / pid / "stat").open() as f:
+                state = f.readline().split()[2]
 
-    return uptime_seconds
+            state_counts[state] = state_counts.get(state, 0) + 1
+        except Exception:
+            continue
 
-
-def get_system_metrics() -> Dict[str, Any]:
-    """
-    Collect and aggregate basic system metrics.
-
-    It combines CPU, memory, load average and uptime metrics together
-    with a UNIX timestamp representing when the metrics were read.
-
-    Returns:
-        Dict[str, Any]: Dictionary containing the keys ``"cpu"``,
-        ``"memory"``, ``"load"``, ``"uptime_seconds"`` and ``"timestamp"``
-        with the corresponding system metrics.
-    """
-    return _unit_metrics_json()
-
-
-def _unit_metrics_json():
-    """
-    Unit test helper to get system metrics as JSON.
-
-    Returns:
-    - CPU:
-        ~ total: Total CPU time ticks since system boot
-        ~ idle: Idle CPU time ticks since system boot
-    - Memory:
-        ~ total_kb: Total system memory in KB
-        ~ used_kb: Used system memory in KB
-        ~ free_kb: Available system memory in KB
-    - Load:
-        ~ 1m: Load average over 1 minute
-        ~ 5m: Load average over 5 minutes
-        ~ 15m: Load average over 15 minutes
-    - Uptime:
-        ~ uptime_seconds: System uptime in seconds
-    - Meta:
-        ~ timestamp: Unix timestamp when metrics were collected
-    """
-
-    logger.info("Collecting system metrics")
-
-    cpu = read_cpu_stat()
-    memory_basic = read_memory_info()
-    load = read_load_average()
-    uptime = read_uptime()
-    memory_extended = read_memory_and_swap_status()
-
-    metrics = {
-        "cpu": cpu,
-        "memory": memory_basic,
-        "memory_status": memory_extended,
-        "load": load,
-        "uptime_seconds": uptime,
-        "timestamp": int(time.time()),
+    return {
+        "total": sum(state_counts.values()),
+        "running": state_counts.get("R", 0),
+        "sleeping": (
+            state_counts.get("S", 0)
+            + state_counts.get("D", 0)
+            + state_counts.get("I", 0)
+        ),
+        "stopped": state_counts.get("T", 0),
+        "zombie": state_counts.get("Z", 0),
     }
-
-    logger.debug("System metrics collected: %s", metrics)
-
-    return metrics
-

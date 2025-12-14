@@ -7,7 +7,6 @@ This module provides high-level helpers built on top of
 from app.common.TIME_TYPES import TimeType
 from app.core.logger import get_logger
 
-from app.modules.processes.top.cpu import get_cpu_global_top_percent
 from app.modules.processes.top.time import (
     get_process_cpu_time_ticks,
     get_process_cpu_time_seconds,
@@ -16,6 +15,7 @@ from app.modules.processes.top.time import (
     get_process_cpu_time_hours,
     get_process_cpu_time_formatted,
 )
+from app.modules.system.cpu import get_cpu_global_top_percent
 
 logger = get_logger(__name__)
 
