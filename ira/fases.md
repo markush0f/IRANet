@@ -34,10 +34,10 @@ Resultado: tabla de procesos ya comparable con `top` real.
 
 Mejora clave para análisis de consumo real.
 
-* [ ] `VIRT` → memoria virtual total (`statm`)
-* [ ] `SHR` → memoria compartida
-* [ ] `%MEM` → porcentaje sobre RAM total
-* [ ] Lectura de RAM total (`/proc/meminfo`)
+* [x] `VIRT` → memoria virtual total (`statm`)
+* [x] `SHR` → memoria compartida
+* [x] `%MEM` → porcentaje sobre RAM total
+* [x] Lectura de RAM total (`/proc/meminfo`)
 
 Resultado: visibilidad real del impacto en memoria.
 
@@ -47,7 +47,7 @@ Resultado: visibilidad real del impacto en memoria.
 
 Información global del sistema.
 
-* [ ] Uptime (`/proc/uptime`)
+* [x] Uptime (`/proc/uptime`)
 * [ ] Load average 1m / 5m / 15m (`/proc/loadavg`)
 * [ ] Número de tareas (running / total)
 * [ ] CPU global (`%us`, `%sy`, `%id`, `%wa`, etc.)

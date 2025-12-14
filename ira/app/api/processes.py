@@ -1,16 +1,23 @@
 from fastapi import APIRouter, Query
 from app.common.TIME_TYPES import TimeType
-from app.modules.processes.top.state import get_process_nice
-from app.services.processes import (
+
+from app.services.processes.processes import get_processes_overview
+from app.services.processes.processes_cpu import (
     get_process_cpu_time,
+    list_top_cpu_processes,
+)
+from app.services.processes.processes_state import (
     get_process_ppid_info,
     get_process_priority_info,
     get_process_stat_extended,
-    list_top_cpu_processes,
-    get_processes_overview,
-    
+    get_process_nice_info,
 )
-from app.services.processes_table import get_processes_table
+from app.services.processes.processes_table import get_processes_table
+from app.services.processes.processes_header import (
+    get_system_uptime_formatted,
+    get_load_average_info,
+    get_tasks_summary_named_info,
+)
 
 router = APIRouter(prefix="/processes", tags=["processes"])
 
@@ -49,9 +56,27 @@ def process_priority(pid: int):
 
 @router.get("/process/{pid}/nice")
 def process_nice(pid: int):
-    return get_process_nice(str(pid))
+    return get_process_nice_info(str(pid))
 
 
 @router.get("/table")
 def processes_table(limit: int = Query(5, ge=1, le=20)):
     return get_processes_table(limit)
+
+
+@router.get("/header/uptime")
+def header_uptime():
+    """Return the formatted system uptime."""
+    return {"uptime": get_system_uptime_formatted()}
+
+
+@router.get("/header/load")
+def header_load():
+    """Return the system load averages (1, 5, 15 minutes)."""
+    return get_load_average_info()
+
+
+@router.get("/header/tasks")
+def header_tasks():
+    """Return a summary of tasks grouped by named states."""
+    return get_tasks_summary_named_info()

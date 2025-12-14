@@ -7,11 +7,11 @@ This module provides high-level helpers built on top of
 from app.common.TIME_TYPES import TimeType
 from app.core.logger import get_logger
 
-from app.modules.processes.top.cpu import get_top_cpu_processes
+from app.modules.processes.top.cpu import get_cpu_global_top_percent
 from app.modules.processes.top.time import (
     get_process_cpu_time_ticks,
     get_process_cpu_time_seconds,
-    get_process_cpu_time_milliseconds,
+    get_process_cpu_time_milliseconds,  
     get_process_cpu_time_minutes,
     get_process_cpu_time_hours,
     get_process_cpu_time_formatted,
@@ -32,7 +32,7 @@ def list_top_cpu_processes(limit: int = 5):
         underlying helper.
     """
     logger.info("Listing top CPU processes (limit=%d)", limit)
-    return get_top_cpu_processes(limit)
+    return get_cpu_global_top_percent(limit)
 
 
 def get_process_cpu_time(pid: str, tyme_type: TimeType = TimeType.TICKS) -> float | str:
@@ -64,7 +64,3 @@ def get_process_cpu_time(pid: str, tyme_type: TimeType = TimeType.TICKS) -> floa
     raise ValueError(f"Unsupported time type: {tyme_type}")
 
 
-__all__ = [
-    "list_top_cpu_processes",
-    "get_process_cpu_time",
-]

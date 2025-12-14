@@ -5,14 +5,14 @@ from app.core.logger import get_logger
 
 from app.shared.pids import iter_pids
 
-from .processes_cpu import get_process_cpu_time
-from .processes_memory import (
+from .processes import get_process_cpu_time
+from .processes import (
     get_process_memory_percent,
     get_process_memory_res,
     get_process_memory_shared,
     get_process_memory_virt,
 )
-from .processes_state import (
+from .processes import (
     get_process_nice_info,
     get_process_ppid_info,
     get_process_priority_info,
@@ -64,4 +64,3 @@ def get_processes_table(limit: int | None = None) -> list[dict]:
     return processes
 
 
-__all__ = ["get_processes_table"]
