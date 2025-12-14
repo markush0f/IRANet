@@ -13,7 +13,7 @@ from app.modules.processes.top.memory import (
     get_process_memory_res_kb,
     get_process_memory_shared_kb,
 )
-from app.modules.processes.top.system import get_total_memory_kb
+from app.modules.system.header import get_total_memory_kb
 from app.modules.system.meminfo import read_memory_info
 
 logger = get_logger(__name__)

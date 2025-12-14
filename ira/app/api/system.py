@@ -4,7 +4,7 @@ from app.core.logger import get_logger
 from app.modules.system.docker import get_docker_containers, stop_docker_container
 from app.modules.system.metrics import get_system_metrics
 from app.modules.system.nginx import get_nginx_status, reload_nginx
-from app.modules.system.services import (
+from app.services.system import (
     get_service_status,
     list_services,
     restart_service,

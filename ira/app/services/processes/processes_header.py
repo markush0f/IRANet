@@ -1,6 +1,6 @@
 from app.api.system import memory_info
 from app.modules.processes.top.cpu import get_cpu_global_top_percent
-from app.modules.processes.top.system import (
+from app.modules.system.header import (
     get_load_average,
     get_system_uptime_seconds,
     get_tasks_summary_named,

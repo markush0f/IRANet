@@ -1,5 +1,5 @@
 import os
-from app.modules.processes.top.base import PROC_PATH
+from app.modules.common.base import PROC_PATH
 
 
 def iter_pids() -> list[str]:

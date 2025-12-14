@@ -4,10 +4,8 @@ System-wide memory information helpers.
 
 import os
 
-from app.modules.processes.top.base import PROC_PATH
+from app.modules.common.base import PROC_PATH
 from app.modules.system.meminfo import get_total_memory
-
-
 
 
 

@@ -2,7 +2,7 @@
 
 import pwd
 from app.core.logger import get_logger
-from app.modules.processes.top.base import PROC_PATH
+from app.modules.common.base import PROC_PATH
 
 logger = get_logger(__name__)
 

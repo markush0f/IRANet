@@ -7,13 +7,12 @@ from typing import Dict, Any
 import time
 
 from app.core.logger import get_logger
+from app.modules.common.base import PROC_PATH
 from app.modules.system.meminfo import read_memory_and_swap_status, read_memory_info
 
 
 logger = get_logger(__name__)
 
-
-PROC_PATH = Path("/proc")
 
 
 def read_cpu_stat() -> Dict[str, Any]:

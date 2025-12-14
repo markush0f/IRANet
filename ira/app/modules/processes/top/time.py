@@ -5,7 +5,7 @@ TIME+ is the TOTAL CPU time consumed by the process
 (user mode + kernel mode) since the process started.
 """
 
-from app.modules.processes.top.base import CLK_TCK, PROC_PATH
+from app.modules.common.base import CLK_TCK, PROC_PATH
 
 
 def _read_process_cpu_time_ticks(pid: str) -> int:

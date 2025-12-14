@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from app.core.logger import get_logger
 from app.modules.common.MEMORY_UNIT import MemoryUnit
-from app.modules.processes.top.base import PROC_PATH
+from app.modules.common.base import PROC_PATH
 
 
 logger = get_logger(__name__)
