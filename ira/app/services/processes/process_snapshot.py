@@ -20,7 +20,6 @@ from app.modules.processes.top.memory import (
     get_process_memory_virt_kb,
     get_process_memory_shared_kb,
 )
-from app.modules.system.cpu import get_cpu_global_top_percent
 
 
 def build_process_snapshot(pid: int) -> Dict[str, Any]:
