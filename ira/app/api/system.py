@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from app.core.logger import get_logger
 from app.services.system.system_alerts_snapshot import build_system_alerts_snapshot
 from app.services.system.system_snapshot import build_system_snapshot
+from app.services.system.host_info import build_host_info
 
 logger = get_logger(__name__)
 
@@ -19,3 +20,7 @@ def system_alerts():
     Return system alert flags for frontend consumption.
     """
     return build_system_alerts_snapshot()
+
+@router.get("/info")
+def system_info():
+    return build_host_info()
