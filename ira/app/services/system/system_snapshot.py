@@ -38,6 +38,12 @@ def build_system_snapshot() -> Dict[str, Any]:
     cpu = get_cpu_global_top_percent()
     memory_status = read_memory_and_swap_status()
 
+    alerts = {
+        "high_load": load["load_1m"] > (cpu["cores"] if "cores" in cpu else 1),
+        "memory_pressure": memory_status["memory"]["pressure"] != "ok",
+        "swap_active": memory_status["swap"]["state"] == "active",
+    }
+
     return {
         "timestamp": timestamp,
         "uptime": {
@@ -49,4 +55,5 @@ def build_system_snapshot() -> Dict[str, Any]:
         "cpu": cpu,
         "memory": memory_status["memory"],
         "swap": memory_status["swap"],
+        "alerts": alerts,
     }

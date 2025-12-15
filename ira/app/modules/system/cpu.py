@@ -25,7 +25,9 @@ def _read_cpu_stat() -> dict[str, int]:
 
 def get_cpu_global_top_percent(interval: float = 0.1) -> dict[str, float]:
     """
+    %Cpu(s):  1.2 us, 0.3 sy, 0.0 ni, 98.1 id, 0.0 wa, 0.0 hi, 0.4 si, 0.0 st
     Return global CPU usage percentages (top-like).
+
     """
     snap1 = _read_cpu_stat()
     time.sleep(interval)
