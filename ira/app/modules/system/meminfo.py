@@ -1,6 +1,6 @@
 from typing import Any, Dict
 from app.core.logger import get_logger
-from app.modules.common.MEMORY_UNIT import MemoryUnit
+from app.modules.types.MEMORY_UNIT_TYPE import MemoryUnit
 from app.modules.common.base import PROC_PATH
 
 
