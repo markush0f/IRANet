@@ -9,6 +9,7 @@ import AppFooter from './components/AppFooter';
 import EnvBadge from './components/EnvBadge';
 import DashboardView from './components/DashboardView';
 import DockerView from './components/DockerView';
+import ProcessesView from './components/ProcessesView';
 import type { Service, LogEntry, ServiceType } from './types';
 import { INITIAL_SERVICES, MOCK_LOGS, generateMockLog } from './mockData';
 
@@ -136,6 +137,8 @@ function App() {
             <UsersView />
           ) : currentView === 'docker' ? (
             <DockerView />
+          ) : currentView === 'processes' ? (
+            <ProcessesView />
           ) : (
             <DashboardView
               services={services}

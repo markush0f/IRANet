@@ -66,3 +66,79 @@ export interface DockerContainer {
     state: string;
     created: string;
 }
+
+export interface ProcessState {
+    code: string;
+    label: string;
+}
+
+export interface ProcessCpuInfo {
+    time_formatted: string;
+}
+
+export interface ProcessMemoryInfo {
+    virt_kb: number;
+    res_kb: number;
+    shared_kb: number;
+}
+
+export interface ProcessInfo {
+    pid: number;
+    ppid: number;
+    name: string;
+    user: string;
+    state: ProcessState;
+    cpu: ProcessCpuInfo;
+    memory: ProcessMemoryInfo;
+    priority: number;
+    nice: number;
+}
+
+export interface ProcessesSnapshotHeader {
+    uptime: string;
+    load_average: {
+        load_1m: number;
+        load_5m: number;
+        load_15m: number;
+    };
+    tasks: {
+        total: number;
+        running: number;
+        sleeping: number;
+        stopped: number;
+        zombie: number;
+    };
+    cpu: {
+        us: number;
+        ni: number;
+        sy: number;
+        id: number;
+        wa: number;
+        hi: number;
+        si: number;
+        st: number;
+    };
+    memory: {
+        total_kb: number;
+        used_kb: number;
+        free_kb: number;
+        buffers_kb: number;
+        cached_kb: number;
+        available_kb: number;
+        available_percent: number;
+        pressure: string;
+    };
+    swap: {
+        total_kb: number;
+        used_kb: number;
+        free_kb: number;
+        state: string;
+    };
+}
+
+export interface ProcessesSnapshot {
+    timestamp: number;
+    limit: number;
+    header: ProcessesSnapshotHeader;
+    processes: ProcessInfo[];
+}

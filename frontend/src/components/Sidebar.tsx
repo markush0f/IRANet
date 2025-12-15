@@ -54,6 +54,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             )
         },
         {
+            id: 'processes',
+            label: 'Processes',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6M4 6h16M4 10h16M4 14h16M5 20h14a1 1 0 001-1v-3H4v3a1 1 0 001 1z" />
+                </svg>
+            )
+        },
+        {
             id: 'users',
             label: 'Users',
             icon: (
