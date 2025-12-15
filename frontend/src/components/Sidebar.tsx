@@ -14,6 +14,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [servicesOpen, setServicesOpen] = useState(true);
 
     const navItems: NavItem[] = [
         {
@@ -22,6 +23,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+            )
+        },
+        {
+            id: 'system',
+            label: 'System Info',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M6 10h12M6 6h12M6 14h12M5 6l1-3h12l1 3" />
                 </svg>
             )
         },
@@ -93,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <span className="text-lg font-bold text-zinc-100 tracking-tight">Nexus</span>
+                        <span className="text-lg font-bold text-zinc-100 tracking-tight">IRANet</span>
                     </div>
                 )}
                 {isCollapsed && (
@@ -118,29 +128,64 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             {/* Navigation */}
             <nav className="flex-1 py-6 px-3 space-y-1">
                 {navItems.map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => onNavigate(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
-                            ${activeView === item.id
-                                ? 'bg-indigo-600/10 text-indigo-400'
-                                : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
-                            }
-                            ${isCollapsed ? 'justify-center' : ''}
-                        `}
-                    >
-                        <div className={`${activeView === item.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
-                            {item.icon}
-                        </div>
+                    <React.Fragment key={item.id}>
+                        <button
+                            onClick={() => {
+                                if (item.id === 'services') {
+                                    setServicesOpen(prev => !prev);
+                                }
+                                onNavigate(item.id);
+                            }}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
+                                ${activeView === item.id
+                                    ? 'bg-indigo-600/10 text-indigo-400'
+                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                }
+                                ${isCollapsed ? 'justify-center' : ''}
+                            `}
+                        >
+                            <div className={`${activeView === item.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                {item.icon}
+                            </div>
 
-                        {!isCollapsed && (
-                            <span className="font-medium text-sm">{item.label}</span>
-                        )}
+                            {!isCollapsed && (
+                                <span className="font-medium text-sm flex-1 flex items-center justify-between">
+                                    <span>{item.label}</span>
+                                    {item.id === 'services' && (
+                                        <svg
+                                            className={`w-3 h-3 text-zinc-500 ml-1 transition-transform ${servicesOpen ? 'rotate-90' : ''}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    )}
+                                </span>
+                            )}
 
-                        {activeView === item.id && !isCollapsed && (
-                            <div className="absolute right-2 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></div>
+                            {activeView === item.id && !isCollapsed && (
+                                <div className="absolute right-2 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></div>
+                            )}
+                        </button>
+
+                        {!isCollapsed && item.id === 'services' && servicesOpen && (
+                            <button
+                                onClick={() => onNavigate('docker')}
+                                className={`ml-8 mt-1 w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                                    ${activeView === 'docker'
+                                        ? 'bg-indigo-600/10 text-indigo-400'
+                                        : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                    }
+                                `}
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M5 6h6m-6 8h4m2 6h4a4 4 0 004-4v-6H3v6a4 4 0 004 4z" />
+                                </svg>
+                                <span>Docker containers</span>
+                            </button>
                         )}
-                    </button>
+                    </React.Fragment>
                 ))}
             </nav>
 

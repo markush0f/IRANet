@@ -1,4 +1,4 @@
-import type { Service, LogEntry } from './types';
+import type { Service, LogEntry, SystemInfo } from './types';
 
 export const INITIAL_SERVICES: Service[] = [
     {
@@ -156,3 +156,30 @@ export const MOCK_USERS = [
         avatarUrl: 'https://ui-avatars.com/api/?name=David+Wilson&background=64748b&color=fff'
     }
 ];
+
+export const MOCK_SYSTEM_INFO: SystemInfo = {
+    hostname: 'markus-pc',
+    fqdn: 'markus-pc.local',
+    os: 'Linux',
+    os_version: '#42-Ubuntu SMP',
+    kernel: '6.5.0-18-generic',
+    architecture: 'x86_64',
+    processor: 'AMD Ryzen 5 5600X',
+    python_version: '3.11.6',
+    boot_time: 1734269187.0,
+    cpu: {
+        cores_physical: 6,
+        cores_logical: 12
+    },
+    memory: {
+        total_bytes: 34359738368
+    },
+    network: {
+        mac_address: '0x1c697a9b3c1a'
+    },
+    distribution: {
+        name: 'Ubuntu',
+        version: '22.04',
+        codename: 'jammy'
+    }
+};

@@ -30,3 +30,39 @@ export interface User {
     lastLogin: string;
     avatarUrl?: string;
 }
+
+export interface SystemInfo {
+    hostname: string;
+    fqdn: string;
+    os: string;
+    os_version: string;
+    kernel: string;
+    architecture: string;
+    processor: string;
+    python_version: string;
+    boot_time: number;
+    cpu?: {
+        cores_physical: number;
+        cores_logical: number;
+    };
+    memory?: {
+        total_bytes: number;
+    };
+    network?: {
+        mac_address: string;
+    };
+    distribution: {
+        name: string;
+        version: string;
+        codename: string;
+    };
+}
+
+export interface DockerContainer {
+    id: string;
+    name: string;
+    image: string[];
+    status: string;
+    state: string;
+    created: string;
+}
