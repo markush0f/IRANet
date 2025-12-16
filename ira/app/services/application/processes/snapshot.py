@@ -1,6 +1,11 @@
 from typing import Dict, Any
 import time
 
+from app.services.application.processes.header import build_processes_header
+from app.services.application.processes.table import get_processes_table
+from typing import Dict, Any
+import time
+
 from app.modules.common.base import read_process_name
 from app.modules.processes.top.state import (
     get_process_state,
@@ -20,6 +25,27 @@ from app.modules.processes.top.memory import (
     get_process_memory_virt_kb,
     get_process_memory_shared_kb,
 )
+
+
+def build_processes_snapshot(limit: int = 20) -> Dict[str, Any]:
+    """
+    Build a full processes snapshot suitable for frontend consumption.
+
+    This snapshot is intended to power top/htop-like views and includes:
+    - a system header (uptime, load, cpu, memory, swap)
+    - a table of processes ordered by CPU usage
+    """
+    timestamp = int(time.time())
+
+    header = build_processes_header()
+    processes = get_processes_table(limit)
+
+    return {
+        "timestamp": timestamp,
+        "limit": limit,
+        "header": header,
+        "processes": processes,
+    }
 
 
 def build_process_snapshot(pid: int) -> Dict[str, Any]:

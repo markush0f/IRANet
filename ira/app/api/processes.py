@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 
-from app.services.processes.processes_snapshot import build_processes_snapshot
-from app.services.processes.process_snapshot import build_process_snapshot
+from app.services.application.processes.snapshot import build_process_snapshot, build_processes_snapshot
+
 
 router = APIRouter(prefix="/processes", tags=["processes"])
 
