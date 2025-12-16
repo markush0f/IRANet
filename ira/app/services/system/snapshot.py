@@ -4,7 +4,7 @@ import time
 
 from app.modules.system.proc import (
     read_uptime_seconds,
-    read_load_average,
+    load_average,
     read_tasks_summary_named,
 )
 from app.modules.system.cpu import get_cpu_global_top_percent
@@ -42,7 +42,7 @@ def build_system_snapshot() -> Dict[str, Any]:
             "seconds": uptime_seconds,
             "formatted": _format_uptime(uptime_seconds),
         },
-        "load": read_load_average(),
+        "load": load_average(),
         "tasks": read_tasks_summary_named(),
         "cpu": {
             "usage": get_cpu_global_top_percent(),
@@ -80,7 +80,7 @@ def build_system_alerts_snapshot() -> Dict[str, Any]:
     """
     timestamp = int(time.time())
 
-    load = read_load_average()
+    load = load_average()
     memory_status = read_memory_and_swap_status()
 
     cpu_cores = os.cpu_count() or 1

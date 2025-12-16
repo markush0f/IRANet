@@ -8,7 +8,7 @@ from app.modules.system.cpu import get_cpu_global_top_percent
 from app.modules.system.meminfo import read_memory_and_swap_status
 from app.modules.system.proc import (
     read_uptime_seconds,
-    read_load_average,
+    load_average,
     read_tasks_summary_named,
 )
 
@@ -35,7 +35,7 @@ def build_processes_header() -> Dict[str, Any]:
 
     return {
         "uptime": _format_uptime(uptime_seconds),
-        "load_average": read_load_average(),
+        "load_average": load_average(),
         "tasks": read_tasks_summary_named(),
         "cpu": get_cpu_global_top_percent(),
         "memory": memory_status["memory"],

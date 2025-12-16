@@ -1,10 +1,13 @@
 import asyncpg
 from typing import Optional
 
+from app.core.config import get_database_dsn
+
 _pool: Optional[asyncpg.Pool] = None
 
 
-async def init_db_pool(dsn: str):
+async def init_db_pool():
+    dsn = get_database_dsn()
     global _pool
     if _pool is None:
         _pool = await asyncpg.create_pool(dsn)

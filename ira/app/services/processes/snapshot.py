@@ -1,8 +1,6 @@
 from typing import Dict, Any
 import time
 
-from app.services.application.processes.header import build_processes_header
-from app.services.application.processes.table import get_processes_table
 from typing import Dict, Any
 import time
 
@@ -25,6 +23,8 @@ from app.modules.processes.top.memory import (
     get_process_memory_virt_kb,
     get_process_memory_shared_kb,
 )
+from app.services.processes.header import build_processes_header
+from app.services.processes.table import get_processes_table
 
 
 def build_processes_snapshot(limit: int = 20) -> Dict[str, Any]:

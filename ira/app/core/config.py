@@ -3,11 +3,13 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
+from dotenv import load_dotenv
+
 from app.core.logger import get_logger
 
 
 logger = get_logger(__name__)
-
+load_dotenv()
 
 def load_config() -> Dict[str, Any]:
     """
@@ -36,3 +38,15 @@ def load_config() -> Dict[str, Any]:
 
     logger.info("Configuration loaded successfully")
     return config
+
+
+def get_database_dsn() -> str:
+    """
+    Return the database DSN from environment variables.
+    """
+    dsn = os.getenv("IRA_DATABASE_DSN")
+
+    if not dsn:
+        raise RuntimeError("IRA_DATABASE_DSN environment variable is not set")
+
+    return dsn

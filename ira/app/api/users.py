@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.services.application.user.info import (
+from app.services.user.info import (
     get_active_users,
     get_all_users,
     get_human_users,

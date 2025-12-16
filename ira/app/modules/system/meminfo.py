@@ -1,3 +1,5 @@
+"""Read and calculate system memory information from /proc/meminfo."""
+
 from typing import Any, Dict
 from app.core.logger import get_logger
 from app.modules.types.MEMORY_UNIT_TYPE import MemoryUnit

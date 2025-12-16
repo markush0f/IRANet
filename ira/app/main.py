@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,14 +9,26 @@ from app.api.processes import router as processes_router
 from app.api.service import router as service_router
 from app.api.users import router as users_router
 from app.core.config import load_config
+from app.core.database import init_db_pool
 from app.core.logger import get_logger
+from app.core.metrics_scheduler import metrics_scheduler
 
 logger = get_logger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db_pool() 
+    task = asyncio.create_task(metrics_scheduler())
+    yield
+    task.cancel()
+
 
 app = FastAPI(
     title="Ira API",
     description="Infrastructure Runtime Analyzer",
     version="0.1.0",
+    lifespan=lifespan, 
 )
 
 app.add_middleware(
@@ -35,8 +49,8 @@ app.include_router(processes_router)
 app.include_router(service_router)
 app.include_router(users_router)
 
+
 @app.get("/config")
 def get_config():
-    """Get the current configuration settings."""
     logger.debug("GET /config called")
     return config

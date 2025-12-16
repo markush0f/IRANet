@@ -23,7 +23,7 @@ def read_uptime_seconds() -> float:
         return 0.0
 
 
-def read_load_average() -> Dict[str, float]:
+def load_average() -> Dict[str, float]:
     """
     Read system load averages.
 
