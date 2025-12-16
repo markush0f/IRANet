@@ -4,6 +4,7 @@ from typing import Iterator
 
 PROC_PATH = Path("/proc")
 CLK_TCK = 100  # Linux default
+PASSWD_FILE = Path("/etc/passwd")
 
 
 def iter_pids() -> Iterator[str]:

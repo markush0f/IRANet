@@ -5,6 +5,7 @@ from app.api.health import router as health_router
 from app.api.system import router as system_router
 from app.api.processes import router as processes_router
 from app.api.service import router as service_router
+from app.api.users import router as users_router
 from app.core.config import load_config
 from app.core.logger import get_logger
 
@@ -32,6 +33,7 @@ app.include_router(health_router)
 app.include_router(system_router)
 app.include_router(processes_router)
 app.include_router(service_router)
+app.include_router(users_router)
 
 @app.get("/config")
 def get_config():
