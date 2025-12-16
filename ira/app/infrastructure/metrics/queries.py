@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Tuple
 
 from app.core.database import get_db_pool
@@ -5,20 +6,20 @@ from app.core.database import get_db_pool
 
 async def query_metric_series(
     metric: str,
-    ts_from: int,
-    ts_to: int,
+    ts_from: datetime,
+    ts_to: datetime,
     host: str,
-) -> List[Tuple[int, float]]:
+) -> List[Tuple[datetime, float]]:
     pool = await get_db_pool()
 
     query = """
         SELECT
-            EXTRACT(EPOCH FROM ts)::BIGINT AS ts,
+            ts,
             value
         FROM metrics_points
         WHERE metric = $1
           AND host = $2
-          AND ts BETWEEN to_timestamp($3) AND to_timestamp($4)
+          AND ts BETWEEN $3 AND $4
         ORDER BY ts ASC
     """
 
@@ -31,4 +32,4 @@ async def query_metric_series(
             ts_to,
         )
 
-    return [(int(r["ts"]), float(r["value"])) for r in rows]
+    return [(r["ts"], float(r["value"])) for r in rows]
