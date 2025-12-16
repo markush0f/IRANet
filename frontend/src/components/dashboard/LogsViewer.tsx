@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import type { LogEntry } from '../types';
+import type { LogEntry } from '../../types';
 
 interface LogsViewerProps {
     logs: LogEntry[];

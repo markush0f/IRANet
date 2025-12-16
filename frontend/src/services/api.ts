@@ -1,4 +1,4 @@
-import type { SystemInfo, DockerContainer, ProcessesSnapshot } from '../types';
+import type { SystemInfo, DockerContainer, ProcessesSnapshot, UsersSummary, RemoteUser } from '../types';
 
 const getBaseUrl = (): string => {
     const base = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://127.0.0.1:8000';
@@ -47,4 +47,51 @@ export const getProcessesSnapshot = async (
 
     const data = await response.json();
     return data as ProcessesSnapshot;
+};
+
+export const getUsersSummary = async (signal?: AbortSignal): Promise<UsersSummary> => {
+    const url = `${getBaseUrl()}/users/summary`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener resumen de usuarios`);
+    }
+
+    return response.json() as Promise<UsersSummary>;
+};
+
+export const getUsersList = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
+    const url = `${getBaseUrl()}/users`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener lista de usuarios`);
+    }
+
+    const data = await response.json();
+    return (data.users ?? []) as RemoteUser[];
+};
+
+export const getSystemUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
+    const url = `${getBaseUrl()}/users/system`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener usuarios del sistema`);
+    }
+
+    const data = await response.json();
+    return (data.users ?? []) as RemoteUser[];
+};
+
+export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
+    const url = `${getBaseUrl()}/users/human`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener usuarios humanos`);
+    }
+
+    const data = await response.json();
+    return (data.users ?? []) as RemoteUser[];
 };

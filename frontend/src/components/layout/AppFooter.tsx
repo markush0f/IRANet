@@ -18,4 +18,3 @@ const AppFooter: React.FC = () => {
 };
 
 export default AppFooter;
-

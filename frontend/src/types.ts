@@ -142,3 +142,21 @@ export interface ProcessesSnapshot {
     header: ProcessesSnapshotHeader;
     processes: ProcessInfo[];
 }
+
+export interface RemoteUser {
+    username: string;
+    uid: number;
+    gid: number;
+    home: string;
+    shell: string;
+    type: 'human' | 'system';
+}
+
+export interface UsersSummary {
+    total: number;
+    human: number;
+    system: number;
+    login_allowed: number;
+    active: number;
+    active_users: string[];
+}

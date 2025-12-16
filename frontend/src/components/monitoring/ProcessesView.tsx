@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { ProcessesSnapshot, ProcessInfo } from '../types';
-import { getProcessesSnapshot } from '../services/api';
+import type { ProcessesSnapshot, ProcessInfo } from '../../types';
+import { getProcessesSnapshot } from '../../services/api';
 
 const formatKbToMiB = (kb: number) => `${(kb / 1024).toFixed(1)} MiB`;
 
@@ -9,6 +9,8 @@ const ProcessesView: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [limit, setLimit] = useState<number>(10);
+    const [stateFilter, setStateFilter] = useState<'all' | 'running' | 'sleeping' | 'other'>('all');
+    const [userFilter, setUserFilter] = useState<string>('all');
 
     useEffect(() => {
         const controller = new AbortController();
@@ -41,6 +43,23 @@ const ProcessesView: React.FC = () => {
     const header = snapshot?.header;
     const processes: ProcessInfo[] = snapshot?.processes ?? [];
 
+    const uniqueUsers = Array.from(new Set(processes.map((p) => p.user))).sort();
+
+    const filteredProcesses = processes.filter((p) => {
+        if (userFilter !== 'all' && p.user !== userFilter) return false;
+
+        if (stateFilter === 'all') return true;
+
+        const label = p.state.label.toLowerCase();
+        if (stateFilter === 'running') {
+            return label.includes('running');
+        }
+        if (stateFilter === 'sleeping') {
+            return label.includes('sleeping');
+        }
+        return !label.includes('running') && !label.includes('sleeping');
+    });
+
     return (
         <div className="max-w-7xl mx-auto px-8 py-12">
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -68,8 +87,35 @@ const ProcessesView: React.FC = () => {
                             <option value={10}>10</option>
                             <option value={20}>20</option>
                             <option value={50}>50</option>
+                            <option value={100}>100</option>
                         </select>
                     </div>
+                    {processes.length > 0 && (
+                        <div className="flex flex-wrap gap-2 justify-end w-full">
+                            <select
+                                value={userFilter}
+                                onChange={(e) => setUserFilter(e.target.value)}
+                                className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="all">Todos los usuarios</option>
+                                {uniqueUsers.map((user) => (
+                                    <option key={user} value={user}>
+                                        {user}
+                                    </option>
+                                ))}
+                            </select>
+                            <select
+                                value={stateFilter}
+                                onChange={(e) => setStateFilter(e.target.value as typeof stateFilter)}
+                                className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="all">Todos los estados</option>
+                                <option value="running">Running</option>
+                                <option value="sleeping">Sleeping</option>
+                                <option value="other">Otros</option>
+                            </select>
+                        </div>
+                    )}
                     {snapshot && (
                         <div className="text-xs text-zinc-500 font-mono">
                             ts: {snapshot.timestamp} · uptime: <span className="text-zinc-200">{header?.uptime}</span>
@@ -139,6 +185,10 @@ const ProcessesView: React.FC = () => {
                 <div className="text-sm text-zinc-400">
                     No se han recibido procesos del backend.
                 </div>
+            ) : filteredProcesses.length === 0 ? (
+                <div className="text-sm text-zinc-400">
+                    No hay procesos que coincidan con el filtro aplicado.
+                </div>
             ) : (
                 <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
                     <div className="overflow-x-auto">
@@ -155,7 +205,7 @@ const ProcessesView: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-800">
-                                {processes.map((p) => (
+                                {filteredProcesses.map((p) => (
                                     <tr key={p.pid} className="hover:bg-zinc-800/40 transition-colors">
                                         <td className="px-4 py-2 font-mono text-zinc-200">{p.pid}</td>
                                         <td className="px-4 py-2 text-zinc-300">{p.user}</td>
@@ -181,7 +231,7 @@ const ProcessesView: React.FC = () => {
                     </div>
                     <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex justify-between">
                         <span>
-                            Mostrando <span className="text-zinc-200 font-semibold">{processes.length}</span> procesos
+                            Mostrando <span className="text-zinc-200 font-semibold">{filteredProcesses.length}</span> procesos
                         </span>
                         <span className="font-mono">
                             limit={snapshot?.limit ?? limit}
@@ -194,4 +244,3 @@ const ProcessesView: React.FC = () => {
 };
 
 export default ProcessesView;
-

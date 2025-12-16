@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import LogsViewer from './components/LogsViewer';
-import Sidebar from './components/Sidebar';
-import PerformanceView from './components/PerformanceView';
-import UsersView from './components/UsersView';
-import SystemInfoView from './components/SystemInfoView';
-import AppHeader from './components/AppHeader';
-import AppFooter from './components/AppFooter';
-import EnvBadge from './components/EnvBadge';
-import DashboardView from './components/DashboardView';
-import DockerView from './components/DockerView';
-import ProcessesView from './components/ProcessesView';
+import LogsViewer from './components/dashboard/LogsViewer';
+import Sidebar from './components/layout/Sidebar';
+import PerformanceView from './components/monitoring/PerformanceView';
+import UsersView from './components/users/UsersView';
+import SystemInfoView from './components/system/SystemInfoView';
+import AppHeader from './components/layout/AppHeader';
+import AppFooter from './components/layout/AppFooter';
+import EnvBadge from './components/layout/EnvBadge';
+import DashboardView from './components/dashboard/DashboardView';
+import DockerView from './components/monitoring/DockerView';
+import ProcessesView from './components/monitoring/ProcessesView';
 import type { Service, LogEntry, ServiceType } from './types';
 import { INITIAL_SERVICES, MOCK_LOGS, generateMockLog } from './mockData';
 

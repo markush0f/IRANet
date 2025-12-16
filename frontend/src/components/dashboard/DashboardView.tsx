@@ -1,7 +1,7 @@
 import React from 'react';
 import ServiceGrid from './ServiceGrid';
 import ServiceCard from './ServiceCard';
-import type { Service } from '../types';
+import type { Service } from '../../types';
 
 interface DashboardViewProps {
     services: Service[];
@@ -72,4 +72,3 @@ const DashboardView: React.FC<DashboardViewProps> = ({
 };
 
 export default DashboardView;
-

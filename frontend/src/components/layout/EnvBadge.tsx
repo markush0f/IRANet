@@ -12,4 +12,3 @@ const EnvBadge: React.FC = () => {
 };
 
 export default EnvBadge;
-

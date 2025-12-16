@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { DockerContainer } from '../types';
-import { getDockerContainers } from '../services/api';
+import type { DockerContainer } from '../../types';
+import { getDockerContainers } from '../../services/api';
 
 const formatCreated = (created: string) => {
     const date = new Date(created);
