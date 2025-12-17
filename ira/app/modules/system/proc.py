@@ -4,9 +4,7 @@ System-wide memory information helpers.
 
 import os
 from app.modules.common.base import PROC_PATH
-from typing import Dict
-
-
+from typing import  List, Optional
 
 
 def read_uptime_seconds() -> float:
@@ -23,58 +21,54 @@ def read_uptime_seconds() -> float:
         return 0.0
 
 
-def load_average() -> Dict[str, float]:
+def list_pids() -> List[str]:
     """
-    Read system load averages.
-
-    Returns the 1, 5 and 15 minute load averages as reported by
-    /proc/loadavg.
+    List numeric process IDs from /proc.
     """
     try:
-        with (PROC_PATH / "loadavg").open() as f:
-            one, five, fifteen, *_ = f.readline().split()
-            return {
-                "load_1m": float(one),
-                "load_5m": float(five),
-                "load_15m": float(fifteen),
-            }
+        return [p for p in os.listdir(PROC_PATH) if p.isdigit()]
     except Exception:
-        return {
-            "load_1m": 0.0,
-            "load_5m": 0.0,
-            "load_15m": 0.0,
-        }
+        return []
 
 
-def read_tasks_summary_named() -> Dict[str, int]:
+def read_process_stat(pid: str) -> Optional[str]:
     """
-    Read a summary of system tasks grouped by human-readable state.
-
-    The process state is read from /proc/<pid>/stat and mapped to
-    aggregated categories similar to those shown by the `top` command.
+    Read raw /proc/<pid>/stat content.
     """
-    state_counts: Dict[str, int] = {}
+    try:
+        with (PROC_PATH / pid / "stat").open() as f:
+            return f.read()
+    except Exception:
+        return None
 
-    for pid in os.listdir(PROC_PATH):
-        if not pid.isdigit():
-            continue
 
-        try:
-            with (PROC_PATH / pid / "stat").open() as f:
-                state = f.readline().split()[2]
+def read_process_cmdline(pid: str) -> List[str]:
+    """
+    Read process command line from /proc/<pid>/cmdline.
+    """
+    try:
+        raw = (PROC_PATH / pid / "cmdline").read_bytes()
+        return [x.decode(errors="ignore") for x in raw.split(b"\x00") if x]
+    except Exception:
+        return []
 
-            state_counts[state] = state_counts.get(state, 0) + 1
-        except Exception:
-            continue
 
-    return {
-        "total": sum(state_counts.values()),
-        "running": state_counts.get("R", 0),
-        "sleeping": (
-            state_counts.get("S", 0)
-            + state_counts.get("D", 0)
-            + state_counts.get("I", 0)
-        ),
-        "stopped": state_counts.get("T", 0),
-        "zombie": state_counts.get("Z", 0),
-    }
+def read_process_comm(pid: str) -> Optional[str]:
+    """
+    Read process comm from /proc/<pid>/comm.
+    """
+    try:
+        with (PROC_PATH / pid / "comm").open() as f:
+            return f.read().strip()
+    except Exception:
+        return None
+
+
+def read_process_cwd(pid: str) -> Optional[str]:
+    """
+    Read process current working directory.
+    """
+    try:
+        return os.readlink(PROC_PATH / pid / "cwd")
+    except Exception:
+        return None

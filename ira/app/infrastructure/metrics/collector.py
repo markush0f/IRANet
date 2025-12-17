@@ -25,9 +25,9 @@ from typing import List
 
 from app.core.logger import get_logger
 from app.infrastructure.metrics.storage import insert_metric_points
+from app.modules.processes.top.system import load_average
 from app.modules.system.cpu import get_cpu_global_top_percent
 from app.modules.system.meminfo import read_memory_and_swap_status
-from app.modules.system.proc import load_average
 from app.modules.types.METRIC_POINT import MetricPoint
 
 logger = get_logger(__name__)

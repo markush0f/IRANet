@@ -1,6 +1,8 @@
 """Get information about top processes."""
 
+import os
 import pwd
+from typing import Dict
 from app.core.logger import get_logger
 from app.modules.common.base import PROC_PATH
 
@@ -161,3 +163,37 @@ def get_process_priority(pid: str) -> int:
             return int(f.readline().split()[17])
     except Exception:
         return -1
+
+
+def read_tasks_summary_named() -> Dict[str, int]:
+    """
+    Read a summary of system tasks grouped by human-readable state.
+
+    The process state is read from /proc/<pid>/stat and mapped to
+    aggregated categories similar to those shown by the `top` command.
+    """
+    state_counts: Dict[str, int] = {}
+
+    for pid in os.listdir(PROC_PATH):
+        if not pid.isdigit():
+            continue
+
+        try:
+            with (PROC_PATH / pid / "stat").open() as f:
+                state = f.readline().split()[2]
+
+            state_counts[state] = state_counts.get(state, 0) + 1
+        except Exception:
+            continue
+
+    return {
+        "total": sum(state_counts.values()),
+        "running": state_counts.get("R", 0),
+        "sleeping": (
+            state_counts.get("S", 0)
+            + state_counts.get("D", 0)
+            + state_counts.get("I", 0)
+        ),
+        "stopped": state_counts.get("T", 0),
+        "zombie": state_counts.get("Z", 0),
+    }

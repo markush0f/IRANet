@@ -2,10 +2,11 @@ import os
 from typing import Dict, Any
 import time
 
+from app.modules.processes.top.state import read_tasks_summary_named
+from app.modules.processes.top.system import load_average
 from app.modules.system.proc import (
     read_uptime_seconds,
-    load_average,
-    read_tasks_summary_named,
+
 )
 from app.modules.system.cpu import get_cpu_global_top_percent
 from app.modules.system.meminfo import read_memory_and_swap_status
