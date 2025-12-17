@@ -20,6 +20,13 @@ CREATE TABLE system_alerts (
     resolved_at TIMESTAMPTZ
 );
 
+CREATE TABLE log_apps (
+    id TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    log_path TEXT NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT true
+);
+
 
 -- MODIFY TABLE FOR USER SETTINGS
 -- CREATE TABLE IF NOT EXISTS settings (
