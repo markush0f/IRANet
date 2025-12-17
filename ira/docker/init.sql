@@ -28,6 +28,16 @@ CREATE TABLE log_apps (
 );
 
 
+CREATE TABLE applications (
+    id UUID PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    discovered BOOLEAN NOT NULL DEFAULT true,
+    enabled BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+
 -- MODIFY TABLE FOR USER SETTINGS
 -- CREATE TABLE IF NOT EXISTS settings (
 --     id BIGSERIAL PRIMARY KEY,

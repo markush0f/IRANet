@@ -16,8 +16,8 @@ _COOLDOWN_SECONDS = 30
 
 # Thresholds centralized
 CPU_CRITICAL = 80
-MEMORY_AVAILABLE_CRITICAL = 0
-LOAD_FACTOR_CRITICAL = 0
+MEMORY_AVAILABLE_CRITICAL = 80
+LOAD_FACTOR_CRITICAL = 80
 
 logger = get_logger(__name__)
 
@@ -63,7 +63,7 @@ async def notify_critical_alert(
         alert_type=alert_type,
         value=value,
         threshold=threshold,
-        )
+    )
     await ws_manager.broadcast("alerts", payload)
 
     logger.info(
