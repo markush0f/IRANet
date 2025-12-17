@@ -5,7 +5,7 @@ import { getSystemInfo } from '../../services/api';
 import InfoCard from './InfoCard';
 import InfoRow from './InfoRow';
 import SystemInfoHeader from './SystemInfoHeader';
-import CpuMetricsPanel from './CpuMetricsPanel';
+import MetricSeriesPanel from './MetricSeriesPanel';
 
 const formatBytesToGiB = (bytes: number) => {
     return `${(bytes / (1024 ** 3)).toFixed(1)} GiB`;
@@ -125,7 +125,12 @@ const SystemInfoView: React.FC = () => {
                     <h3 className="text-sm font-bold text-zinc-200 uppercase tracking-wide">Métricas de CPU</h3>
                     <span className="text-xs text-zinc-500">Actualización cada 5 segundos</span>
                 </div>
-                <CpuMetricsPanel hostname={info.hostname} />
+                <MetricSeriesPanel
+                    hostname={info.hostname}
+                    metric="cpu.total"
+                    seriesLabel="Serie de métricas CPU total"
+                    valueFormatter={value => `${value.toFixed(2)}%`}
+                />
             </div>
         </div>
     );

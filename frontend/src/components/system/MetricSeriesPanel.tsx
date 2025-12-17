@@ -24,11 +24,19 @@ const sortSamples = (items: MetricSample[]) => {
     return [...items].sort((a, b) => a.ts.localeCompare(b.ts));
 };
 
-interface CpuMetricsPanelProps {
+interface MetricSeriesPanelProps {
     hostname?: string | null;
+    metric: string;
+    seriesLabel: string;
+    valueFormatter?: (value: number) => string;
 }
 
-const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
+const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
+    hostname,
+    metric,
+    seriesLabel,
+    valueFormatter,
+}) => {
     const [samples, setSamples] = useState<MetricSample[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [mode, setMode] = useState<'manual' | 'live'>('manual');
@@ -44,6 +52,10 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
     const intervalRef = useRef<number | null>(null);
     const initialLiveRunRef = useRef(false);
     const [isLiveState, setIsLiveState] = useState(false);
+
+    const valueToDisplay = (value: number) => {
+        return valueFormatter ? valueFormatter(value) : value.toFixed(2);
+    };
 
     const stopLive = useCallback(() => {
         if (intervalRef.current) {
@@ -63,7 +75,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
         const toTs = new Date().toISOString();
         try {
             const data = await getMetricSeries({
-                metric: 'cpu.total',
+                metric,
                 host,
                 fromTs,
                 toTs,
@@ -97,10 +109,10 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
             latestTimestampRef.current = newestTs;
             setLastLoadedAt(new Date());
         } catch (err) {
-            console.error('Error fetching live CPU metrics', err);
+            console.error(`Error updating ${metric} live metrics`, err);
             setError('No se pudieron actualizar las métricas en vivo.');
         }
-    }, [hostname]);
+    }, [hostname, metric]);
 
     const startLive = useCallback(async () => {
         const host = hostname?.trim();
@@ -118,7 +130,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
 
         try {
             const data = await getMetricSeries({
-                metric: 'cpu.total',
+                metric,
                 host,
                 fromTs: fromTs || undefined,
                 toTs,
@@ -133,12 +145,12 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
                 fetchLiveTick();
             }, POLL_INTERVAL_MS);
         } catch (err) {
-            console.error('Error starting live CPU metrics', err);
+            console.error(`Error starting live ${metric} metrics`, err);
             setError('No se pudieron cargar las métricas en vivo.');
         } finally {
             setLiveLoading(false);
         }
-    }, [fetchLiveTick, hostname, liveStart, stopLive]);
+    }, [fetchLiveTick, hostname, liveStart, stopLive, metric]);
 
     const handleManualFetch = useCallback(async () => {
         const host = hostname?.trim();
@@ -169,7 +181,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
 
         try {
             const data = await getMetricSeries({
-                metric: 'cpu.total',
+                metric,
                 host,
                 fromTs,
                 toTs,
@@ -179,12 +191,12 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
             latestTimestampRef.current = ordered.length ? ordered.at(-1)?.ts ?? toTs : toTs;
             setLastLoadedAt(new Date());
         } catch (err) {
-            console.error('Error fetching manual CPU metrics', err);
+            console.error(`Error loading manual ${metric} metrics`, err);
             setError('No se pudieron cargar las métricas para el intervalo seleccionado.');
         } finally {
             setLoading(false);
         }
-    }, [manualStart, manualEnd, hostname, stopLive]);
+    }, [manualStart, manualEnd, hostname, stopLive, metric]);
 
     useEffect(() => {
         return () => {
@@ -234,6 +246,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
     }, [manualSummary, samples]);
 
     const latestValue = samples.at(-1)?.value ?? null;
+    const latestValueLabel = latestValue !== null ? valueToDisplay(latestValue) : null;
 
     const summaryLabel = mode === 'live' ? 'En vivo' : 'Manual';
 
@@ -246,7 +259,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
                         className="w-full h-full"
                         preserveAspectRatio="none"
                         role="img"
-                        aria-label="Gráfica de uso de CPU"
+                        aria-label={`${seriesLabel} chart`}
                     >
                         <polyline
                             fill="none"
@@ -263,7 +276,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
                     </div>
                 )}
                 <div className="absolute left-4 top-4 text-[11px] uppercase tracking-wide text-zinc-400">
-                    Serie de métricas CPU total
+                    {seriesLabel}
                 </div>
                 <div className="absolute right-4 top-4 text-[11px] uppercase tracking-wide text-zinc-400">
                     {summaryLabel}
@@ -278,7 +291,7 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
                     <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Intervalo manual</p>
                         <span className="text-[11px] text-zinc-500">
-                            {samples.length ? `Último valor ${latestValue?.toFixed(2)}%` : 'Sin datos'}
+                            {latestValueLabel ? `Último valor ${latestValueLabel}` : 'Sin datos'}
                         </span>
                     </div>
                     <div className="grid gap-3">
@@ -344,9 +357,9 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] text-zinc-500">
-                <span>Máx {manualSummary.max.toFixed(2)}%</span>
-                <span>Mín {manualSummary.min.toFixed(2)}%</span>
-                <span>Promedio {manualSummary.avg.toFixed(2)}%</span>
+                <span>Máx {valueToDisplay(manualSummary.max)}</span>
+                <span>Mín {valueToDisplay(manualSummary.min)}</span>
+                <span>Promedio {valueToDisplay(manualSummary.avg)}</span>
             </div>
 
             {error && (
@@ -358,4 +371,4 @@ const CpuMetricsPanel: React.FC<CpuMetricsPanelProps> = ({ hostname }) => {
     );
 };
 
-export default CpuMetricsPanel;
+export default MetricSeriesPanel;

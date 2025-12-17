@@ -11,6 +11,7 @@ import EnvBadge from './components/layout/EnvBadge';
 import DashboardView from './components/dashboard/DashboardView';
 import DockerView from './components/monitoring/DockerView';
 import ProcessesView from './components/monitoring/ProcessesView';
+import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
 import type { Service, LogEntry, ServiceType } from './types';
 import { INITIAL_SERVICES, MOCK_LOGS, generateMockLog } from './mockData';
 
@@ -134,6 +135,8 @@ function App() {
             <SystemInfoView />
           ) : currentView === 'cpu-metrics' ? (
             <CpuMetricsView />
+          ) : currentView === 'memory-metrics' ? (
+            <MemoryMetricsView />
           ) : currentView === 'performance' ? (
             <PerformanceView />
           ) : currentView === 'users' ? (

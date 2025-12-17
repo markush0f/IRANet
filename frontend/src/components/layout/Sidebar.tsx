@@ -5,6 +5,7 @@ interface NavItem {
     label: string;
     icon: React.ReactNode;
     active?: boolean;
+    children?: NavItem[];
 }
 
 interface SidebarProps {
@@ -15,6 +16,29 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [servicesOpen, setServicesOpen] = useState(true);
+    const [metricsOpen, setMetricsOpen] = useState(true);
+
+    const metricsChildren: NavItem[] = [
+        {
+            id: 'cpu-metrics',
+            label: 'CPU Metrics',
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h7m-7 6h16M12 6v12" />
+                </svg>
+            ),
+        },
+        {
+            id: 'memory-metrics',
+            label: 'Memory Metrics',
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16v10H4z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7v10M15 7v10" />
+                </svg>
+            ),
+        },
+    ];
 
     const navItems: NavItem[] = [
         {
@@ -36,13 +60,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             )
         },
         {
-            id: 'cpu-metrics',
-            label: 'CPU Metrics',
+            id: 'metrics',
+            label: 'Métricas',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h7m-7 6h16M12 6v12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 4h12v16H6z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 8h6M9 12h6M9 16h4" />
                 </svg>
-            )
+            ),
+            children: metricsChildren,
         },
         {
             id: 'services',
@@ -145,66 +171,116 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
 
             {/* Navigation */}
             <nav className="flex-1 py-6 px-3 space-y-1">
-                {navItems.map(item => (
-                    <React.Fragment key={item.id}>
-                        <button
-                            onClick={() => {
-                                if (item.id === 'services') {
-                                    setServicesOpen(prev => !prev);
-                                }
-                                onNavigate(item.id);
-                            }}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
-                                ${activeView === item.id
-                                    ? 'bg-indigo-600/10 text-indigo-400'
-                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
-                                }
-                                ${isCollapsed ? 'justify-center' : ''}
-                            `}
-                        >
-                            <div className={`${activeView === item.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
-                                {item.icon}
-                            </div>
+                {navItems.map(item => {
+                    const isMetricsGroup = item.id === 'metrics';
+                    const groupActive = isMetricsGroup
+                        ? (item.children ?? []).some(child => child.id === activeView)
+                        : activeView === item.id;
 
-                            {!isCollapsed && (
-                                <span className="font-medium text-sm flex-1 flex items-center justify-between">
-                                    <span>{item.label}</span>
-                                    {item.id === 'services' && (
-                                        <svg
-                                            className={`w-3 h-3 text-zinc-500 ml-1 transition-transform ${servicesOpen ? 'rotate-90' : ''}`}
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    )}
-                                </span>
-                            )}
-
-                            {activeView === item.id && !isCollapsed && (
-                                <div className="absolute right-2 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></div>
-                            )}
-                        </button>
-
-                        {!isCollapsed && item.id === 'services' && servicesOpen && (
+                    return (
+                        <React.Fragment key={item.id}>
                             <button
-                                onClick={() => onNavigate('docker')}
-                                className={`ml-8 mt-1 w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-                                    ${activeView === 'docker'
+                                onClick={() => {
+                                    if (item.id === 'services') {
+                                        setServicesOpen(prev => !prev);
+                                    }
+                                    if (isMetricsGroup) {
+                                        setMetricsOpen(prev => !prev);
+                                        return;
+                                    }
+                                    onNavigate(item.id);
+                                }}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
+                                    ${groupActive
                                         ? 'bg-indigo-600/10 text-indigo-400'
                                         : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
                                     }
+                                    ${isCollapsed ? 'justify-center' : ''}
                                 `}
                             >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M5 6h6m-6 8h4m2 6h4a4 4 0 004-4v-6H3v6a4 4 0 004 4z" />
-                                </svg>
-                                <span>Docker containers</span>
+                                <div className={`${groupActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                    {item.icon}
+                                </div>
+
+                                {!isCollapsed && (
+                                    <span className="font-medium text-sm flex-1 flex items-center justify-between">
+                                        <span>{item.label}</span>
+                                        {!isCollapsed && (
+                                            <span className="flex items-center gap-1">
+                                                {item.id === 'services' && (
+                                                    <svg
+                                                        className={`w-3 h-3 text-zinc-500 transition-transform ${servicesOpen ? 'rotate-90' : ''}`}
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                )}
+                                                {isMetricsGroup && (
+                                                    <svg
+                                                        className={`w-3 h-3 text-zinc-500 transition-transform ${metricsOpen ? 'rotate-90' : ''}`}
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                )}
+                                            </span>
+                                        )}
+                                    </span>
+                                )}
+
+                                {groupActive && !isCollapsed && (
+                                    <div className="absolute right-2 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></div>
+                                )}
                             </button>
-                        )}
-                    </React.Fragment>
-                ))}
+
+                            {!isCollapsed && item.id === 'services' && servicesOpen && (
+                                <button
+                                    onClick={() => onNavigate('docker')}
+                                    className={`ml-8 mt-1 w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                                        ${activeView === 'docker'
+                                            ? 'bg-indigo-600/10 text-indigo-400'
+                                            : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                        }
+                                    `}
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M5 6h6m-6 8h4m2 6h4a4 4 0 004-4v-6H3v6a4 4 0 004 4z" />
+                                    </svg>
+                                    <span>Docker containers</span>
+                                </button>
+                            )}
+
+                            {!isCollapsed && isMetricsGroup && metricsOpen && (
+                                <div className="ml-8 mt-1 space-y-1">
+                                    {(item.children ?? []).map(child => (
+                                        <button
+                                            key={child.id}
+                                            onClick={() => onNavigate(child.id)}
+                                            className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                                                ${activeView === child.id
+                                                    ? 'bg-indigo-600/10 text-indigo-400'
+                                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                }
+                                            `}
+                                        >
+                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                                {child.icon}
+                                            </div>
+                                            <span className="flex-1">{child.label}</span>
+                                            {activeView === child.id && (
+                                                <div className="absolute right-2 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </React.Fragment>
+                    );
+                })}
             </nav>
 
             {/* User Profile */}
