@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import LogsViewer from './components/dashboard/LogsViewer';
 import Sidebar from './components/layout/Sidebar';
 import PerformanceView from './components/monitoring/PerformanceView';
@@ -12,114 +12,17 @@ import DashboardView from './components/dashboard/DashboardView';
 import DockerView from './components/monitoring/DockerView';
 import ProcessesView from './components/monitoring/ProcessesView';
 import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
-import type { Service, LogEntry, ServiceType } from './types';
-import { INITIAL_SERVICES, MOCK_LOGS, generateMockLog } from './mockData';
 import { Toaster } from 'react-hot-toast';
-
-const detectServiceType = (url: string, name: string): ServiceType => {
-  const lowerUrl = url.toLowerCase();
-  const lowerName = name.toLowerCase();
-
-  if (lowerUrl.includes('postgres') || lowerUrl.includes('mysql') || lowerUrl.includes('mongo') || lowerName.includes('db') || lowerName.includes('database')) return 'database';
-  if (lowerUrl.includes('redis') || lowerName.includes('redis') || lowerName.includes('cache')) return 'redis';
-  if (lowerUrl.includes('docker') || lowerUrl.includes('.sock') || lowerName.includes('docker') || lowerName.includes('swarm')) return 'docker';
-  if (lowerUrl.includes('nginx') || lowerName.includes('nginx') || lowerName.includes('gateway') || lowerName.includes('balancer')) return 'nginx';
-  if (lowerName.includes('linux') || lowerName.includes('server') || lowerName.includes('ubuntu') || lowerName.includes('centos')) return 'linux';
-
-  return 'http';
-};
+import { useServices } from './hooks/useServices';
+import { useLogsModal } from './hooks/useLogsModal';
+import { useSystemAlerts } from './hooks/useSystemAlerts';
 
 function App() {
-  const [services, setServices] = useState<Service[]>(() =>
-    INITIAL_SERVICES.map(s => ({ ...s, type: detectServiceType(s.url, s.name) }))
-  );
-  const [logsOpen, setLogsOpen] = useState(false);
-  const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
-  const [currentLogs, setCurrentLogs] = useState<LogEntry[]>([]);
+  const { services, handleAddService, handleDeleteService, handleRefreshAll, handleCheckStatus, handleUpdateService } = useServices();
+  const { logsOpen, currentLogs, currentServiceId, openLogs, closeLogs } = useLogsModal();
   const [currentView, setCurrentView] = useState('system');
 
-  // Simulate initial load status check
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setServices(prev => prev.map(s => ({ ...s, status: Math.random() > 0.1 ? 'online' : 'offline' })));
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleCheckStatus = async (id: string) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, status: 'loading' } : s));
-
-    // Simulate network delay
-    setTimeout(() => {
-      const isOnline = Math.random() > 0.2; // 80% chance of being online
-      setServices(prev => prev.map(s =>
-        s.id === id ? { ...s, status: isOnline ? 'online' : 'error' } : s
-      ));
-    }, 1000 + Math.random() * 1000);
-  };
-
-  const handleUpdateService = (id: string, field: 'url' | 'healthEndpoint' | 'name', value: string) => {
-    setServices(prev => prev.map(s => {
-      if (s.id !== id) return s;
-      const newService = { ...s, [field]: value };
-      if (field === 'url' || field === 'name') {
-        newService.type = detectServiceType(newService.url, newService.name);
-      }
-      return newService;
-    }));
-  };
-
-  const handleAddService = () => {
-    const defaultUrl = 'https://api.example.com';
-    const defaultName = 'New Service';
-    const newService: Service = {
-      id: Date.now().toString(),
-      name: defaultName,
-      url: defaultUrl,
-      healthEndpoint: '/health',
-      description: 'Newly added service monitor',
-      type: detectServiceType(defaultUrl, defaultName),
-      status: 'offline', // Default to offline until checked
-    };
-    setServices(prev => [...prev, newService]);
-  };
-
-  const handleDeleteService = (id: string) => {
-    setServices(prev => prev.filter(s => s.id !== id));
-  };
-
-  const handleRefreshAllServices = () => {
-    services.forEach(s => handleCheckStatus(s.id));
-  };
-
-  const handleViewLogs = (id: string) => {
-    setCurrentServiceId(id);
-    const existingLogs = MOCK_LOGS[id] || [];
-    if (existingLogs.length === 0) {
-      const startupLogs: LogEntry[] = [
-        { id: 'start1', timestamp: new Date().toISOString(), level: 'info', message: 'System startup initiated', serviceId: id },
-        { id: 'start2', timestamp: new Date().toISOString(), level: 'info', message: 'Configuration loaded from env', serviceId: id }
-      ];
-      setCurrentLogs(startupLogs);
-    } else {
-      setCurrentLogs(existingLogs);
-    }
-    setLogsOpen(true);
-  };
-
-  // Poll for new logs when modal is open
-  useEffect(() => {
-    if (!logsOpen || !currentServiceId) return;
-
-    const interval = setInterval(() => {
-      if (Math.random() > 0.6) { // 40% chance of new log per tick
-        const newLog = generateMockLog(currentServiceId);
-        setCurrentLogs(prev => [...prev.slice(-49), newLog]); // Keep last 50
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [logsOpen, currentServiceId]);
+  useSystemAlerts();
 
   const currentServiceName = services.find(s => s.id === currentServiceId)?.name || 'Unknown Service';
 
@@ -150,9 +53,9 @@ function App() {
             <DashboardView
               services={services}
               onAddService={handleAddService}
-              onRefreshAll={handleRefreshAllServices}
+              onRefreshAll={handleRefreshAll}
               onCheck={handleCheckStatus}
-              onViewLogs={handleViewLogs}
+              onViewLogs={openLogs}
               onUpdateService={handleUpdateService}
               onDeleteService={handleDeleteService}
             />
@@ -164,7 +67,7 @@ function App() {
 
       <LogsViewer
         isOpen={logsOpen}
-        onClose={() => setLogsOpen(false)}
+        onClose={closeLogs}
         logs={currentLogs}
         serviceName={currentServiceName}
       />
@@ -172,14 +75,17 @@ function App() {
       <EnvBadge />
       <Toaster
         position="bottom-right"
+        gutter={12}
+        reverseOrder={false}
+        containerStyle={{
+          width: '360px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          alignItems: 'flex-end',
+        }}
         toastOptions={{
-          duration: 8000,
-          style: {
-            background: '#b91c1c',
-            color: '#fee2e2',
-            border: '1px solid rgba(248, 113, 113, 0.6)',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.45)',
-          },
+          duration: 0,
         }}
       />
     </div>
