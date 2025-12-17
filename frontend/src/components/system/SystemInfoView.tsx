@@ -1,11 +1,12 @@
- import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MOCK_SYSTEM_INFO } from '../../mockData';
 import type { SystemInfo } from '../../types';
-import { getSystemInfo } from '../../services/api';
+import { getBaseUrl, getSystemInfo } from '../../services/api';
 import InfoCard from './InfoCard';
 import InfoRow from './InfoRow';
 import SystemInfoHeader from './SystemInfoHeader';
 import MetricSeriesPanel from './MetricSeriesPanel';
+import { toast } from 'react-hot-toast';
 
 const formatBytesToGiB = (bytes: number) => {
     return `${(bytes / (1024 ** 3)).toFixed(1)} GiB`;
@@ -14,6 +15,24 @@ const formatBytesToGiB = (bytes: number) => {
 const formatBootTime = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
     return date.toLocaleString();
+};
+
+const parseAlertText = (raw: string) => {
+    try {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed !== null) {
+            if (typeof parsed.alert === 'string') return parsed.alert;
+            if (typeof parsed.message === 'string') return parsed.message;
+            const fallbackString = Object.values(parsed).find(value => typeof value === 'string');
+            if (typeof fallbackString === 'string') {
+                return fallbackString;
+            }
+        }
+    } catch {
+        // If parsing fails fall back to raw string
+    }
+
+    return raw;
 };
 
 const SystemInfoView: React.FC = () => {
@@ -49,6 +68,40 @@ const SystemInfoView: React.FC = () => {
         fetchSystemInfo();
 
         return () => controller.abort();
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        const baseUrl = getBaseUrl();
+        const wsUrl = new URL(baseUrl);
+        wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsUrl.pathname = '/ws/alerts';
+        const websocket = new WebSocket(wsUrl.toString());
+
+        const handleMessage = (event: MessageEvent) => {
+            toast(parseAlertText(event.data), {
+                icon: '⚠️',
+                duration: 8000,
+            });
+        };
+
+        const handleError = () => {
+            toast.error('No se pudo conectar con el canal de alertas del sistema.', {
+                duration: 4000,
+            });
+        };
+
+        websocket.addEventListener('message', handleMessage);
+        websocket.addEventListener('error', handleError);
+
+        return () => {
+            websocket.removeEventListener('message', handleMessage);
+            websocket.removeEventListener('error', handleError);
+            websocket.close();
+        };
     }, []);
 
     if (loading || !info) {

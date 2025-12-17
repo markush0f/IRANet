@@ -198,11 +198,15 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
         }
     }, [manualStart, manualEnd, hostname, stopLive, metric]);
 
+    useEffect(() => stopLive, [stopLive]);
+
     useEffect(() => {
-        return () => {
-            stopLive();
-        };
-    }, [stopLive]);
+        stopLive();
+        latestTimestampRef.current = null;
+        setSamples([]);
+        setError(null);
+        initialLiveRunRef.current = false;
+    }, [metric, stopLive]);
 
     useEffect(() => {
         if (!hostname?.trim() || initialLiveRunRef.current) {
@@ -284,6 +288,12 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
                 <div className="absolute right-4 bottom-3 text-[11px] text-zinc-500">
                     Actualizado {lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : '—'}
                 </div>
+                {latestValueLabel && (
+                    <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 text-center">
+                        <span className="text-3xl font-semibold text-emerald-400">{latestValueLabel}</span>
+                        <span className="text-[11px] uppercase tracking-wide text-zinc-500">Último registro</span>
+                    </div>
+                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">

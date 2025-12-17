@@ -7,8 +7,9 @@ import type {
     MetricSample,
 } from '../types';
 
-const getBaseUrl = (): string => {
-    const base = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://127.0.0.1:8000';
+export const getBaseUrl = (): string => {
+    const base =
+        (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8000';
     return base.replace(/\/+$/, '');
 };
 

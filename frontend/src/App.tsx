@@ -14,6 +14,7 @@ import ProcessesView from './components/monitoring/ProcessesView';
 import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
 import type { Service, LogEntry, ServiceType } from './types';
 import { INITIAL_SERVICES, MOCK_LOGS, generateMockLog } from './mockData';
+import { Toaster } from 'react-hot-toast';
 
 const detectServiceType = (url: string, name: string): ServiceType => {
   const lowerUrl = url.toLowerCase();
@@ -169,6 +170,18 @@ function App() {
       />
 
       <EnvBadge />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 8000,
+          style: {
+            background: '#b91c1c',
+            color: '#fee2e2',
+            border: '1px solid rgba(248, 113, 113, 0.6)',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.45)',
+          },
+        }}
+      />
     </div>
   );
 }

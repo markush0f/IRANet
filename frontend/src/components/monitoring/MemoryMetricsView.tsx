@@ -106,8 +106,8 @@ const MemoryMetricsView: React.FC = () => {
                     )}
                     <MetricSeriesPanel
                         hostname={hostToUse || undefined}
-                        metric="memory.available_percent"
-                        seriesLabel="Serie de métricas de memoria disponible"
+                        metric={activeMemoryMetric.id}
+                        seriesLabel={`Serie de métricas de ${activeMemoryMetric.label.toLowerCase()}`}
                         valueFormatter={value => `${value.toFixed(2)}%`}
                     />
                 </div>
