@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Badge, Card, Flex, Text, Title } from '@tremor/react';
 import MetricSeriesPanel from '../system/MetricSeriesPanel';
 import { getSystemInfo } from '../../services/api';
+import RechartsMetricPanel from '../system/RechartsMetricPanel';
 
 const CpuMetricsView: React.FC = () => {
     const [hostname, setHostname] = useState<string | null>(null);
@@ -83,7 +84,7 @@ const CpuMetricsView: React.FC = () => {
                             {error}
                         </div>
                     )}
-                    <MetricSeriesPanel
+                    <RechartsMetricPanel
                         hostname={hostToUse || undefined}
                         metric="cpu.total"
                         seriesLabel="Serie de métricas CPU total"

@@ -60,6 +60,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             )
         },
         {
+            id: 'alerts',
+            label: 'Alertas',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 10-12 0v5H4v2h16v-2h-2z" />
+                </svg>
+            )
+        },
+        {
             id: 'metrics',
             label: 'Métricas',
             icon: (
@@ -125,6 +134,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             )
         },
         {
+            id: 'alerts',
+            label: 'Alertas',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 10-12 0v5H4v2h16v-2h-2z" />
+                </svg>
+            )
+        },
+        {
             id: 'settings',
             label: 'Settings',
             icon: (
@@ -170,7 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-6 px-3 space-y-1">
+            <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                 {navItems.map(item => {
                     const isMetricsGroup = item.id === 'metrics';
                     const groupActive = isMetricsGroup

@@ -12,6 +12,7 @@ import DashboardView from './components/dashboard/DashboardView';
 import DockerView from './components/monitoring/DockerView';
 import ProcessesView from './components/monitoring/ProcessesView';
 import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
+import AlertsView from './components/alerts/AlertsView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -49,6 +50,8 @@ function App() {
             <DockerView />
           ) : currentView === 'processes' ? (
             <ProcessesView />
+          ) : currentView === 'alerts' ? (
+            <AlertsView />
           ) : (
             <DashboardView
               services={services}
@@ -85,7 +88,7 @@ function App() {
           alignItems: 'flex-end',
         }}
         toastOptions={{
-          duration: 0,
+          duration: 5000,
         }}
       />
     </div>
