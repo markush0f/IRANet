@@ -36,6 +36,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             )
         },
         {
+            id: 'cpu-metrics',
+            label: 'CPU Metrics',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h7m-7 6h16M12 6v12" />
+                </svg>
+            )
+        },
+        {
             id: 'services',
             label: 'Services',
             icon: (

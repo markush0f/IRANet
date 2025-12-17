@@ -4,6 +4,7 @@ import Sidebar from './components/layout/Sidebar';
 import PerformanceView from './components/monitoring/PerformanceView';
 import UsersView from './components/users/UsersView';
 import SystemInfoView from './components/system/SystemInfoView';
+import CpuMetricsView from './components/monitoring/CpuMetricsView';
 import AppHeader from './components/layout/AppHeader';
 import AppFooter from './components/layout/AppFooter';
 import EnvBadge from './components/layout/EnvBadge';
@@ -131,6 +132,8 @@ function App() {
         <div className="flex-1 overflow-y-auto">
           {currentView === 'system' ? (
             <SystemInfoView />
+          ) : currentView === 'cpu-metrics' ? (
+            <CpuMetricsView />
           ) : currentView === 'performance' ? (
             <PerformanceView />
           ) : currentView === 'users' ? (

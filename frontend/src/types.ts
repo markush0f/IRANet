@@ -58,6 +58,11 @@ export interface SystemInfo {
     };
 }
 
+export interface MetricSample {
+    ts: string;
+    value: number;
+}
+
 export interface DockerContainer {
     id: string;
     name: string;

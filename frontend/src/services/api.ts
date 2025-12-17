@@ -1,4 +1,11 @@
-import type { SystemInfo, DockerContainer, ProcessesSnapshot, UsersSummary, RemoteUser } from '../types';
+import type {
+    SystemInfo,
+    DockerContainer,
+    ProcessesSnapshot,
+    UsersSummary,
+    RemoteUser,
+    MetricSample,
+} from '../types';
 
 const getBaseUrl = (): string => {
     const base = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://127.0.0.1:8000';
@@ -94,4 +101,40 @@ export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]>
 
     const data = await response.json();
     return (data.users ?? []) as RemoteUser[];
+};
+
+export interface MetricSeriesRequest {
+    metric: string;
+    host?: string;
+    fromTs?: string;
+    toTs?: string;
+    signal?: AbortSignal;
+}
+
+export const getMetricSeries = async ({
+    metric,
+    host,
+    fromTs,
+    toTs,
+    signal,
+}: MetricSeriesRequest): Promise<MetricSample[]> => {
+    const params = new URLSearchParams();
+    params.set('metric', metric);
+    if (host) params.set('host', host);
+    if (fromTs) params.set('from_ts', fromTs);
+    if (toTs) params.set('to_ts', toTs);
+
+    const url = `${getBaseUrl()}/metrics/series?${params.toString()}`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener métricas`);
+    }
+
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+        return [];
+    }
+
+    return data as MetricSample[];
 };

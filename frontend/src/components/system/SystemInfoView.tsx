@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+ import React, { useEffect, useState } from 'react';
 import { MOCK_SYSTEM_INFO } from '../../mockData';
 import type { SystemInfo } from '../../types';
 import { getSystemInfo } from '../../services/api';
 import InfoCard from './InfoCard';
 import InfoRow from './InfoRow';
 import SystemInfoHeader from './SystemInfoHeader';
+import CpuMetricsPanel from './CpuMetricsPanel';
 
 const formatBytesToGiB = (bytes: number) => {
     return `${(bytes / (1024 ** 3)).toFixed(1)} GiB`;
@@ -118,6 +119,13 @@ const SystemInfoView: React.FC = () => {
                 >
                     <InfoRow label="Python" value={info.python_version} />
                 </InfoCard>
+            </div>
+            <div className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold text-zinc-200 uppercase tracking-wide">Métricas de CPU</h3>
+                    <span className="text-xs text-zinc-500">Actualización cada 5 segundos</span>
+                </div>
+                <CpuMetricsPanel hostname={info.hostname} />
             </div>
         </div>
     );
