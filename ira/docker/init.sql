@@ -6,6 +6,21 @@ CREATE TABLE IF NOT EXISTS metrics_points (
     host TEXT NOT NULL
 );
 
+CREATE TABLE system_alerts (    
+    id UUID PRIMARY KEY,
+    host TEXT NOT NULL,
+    metric TEXT NOT NULL,
+    level TEXT NOT NULL,
+    value DOUBLE PRECISION NOT NULL,
+    threshold DOUBLE PRECISION NOT NULL,
+    status TEXT NOT NULL,
+    message TEXT NOT NULL,
+    first_seen_at TIMESTAMPTZ NOT NULL,
+    last_seen_at TIMESTAMPTZ NOT NULL,
+    resolved_at TIMESTAMPTZ
+);
+
+
 -- MODIFY TABLE FOR USER SETTINGS
 -- CREATE TABLE IF NOT EXISTS settings (
 --     id BIGSERIAL PRIMARY KEY,
