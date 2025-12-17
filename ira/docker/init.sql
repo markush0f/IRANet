@@ -6,6 +6,12 @@ CREATE TABLE IF NOT EXISTS metrics_points (
     host TEXT NOT NULL
 );
 
+-- MODIFY TABLE FOR USER SETTINGS
+-- CREATE TABLE IF NOT EXISTS settings (
+--     id BIGSERIAL PRIMARY KEY,
+    
+-- )
+
 CREATE INDEX IF NOT EXISTS idx_metrics_points_metric_ts
     ON metrics_points (metric, ts);
 

@@ -1,4 +1,21 @@
-"""Utilities that collect system metrics and persist them."""
+"""
+Utilities that collect system metrics and persist them.
+-- CPU --
+cpu.total = Total CPU usage percentage (100 - idle).
+cpu.user = CPU consumed by user processes.
+cpu.system = CPU used by the kernel.
+
+-- MEMORY --
+memory.user_kb = Memory actually used by processes, excluding buffers and cache.
+memory.free_kb = Memory completely empty, not even used as cache.
+memory.available_percent = Percentage of RAM that the system can free up immediately without 
+killing processes.
+
+-- LOAD AVERAGE --
+load.1m = Load average over the last minute.
+load.5m = Load average over the last 5 minutes.
+load.15m = Load average over the last 15 minutes.
+"""
 
 from __future__ import annotations
 
@@ -100,9 +117,9 @@ def _build_load_metrics(ts: datetime, host: str) -> List[MetricPoint]:
     ]
 
 
-async def collect_metrics(host: str) -> None:
+async def collect_metrics(host: str) -> List[MetricPoint]:
     """Gather CPU, memory and load averages and persist the resulting points."""
-    ts = datetime.now(timezone.utc)  # CHANGED: use datetime instead of int
+    ts = datetime.now(timezone.utc)
     logger.info("collecting metrics snapshot for host %s", host)
 
     points: List[MetricPoint] = []
@@ -117,4 +134,4 @@ async def collect_metrics(host: str) -> None:
         ts,
     )
 
-    await insert_metric_points(points)
+    return points
