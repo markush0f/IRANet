@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Badge, Card, Flex, Text, Title } from '@tremor/react';
 import MetricSeriesPanel from '../system/MetricSeriesPanel';
 import { getSystemInfo } from '../../services/api';
+import RechartsMetricPanel from '../system/RechartsMetricPanel';
 
 const MemoryMetricsView: React.FC = () => {
     const [hostname, setHostname] = useState<string | null>(null);
@@ -104,7 +105,7 @@ const MemoryMetricsView: React.FC = () => {
                             {error}
                         </div>
                     )}
-                    <MetricSeriesPanel
+                    <RechartsMetricPanel
                         hostname={hostToUse || undefined}
                         metric={activeMemoryMetric.id}
                         seriesLabel={`Serie de métricas de ${activeMemoryMetric.label.toLowerCase()}`}
