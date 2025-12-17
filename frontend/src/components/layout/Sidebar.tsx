@@ -41,15 +41,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
     ];
 
     const navItems: NavItem[] = [
-        {
-            id: 'dashboard',
-            label: 'Dashboard',
-            icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-            )
-        },
+        // {
+        //     id: 'dashboard',
+        //     label: 'Dashboard',
+        //     icon: (
+        //         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        //         </svg>
+        //     )
+        // },
         {
             id: 'system',
             label: 'System Info',
@@ -116,14 +116,24 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             )
         },
         {
-            id: 'deployments',
-            label: 'Deployments',
+            id: 'applications',
+            label: 'Applications',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10M7 11h10M7 15h7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5h14v14H5z" />
                 </svg>
             )
         },
+        // {
+        //     id: 'deployments',
+        //     label: 'Deployments',
+        //     icon: (
+        //         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        //         </svg>
+        //     )
+        // },
         {
             id: 'logs',
             label: 'Global Logs',
@@ -133,15 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                 </svg>
             )
         },
-        {
-            id: 'alerts',
-            label: 'Alertas',
-            icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 10-12 0v5H4v2h16v-2h-2z" />
-                </svg>
-            )
-        },
+
         {
             id: 'settings',
             label: 'Settings',
