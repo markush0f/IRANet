@@ -9,7 +9,7 @@ from app.modules.scanner.logs import detect_log_paths
 from app.modules.scanner.models import ScannedProcess
 from app.modules.scanner.ports import scan_listening_ports
 from app.modules.scanner.process import scan_processes
-from app.services.logs.service import attach_discovered_logs
+from app.services.logs.service import attach_logs_to_application
 
 
 def discover_applications(min_etimes_seconds: int = 15) -> List[Dict]:
@@ -123,7 +123,7 @@ async def create_application(
     )
 
     # Initialize log configuration for the application
-    await attach_discovered_logs(
+    await attach_logs_to_application(
         application_id=application_id,
         workdir=data.cwd,
     )
