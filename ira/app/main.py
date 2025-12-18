@@ -10,6 +10,7 @@ from app.api.service import router as service_router
 from app.api.users import router as users_router
 from app.api.metrics import router as metrics_router
 from app.api.alerts import router as alerts_router
+from app.api.applications import router as applications_router
 
 from app.core.config import load_config
 from app.core.database import init_db_pool
@@ -53,6 +54,7 @@ app.include_router(service_router)
 app.include_router(users_router)
 app.include_router(metrics_router)
 app.include_router(alerts_router)
+app.include_router(applications_router)
 
 
 @app.get("/config")
