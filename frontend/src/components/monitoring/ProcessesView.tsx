@@ -1,244 +1,199 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { ProcessesSnapshot, ProcessInfo } from '../../types';
 import { getProcessesSnapshot } from '../../services/api';
 
 const formatKbToMiB = (kb: number) => `${(kb / 1024).toFixed(1)} MiB`;
 
+const getStateDisplay = (stateCode: string, stateLabel: string) => {
+    const code = stateCode.toUpperCase();
+    const label = stateLabel.toLowerCase();
+
+    if (code === 'R' || label.includes('running')) {
+        return { badge: 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300', text: 'Running', icon: '▶️' };
+    }
+    if (code === 'S' || label.includes('sleeping')) {
+        return { badge: 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300', text: 'Sleeping', icon: '💤' };
+    }
+    if (code === 'Z') {
+        return { badge: 'bg-zinc-500/10 border-zinc-500/40 text-zinc-300', text: 'Zombie', icon: '🧟' };
+    }
+    if (code === 'T') {
+        return { badge: 'bg-amber-500/10 border-amber-500/40 text-amber-300', text: 'Stopped', icon: '⏸️' };
+    }
+
+    return { badge: 'bg-zinc-500/10 border-zinc-500/40 text-zinc-300', text: stateLabel, icon: '⚙️' };
+};
+
 const ProcessesView: React.FC = () => {
     const [snapshot, setSnapshot] = useState<ProcessesSnapshot | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [limit, setLimit] = useState<number>(10);
+
+    const [limit, setLimit] = useState(10);
     const [stateFilter, setStateFilter] = useState<'all' | 'running' | 'sleeping' | 'other'>('all');
-    const [userFilter, setUserFilter] = useState<string>('all');
+    const [userFilter, setUserFilter] = useState('all');
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         const controller = new AbortController();
 
-        const fetchSnapshot = async () => {
+        const loadSnapshot = async () => {
             try {
-                setError(null);
                 setLoading(true);
+                setError(null);
                 const data = await getProcessesSnapshot(limit, controller.signal);
                 setSnapshot(data);
-            } catch (e) {
-                if (
-                    e instanceof DOMException && e.name === 'AbortError' ||
-                    (typeof e === 'object' && e !== null && 'name' in e && (e as any).name === 'AbortError')
-                ) {
-                    return;
+            } catch (e: any) {
+                if (e?.name !== 'AbortError') {
+                    setError('Failed to load processes snapshot');
                 }
-                console.error('Error fetching processes snapshot', e);
-                setError('No se pudo cargar el snapshot de procesos.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchSnapshot();
-
+        loadSnapshot();
         return () => controller.abort();
     }, [limit]);
 
+    const processes = snapshot?.processes ?? [];
     const header = snapshot?.header;
-    const processes: ProcessInfo[] = snapshot?.processes ?? [];
 
-    const uniqueUsers = Array.from(new Set(processes.map((p) => p.user))).sort();
+    const users = useMemo(
+        () => Array.from(new Set(processes.map(p => p.user))).sort(),
+        [processes]
+    );
 
-    const filteredProcesses = processes.filter((p) => {
-        if (userFilter !== 'all' && p.user !== userFilter) return false;
+    const filteredProcesses = useMemo(() => {
+        return processes.filter(p => {
+            if (userFilter !== 'all' && p.user !== userFilter) return false;
 
-        if (stateFilter === 'all') return true;
+            const label = p.state.label.toLowerCase();
 
-        const label = p.state.label.toLowerCase();
-        if (stateFilter === 'running') {
-            return label.includes('running');
-        }
-        if (stateFilter === 'sleeping') {
-            return label.includes('sleeping');
-        }
-        return !label.includes('running') && !label.includes('sleeping');
-    });
+            if (stateFilter === 'running' && !label.includes('running')) return false;
+            if (stateFilter === 'sleeping' && !label.includes('sleeping')) return false;
+            if (stateFilter === 'other' && (label.includes('running') || label.includes('sleeping'))) return false;
+
+            if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+
+            return true;
+        });
+    }, [processes, userFilter, stateFilter, search]);
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12">
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Processes Snapshot</h2>
-                    <div className="h-1 w-24 bg-indigo-600 rounded-full mt-4" />
-                    <p className="text-zinc-400 mt-2 text-sm">
-                        Vista compacta de procesos similar a <span className="font-semibold text-zinc-200">top</span>, obtenida desde el backend.
-                    </p>
-                    {error && (
-                        <p className="mt-3 text-xs text-amber-400">
-                            {error}
-                        </p>
-                    )}
-                </div>
-                <div className="flex flex-col items-start md:items-end gap-3">
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-zinc-500">Límite de procesos:</span>
+        <div className="max-w-5xl mx-auto px-4 py-8 h-screen flex flex-col">
+            <header className="mb-6 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-3xl font-bold text-zinc-100">System Processes</h2>
+                        <p className="text-base text-zinc-400">Real-time process monitoring</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
                         <select
                             value={limit}
-                            onChange={(e) => setLimit(Number(e.target.value) || 10)}
-                            className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                            onChange={e => setLimit(Number(e.target.value))}
+                            className="bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2 text-sm text-zinc-200"
                         >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                            <option value={100}>100</option>
+                            <option value={5}>Top 5</option>
+                            <option value={10}>Top 10</option>
+                            <option value={20}>Top 20</option>
+                            <option value={50}>Top 50</option>
+                            <option value={100}>Top 100</option>
                         </select>
-                    </div>
-                    {processes.length > 0 && (
-                        <div className="flex flex-wrap gap-2 justify-end w-full">
-                            <select
-                                value={userFilter}
-                                onChange={(e) => setUserFilter(e.target.value)}
-                                className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option value="all">Todos los usuarios</option>
-                                {uniqueUsers.map((user) => (
-                                    <option key={user} value={user}>
-                                        {user}
-                                    </option>
-                                ))}
-                            </select>
-                            <select
-                                value={stateFilter}
-                                onChange={(e) => setStateFilter(e.target.value as typeof stateFilter)}
-                                className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option value="all">Todos los estados</option>
-                                <option value="running">Running</option>
-                                <option value="sleeping">Sleeping</option>
-                                <option value="other">Otros</option>
-                            </select>
-                        </div>
-                    )}
-                    {snapshot && (
-                        <div className="text-xs text-zinc-500 font-mono">
-                            ts: {snapshot.timestamp} · uptime: <span className="text-zinc-200">{header?.uptime}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
 
-            {header && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-                        <h3 className="text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wide">Load / Tasks</h3>
-                        <div className="flex justify-between text-xs text-zinc-400 mb-2">
-                            <span>Load (1/5/15m)</span>
-                            <span className="font-mono text-zinc-200">
-                                {header.load_average.load_1m.toFixed(2)} / {header.load_average.load_5m.toFixed(2)} / {header.load_average.load_15m.toFixed(2)}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-xs text-zinc-400">
-                            <span>Tasks</span>
-                            <span className="font-mono text-zinc-200">
-                                total {header.tasks.total}, run {header.tasks.running}, sleep {header.tasks.sleeping}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-                        <h3 className="text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wide">CPU</h3>
-                        <div className="flex justify-between text-xs text-zinc-400">
-                            <span>us / sy / id</span>
-                            <span className="font-mono text-zinc-200">
-                                {header.cpu.us.toFixed(1)}% / {header.cpu.sy.toFixed(1)}% / {header.cpu.id.toFixed(1)}%
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-                        <h3 className="text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wide">Memory / Swap</h3>
-                        <div className="flex justify-between text-xs text-zinc-400 mb-1">
-                            <span>Mem used / total</span>
-                            <span className="font-mono text-zinc-200">
-                                {formatKbToMiB(header.memory.used_kb)} / {formatKbToMiB(header.memory.total_kb)}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-xs text-zinc-400 mb-1">
-                            <span>Available</span>
-                            <span className="font-mono text-zinc-200">
-                                {header.memory.available_percent.toFixed(1)}%
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-xs text-zinc-400">
-                            <span>Swap</span>
-                            <span className="font-mono text-zinc-200">
-                                {formatKbToMiB(header.swap.used_kb)} / {formatKbToMiB(header.swap.total_kb)} ({header.swap.state})
-                            </span>
-                        </div>
+                        <span className="px-3 py-2 rounded-full bg-zinc-800 text-sm text-zinc-300">
+                            {filteredProcesses.length}
+                        </span>
                     </div>
                 </div>
-            )}
 
-            {loading ? (
-                <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-10">
-                    <div className="w-6 h-6 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
-                    <span>Cargando procesos...</span>
+                <div className="flex flex-wrap gap-2">
+                    <input
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Search process..."
+                        className="px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
+                    />
+
+                    <select
+                        value={userFilter}
+                        onChange={e => setUserFilter(e.target.value)}
+                        className="px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
+                    >
+                        <option value="all">All users</option>
+                        {users.map(u => (
+                            <option key={u} value={u}>{u}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={stateFilter}
+                        onChange={e => setStateFilter(e.target.value as any)}
+                        className="px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
+                    >
+                        <option value="all">All states</option>
+                        <option value="running">Running</option>
+                        <option value="sleeping">Sleeping</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
-            ) : processes.length === 0 ? (
-                <div className="text-sm text-zinc-400">
-                    No se han recibido procesos del backend.
-                </div>
-            ) : filteredProcesses.length === 0 ? (
-                <div className="text-sm text-zinc-400">
-                    No hay procesos que coincidan con el filtro aplicado.
-                </div>
-            ) : (
-                <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-xs">
-                            <thead className="bg-zinc-950/70 border-b border-zinc-800">
-                                <tr>
-                                    <th className="px-4 py-3 text-left font-bold text-zinc-500 uppercase tracking-wide">PID</th>
-                                    <th className="px-4 py-3 text-left font-bold text-zinc-500 uppercase tracking-wide">User</th>
-                                    <th className="px-4 py-3 text-left font-bold text-zinc-500 uppercase tracking-wide">Name</th>
-                                    <th className="px-4 py-3 text-left font-bold text-zinc-500 uppercase tracking-wide">State</th>
-                                    <th className="px-4 py-3 text-right font-bold text-zinc-500 uppercase tracking-wide">CPU</th>
-                                    <th className="px-4 py-3 text-right font-bold text-zinc-500 uppercase tracking-wide">RES</th>
-                                    <th className="px-4 py-3 text-right font-bold text-zinc-500 uppercase tracking-wide">VIRT</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-zinc-800">
-                                {filteredProcesses.map((p) => (
-                                    <tr key={p.pid} className="hover:bg-zinc-800/40 transition-colors">
-                                        <td className="px-4 py-2 font-mono text-zinc-200">{p.pid}</td>
-                                        <td className="px-4 py-2 text-zinc-300">{p.user}</td>
-                                        <td className="px-4 py-2 text-zinc-200 truncate max-w-[200px]">{p.name}</td>
-                                        <td className="px-4 py-2">
-                                            <span className="px-2 py-0.5 text-[10px] rounded-full border border-zinc-700 text-zinc-300 font-semibold uppercase tracking-wide">
-                                                {p.state.code} · {p.state.label}
+            </header>
+
+            <main className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                {loading && (
+                    <div className="h-full flex items-center justify-center text-base text-zinc-400">
+                        Loading processes...
+                    </div>
+                )}
+
+                {!loading && filteredProcesses.length === 0 && (
+                    <div className="h-full flex items-center justify-center text-base text-zinc-400">
+                        No matching processes
+                    </div>
+                )}
+
+                <div className="divide-y divide-zinc-800 overflow-y-auto h-full">
+                    {filteredProcesses.map(p => {
+                        const state = getStateDisplay(p.state.code, p.state.label);
+
+                        return (
+                            <div key={p.pid} className="p-4 hover:bg-zinc-800/40">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xs uppercase tracking-wide text-zinc-500">
+                                                PID
                                             </span>
-                                        </td>
-                                        <td className="px-4 py-2 text-right font-mono text-zinc-300">
+                                            <span className="text-sm font-mono text-zinc-400">
+                                                {p.pid}
+                                            </span>
+                                            <span className="text-base font-medium text-zinc-100 truncate">
+                                                {p.name}
+                                            </span>
+                                        </div>
+
+                                        <div className="mt-1 text-xs text-zinc-500 flex gap-4">
+                                            <span>User: {p.user}</span>
+                                            <span>RES: {formatKbToMiB(p.memory.res_kb)}</span>
+                                            <span>VIRT: {formatKbToMiB(p.memory.virt_kb)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col items-end shrink-0">
+                                        <span className={`px-3 py-1 rounded border text-xs font-semibold ${state.badge}`}>
+                                            {state.icon} {state.text}
+                                        </span>
+                                        <span className="mt-1 text-xs font-mono text-zinc-400">
                                             {p.cpu.time_formatted}
-                                        </td>
-                                        <td className="px-4 py-2 text-right font-mono text-zinc-300">
-                                            {formatKbToMiB(p.memory.res_kb)}
-                                        </td>
-                                        <td className="px-4 py-2 text-right font-mono text-zinc-300">
-                                            {formatKbToMiB(p.memory.virt_kb)}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex justify-between">
-                        <span>
-                            Mostrando <span className="text-zinc-200 font-semibold">{filteredProcesses.length}</span> procesos
-                        </span>
-                        <span className="font-mono">
-                            limit={snapshot?.limit ?? limit}
-                        </span>
-                    </div>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-            )}
+            </main>
         </div>
     );
 };

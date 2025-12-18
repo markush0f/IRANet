@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { useAlerts } from '../../hooks/useAlerts';
 import type { AlertRecord } from '../../services/alertsService';
 
-const LEVEL_STYLES: Record<string, { bg: string; icon: string }> = {
-    critical: { bg: 'bg-rose-500/10 border-rose-500/40 text-rose-300', icon: '🔴' },
-    warning: { bg: 'bg-amber-500/10 border-amber-500/40 text-amber-300', icon: '⚠️' },
-    error: { bg: 'bg-rose-500/10 border-rose-500/40 text-rose-300', icon: '❌' },
-    info: { bg: 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300', icon: 'ℹ️' },
-    debug: { bg: 'bg-zinc-500/10 border-zinc-500/40 text-zinc-300', icon: '🐛' },
+const LEVEL_STYLES: Record<string, { bg: string; border: string }> = {
+    critical: { bg: 'bg-rose-500/10 border-rose-500/40 text-rose-300', border: 'border-l-rose-500' },
+    warning: { bg: 'bg-amber-500/10 border-amber-500/40 text-amber-300', border: 'border-l-amber-500' },
+    error: { bg: 'bg-rose-500/10 border-rose-500/40 text-rose-300', border: 'border-l-red-500' },
+    info: { bg: 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300', border: 'border-l-indigo-500' },
+    debug: { bg: 'bg-zinc-500/10 border-zinc-500/40 text-zinc-300', border: 'border-l-zinc-500' },
 };
 
 const formatTimestamp = (value: string) => {
@@ -101,8 +101,8 @@ const AlertsView: React.FC = () => {
                                 type="button"
                                 onClick={() => setLevelFilter(filter.value)}
                                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wide border transition ${levelFilter === filter.value
-                                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                    : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                                        ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                                        : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                                     }`}
                             >
                                 {filter.label}
@@ -142,28 +142,21 @@ const AlertsView: React.FC = () => {
                                 return (
                                     <div
                                         key={alert.id}
-                                        className="p-4 hover:bg-zinc-800/40 transition-colors cursor-pointer"
+                                        className={`p-4 hover:bg-zinc-800/40 transition-colors cursor-pointer border-l-8 ${levelStyle.border}`}
                                     >
-                                        <div className="flex items-start gap-3">
-                                            <div className={`flex-shrink-0 w-10 h-10 rounded-xl border ${levelStyle.bg} flex items-center justify-center text-lg`}>
-                                                {levelStyle.icon}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between gap-3 mb-1">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${levelStyle.bg}`}>
-                                                        {alert.level}
-                                                    </span>
-                                                    <span className="text-[11px] text-zinc-500 font-mono whitespace-nowrap">
-                                                        {formatMoment(alert)}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-zinc-200 mb-2 break-words">
-                                                    {alert.message}
-                                                </p>
-                                                <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-                                                    <span className="font-mono">{alert.host ?? alert.source ?? 'N/A'}</span>
-                                                </div>
-                                            </div>
+                                        <div className="flex items-start justify-between gap-4 mb-2">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${levelStyle.bg}`}>
+                                                {alert.level}
+                                            </span>
+                                            <span className="text-[11px] text-zinc-500 font-mono whitespace-nowrap">
+                                                {formatMoment(alert)}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-zinc-200 mb-2 break-words">
+                                            {alert.message}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+                                            <span className="font-mono">{alert.host ?? alert.source ?? 'N/A'}</span>
                                         </div>
                                     </div>
                                 );
