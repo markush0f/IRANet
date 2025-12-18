@@ -1,4 +1,4 @@
-import type { Service, LogEntry, SystemInfo } from './types';
+import type { Service, LogEntry, SystemInfo, SystemApplication } from './types';
 
 export const INITIAL_SERVICES: Service[] = [
     {
@@ -183,3 +183,18 @@ export const MOCK_SYSTEM_INFO: SystemInfo = {
         codename: 'jammy'
     }
 };
+
+export const MOCK_SYSTEM_APPLICATIONS: SystemApplication[] = [
+    {
+        cwd: '/mnt/c/Users/abram/AppData/Local/Programs/Microsoft VS Code',
+        commands: ['node'],
+    },
+    {
+        cwd: '/home/markus/projects/IRANet/ira',
+        commands: ['node', 'python', 'python3', 'uvicorn'],
+    },
+    {
+        cwd: '/home/markus/projects/IRANet/frontend',
+        commands: ['node'],
+    },
+];

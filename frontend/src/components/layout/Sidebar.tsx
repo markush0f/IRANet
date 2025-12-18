@@ -17,6 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [servicesOpen, setServicesOpen] = useState(true);
     const [metricsOpen, setMetricsOpen] = useState(true);
+    const [applicationsOpen, setApplicationsOpen] = useState(true);
 
     const metricsChildren: NavItem[] = [
         {
@@ -35,6 +36,30 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16v10H4z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7v10M15 7v10" />
+                </svg>
+            ),
+        },
+    ];
+
+    const applicationsChildren: NavItem[] = [
+        {
+            id: 'applications',
+            label: 'Applications',
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6h12v4H6z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 14h12v4H6z" />
+                </svg>
+            ),
+        },
+        {
+            id: 'system-applications',
+            label: 'System applications',
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5h14v4H5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15h14v4H5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9h6v6H9z" />
                 </svg>
             ),
         },
@@ -88,15 +113,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                 </svg>
             )
         },
-        {
-            id: 'performance',
-            label: 'Performance',
-            icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-            )
-        },
+        // {
+        //     id: 'performance',
+        //     label: 'Performance',
+        //     icon: (
+        //         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        //         </svg>
+        //     )
+        // },
         {
             id: 'processes',
             label: 'Processes',
@@ -123,7 +148,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10M7 11h10M7 15h7" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5h14v14H5z" />
                 </svg>
-            )
+            ),
+            children: applicationsChildren,
         },
         // {
         //     id: 'deployments',
@@ -193,7 +219,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
             <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                 {navItems.map(item => {
                     const isMetricsGroup = item.id === 'metrics';
-                    const groupActive = isMetricsGroup
+                    const isApplicationsGroup = item.id === 'applications';
+                    const hasChildren = Boolean(item.children && item.children.length > 0);
+                    const groupActive = hasChildren
                         ? (item.children ?? []).some(child => child.id === activeView)
                         : activeView === item.id;
 
@@ -203,9 +231,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                                 onClick={() => {
                                     if (item.id === 'services') {
                                         setServicesOpen(prev => !prev);
+                                        return;
                                     }
                                     if (isMetricsGroup) {
                                         setMetricsOpen(prev => !prev);
+                                        return;
+                                    }
+                                    if (isApplicationsGroup) {
+                                        setApplicationsOpen(prev => !prev);
                                         return;
                                     }
                                     onNavigate(item.id);
@@ -247,6 +280,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>
                                                 )}
+                                                {isApplicationsGroup && (
+                                                    <svg
+                                                        className={`w-3 h-3 text-zinc-500 transition-transform ${applicationsOpen ? 'rotate-90' : ''}`}
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                )}
                                             </span>
                                         )}
                                     </span>
@@ -275,6 +318,30 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                             )}
 
                             {!isCollapsed && isMetricsGroup && metricsOpen && (
+                                <div className="ml-8 mt-1 space-y-1">
+                                    {(item.children ?? []).map(child => (
+                                        <button
+                                            key={child.id}
+                                            onClick={() => onNavigate(child.id)}
+                                            className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                                                ${activeView === child.id
+                                                    ? 'bg-indigo-600/10 text-indigo-400'
+                                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                }
+                                            `}
+                                        >
+                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                                {child.icon}
+                                            </div>
+                                            <span className="flex-1">{child.label}</span>
+                                            {activeView === child.id && (
+                                                <div className="absolute right-2 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {!isCollapsed && isApplicationsGroup && applicationsOpen && (
                                 <div className="ml-8 mt-1 space-y-1">
                                     {(item.children ?? []).map(child => (
                                         <button

@@ -14,6 +14,7 @@ import ProcessesView from './components/monitoring/ProcessesView';
 import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
 import AlertsView from './components/alerts/AlertsView';
 import ApplicationsView from './components/applications/ApplicationsView';
+import SystemApplicationsView from './components/system/SystemApplicationsView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -55,6 +56,8 @@ function App() {
             <AlertsView />
           ) : currentView === 'applications' ? (
             <ApplicationsView />
+          ) : currentView === 'system-applications' ? (
+            <SystemApplicationsView />
           ) : (
             <DashboardView
               services={services}

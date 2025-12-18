@@ -58,6 +58,11 @@ export interface SystemInfo {
     };
 }
 
+export interface SystemApplication {
+    cwd: string;
+    commands: string[];
+}
+
 export interface MetricSample {
     ts: string;
     value: number;

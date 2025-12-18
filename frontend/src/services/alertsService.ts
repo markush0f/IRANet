@@ -2,10 +2,18 @@ import { getBaseUrl } from './api';
 
 export interface AlertRecord {
     id: string;
+    host?: string;
+    metric?: string;
     level: 'info' | 'warning' | 'critical' | 'debug' | 'error';
+    value?: number;
+    threshold?: number;
+    status?: string;
     message: string;
     source?: string;
-    timestamp: string;
+    timestamp?: string;
+    first_seen_at?: string;
+    last_seen_at?: string;
+    resolved_at?: string | null;
 }
 
 export interface AlertsResponse {
