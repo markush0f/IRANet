@@ -12,3 +12,10 @@ class ScannedProcess:
     file_path: Optional[str]
     port: Optional[int]
     npm_mode: Optional[str]
+
+
+@dataclass
+class ListeningPort:
+    pid: int
+    port: int
+    protocol: str  # tcp | tcp6

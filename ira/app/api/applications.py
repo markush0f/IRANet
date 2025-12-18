@@ -1,6 +1,13 @@
+from typing import Dict
+from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query
 
+from app.infrastructure.applications.queries import query_application_by_identifier
+from app.infrastructure.applications.storage import insert_application
+from app.models.requests.create_application_request import CreateApplicationRequest
 from app.services.applications.scanner import (
+    build_application_identifier,
+    create_application,
     discover_application_details,
     discover_applications,
     discover_applications_grouped,
@@ -82,3 +89,15 @@ def discover_application_details_endpoint(
         )
 
     return details
+
+
+@router.post("")
+async def create_application_endpoint(
+    payload: CreateApplicationRequest,
+):
+    application_id = await create_application(payload)
+
+    return {
+        "id": str(application_id),
+        "status": "created",
+    }

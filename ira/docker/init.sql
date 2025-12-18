@@ -24,26 +24,32 @@ CREATE TABLE
         resolved_at TIMESTAMPTZ
     );
 
-CREATE TABLE
-    log_apps (
-        id TEXT PRIMARY KEY,
-        label TEXT NOT NULL,
-        log_path TEXT NOT NULL,
-        enabled BOOLEAN NOT NULL DEFAULT true
-    );
+CREATE TABLE application_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
+    application_id UUID NOT NULL
+        REFERENCES applications(id)
+        ON DELETE CASCADE,
+
+    path TEXT NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT true,
+    discovered BOOLEAN NOT NULL DEFAULT true,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    UNIQUE (application_id, path)
+);
 CREATE TABLE
     IF NOT EXISTS applications (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
-        kind TEXT NOT NULL,
-        identifier TEXT NOT NULL UNIQUE,
+        kind TEXT NOT NULL, -- process (for now)
+        identifier TEXT NOT NULL UNIQUE, -- stable logical identifier
         name TEXT NOT NULL,
-        file_path TEXT,
-        workdir TEXT NOT NULL,
-        port INTEGER,
-        pid INTEGER,
-        status TEXT NOT NULL,
-        discovered BOOLEAN NOT NULL DEFAULT true,
+        workdir TEXT NOT NULL, -- project root (cwd)
+        file_path TEXT, -- optional main file
+        port INTEGER, -- optional port
+        pid INTEGER, -- last seen pid (informative)
+        status TEXT NOT NULL, -- running | stopped
         enabled BOOLEAN NOT NULL DEFAULT false,
         last_seen_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
