@@ -1,4 +1,5 @@
 import type {
+    ApplicationDiscoveryDetails,
     SystemInfo,
     DockerContainer,
     ProcessesSnapshot,
@@ -78,6 +79,25 @@ export const getUsersList = async (signal?: AbortSignal): Promise<RemoteUser[]> 
 
     const data = await response.json();
     return (data.users ?? []) as RemoteUser[];
+};
+
+export const getApplicationDiscoveryDetails = async (
+    cwd: string,
+    minEtimesSeconds = 15,
+    signal?: AbortSignal
+): Promise<ApplicationDiscoveryDetails> => {
+    const params = new URLSearchParams();
+    params.set('cwd', cwd);
+    params.set('min_etimes_seconds', String(minEtimesSeconds));
+
+    const url = `${getBaseUrl()}/applications/discover/details?${params.toString()}`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener detalles del descubrimiento`);
+    }
+
+    return (await response.json()) as ApplicationDiscoveryDetails;
 };
 
 export const getSystemUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {

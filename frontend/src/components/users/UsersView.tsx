@@ -18,18 +18,24 @@ const UsersView: React.FC = () => {
     } = useUsersData();
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12 space-y-8">
-            <UsersPageHeader
-                searchTerm={searchTerm}
-                onSearchTermChange={setSearchTerm}
-                error={error}
-            />
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-12 h-screen flex flex-col">
+            {/* Header */}
+            <div className="flex flex-col gap-4 mb-6">
+                <UsersPageHeader
+                    searchTerm={searchTerm}
+                    onSearchTermChange={setSearchTerm}
+                    error={error}
+                />
 
-            <UsersSummaryGrid summary={summary} />
+                <UsersSummaryGrid summary={summary} />
 
-            <UsersFilterBar currentFilter={typeFilter} onFilterChange={setTypeFilter} />
+                <UsersFilterBar currentFilter={typeFilter} onFilterChange={setTypeFilter} />
+            </div>
 
-            <UsersTable users={filteredUsers} loading={loading} summary={summary} />
+            {/* Users Container with Fixed Height */}
+            <div className="flex-1 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-xl overflow-hidden flex flex-col min-h-0">
+                <UsersTable users={filteredUsers} loading={loading} summary={summary} />
+            </div>
         </div>
     );
 };

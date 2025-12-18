@@ -63,6 +63,24 @@ export interface SystemApplication {
     commands: string[];
 }
 
+export interface ApplicationDiscoveryProcess {
+    command: string;
+    elapsed_seconds?: number;
+}
+
+export interface ApplicationDiscoveryDetails {
+    name?: string;
+    cwd: string;
+    description?: string;
+    detected_runtimes?: string[];
+    detected_log_paths?: string[];
+    detected_processes?: ApplicationDiscoveryProcess[];
+    paths?: {
+        log_paths?: string[];
+    };
+    commands?: string[];
+}
+
 export interface MetricSample {
     ts: string;
     value: number;

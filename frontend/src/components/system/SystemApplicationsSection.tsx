@@ -1,5 +1,6 @@
-import React from 'react';
-import type { SystemApplication } from '../../types';
+import React, { useEffect, useState } from 'react';
+import type { ApplicationDiscoveryDetails, SystemApplication } from '../../types';
+import { getApplicationDiscoveryDetails } from '../../services/api';
 
 const KNOWN_LOGOS = [
     { matcher: 'python', label: '🐍', gradient: 'from-sky-500 to-emerald-500' },
@@ -38,75 +39,343 @@ interface SystemApplicationsSectionProps {
 }
 
 const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ applications }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedApplication, setSelectedApplication] = useState<SystemApplication | null>(null);
+    const [discoveryCwd, setDiscoveryCwd] = useState('');
+    const [discoveryDetails, setDiscoveryDetails] = useState<ApplicationDiscoveryDetails | null>(null);
+    const [discoveryError, setDiscoveryError] = useState<string | null>(null);
+    const [logPaths, setLogPaths] = useState<string[]>([]);
+    const [loadingDetails, setLoadingDetails] = useState(false);
+    const [technicalDetailsOpen, setTechnicalDetailsOpen] = useState(false);
+    const [fetchKey, setFetchKey] = useState(0);
+
+    const prepareDiscoveryRequest = () => {
+        setLoadingDetails(true);
+        setDiscoveryError(null);
+        setDiscoveryDetails(null);
+        setLogPaths([]);
+        setFetchKey(key => key + 1);
+    };
+
+    const openModal = (application: SystemApplication) => {
+        setSelectedApplication(application);
+        setDiscoveryCwd(application.cwd);
+        setTechnicalDetailsOpen(false);
+        setIsModalOpen(true);
+        prepareDiscoveryRequest();
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setDiscoveryCwd('');
+        setSelectedApplication(null);
+        setDiscoveryDetails(null);
+        setLogPaths([]);
+        setDiscoveryError(null);
+        setLoadingDetails(false);
+        setTechnicalDetailsOpen(false);
+    };
+
+    const handleSaveApplication = () => {
+        console.log('Guardar aplicación', { cwd: discoveryCwd, discoveryDetails, logPaths });
+        closeModal();
+    };
+
+    const handleConfirm = () => {
+        console.log('Confirmar detección', { cwd: discoveryCwd, discoveryDetails, logPaths });
+    };
+
+    const handleRetryFetch = () => {
+        if (!discoveryCwd) {
+            return;
+        }
+
+        prepareDiscoveryRequest();
+    };
+
+    const handleLogPathChange = (index: number, value: string) => {
+        setLogPaths(prev => {
+            const next = [...prev];
+            next[index] = value;
+            return next;
+        });
+    };
+
+    const handleAddLogPath = () => {
+        setLogPaths(prev => [...prev, '']);
+    };
+
+    const handleRemoveLogPath = (index: number) => {
+        setLogPaths(prev => prev.filter((_, idx) => idx !== index));
+    };
+
+    useEffect(() => {
+        if (!isModalOpen || !discoveryCwd) {
+            return;
+        }
+
+        const controller = new AbortController();
+
+        getApplicationDiscoveryDetails(discoveryCwd, 15, controller.signal)
+            .then(data => {
+                setDiscoveryDetails(data);
+                setLogPaths(
+                    data.detected_log_paths ??
+                        data.paths?.log_paths ??
+                        []
+                );
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError') {
+                    const message =
+                        error instanceof Error
+                            ? error.message
+                            : typeof error === 'string'
+                            ? error
+                            : 'No se pudo obtener la información de la aplicación';
+                    setDiscoveryError(message);
+                }
+            })
+            .finally(() => {
+                setLoadingDetails(false);
+            });
+
+        return () => {
+            controller.abort();
+        };
+    }, [isModalOpen, discoveryCwd, fetchKey]);
+
+    const runtimeTokens =
+        discoveryDetails?.detected_runtimes?.filter(Boolean) ??
+        discoveryDetails?.commands ??
+        selectedApplication?.commands ??
+        [];
+
+    const iconCommands =
+        discoveryDetails?.commands ??
+        discoveryDetails?.detected_runtimes ??
+        selectedApplication?.commands ??
+        [];
+
+    const modalDisplayName =
+        discoveryDetails?.name ?? selectedApplication?.cwd ?? 'Aplicación detectada';
+    const modalDisplayCwd = discoveryDetails?.cwd ?? discoveryCwd;
+
     return (
-        <section className="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Aplicaciones</p>
-                    <h3 className="text-lg font-semibold text-zinc-100">System applications</h3>
+        <>
+            <section className="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p className="text-xs uppercase tracking-wide text-zinc-500">Aplicaciones</p>
+                        <h3 className="text-lg font-semibold text-zinc-100">System applications</h3>
+                    </div>
                 </div>
-                <button
-                    type="button"
-                    onClick={() => console.log('Añadir aplicación')}
-                    className="inline-flex items-center gap-2 rounded-full border border-zinc-800 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-zinc-700 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
-                    </svg>
-                    Añadir aplicación
-                </button>
-            </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                {applications.map(application => (
-                    <article
-                        key={application.cwd}
-                        className="flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-950/60 to-zinc-950/20 p-4 backdrop-blur-xl hover:border-zinc-700 transition-colors"
-                    >
-                        <div className="flex gap-3">
-                            {getApplicationIcon(application.commands)}
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[10px] uppercase tracking-wide text-zinc-500">Directorio</p>
-                                <p
-                                    className="text-sm font-mono text-zinc-100 break-all"
-                                    title={application.cwd}
-                                >
-                                    {application.cwd}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-end justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[10px] uppercase tracking-wide text-zinc-500">Comandos</p>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {application.commands.map(command => (
-                                        <span
-                                            key={`${application.cwd}-${command}`}
-                                            className="rounded-full border border-zinc-800 bg-zinc-950/60 px-2 py-1 text-[11px] font-medium text-zinc-300"
-                                        >
-                                            {command}
-                                        </span>
-                                    ))}
+                <div className="mt-6 grid gap-4 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                    {applications.map(application => (
+                        <article
+                            key={application.cwd}
+                            className="flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-950/60 to-zinc-950/20 p-4 backdrop-blur-xl hover:border-zinc-700 transition-colors"
+                        >
+                            <div className="flex gap-3">
+                                {getApplicationIcon(application.commands)}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] uppercase tracking-wide text-zinc-500">Directorio</p>
+                                    <p
+                                        className="text-sm font-mono text-zinc-100 break-all"
+                                        title={application.cwd}
+                                    >
+                                        {application.cwd}
+                                    </p>
                                 </div>
                             </div>
 
+                            <div className="flex items-end justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] uppercase tracking-wide text-zinc-500">Comandos</p>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {application.commands.map(command => (
+                                            <span
+                                                key={`${application.cwd}-${command}`}
+                                                className="rounded-full border border-zinc-800 bg-zinc-950/60 px-2 py-1 text-[11px] font-medium text-zinc-300"
+                                            >
+                                                {command}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => openModal(application)}
+                                    className="shrink-0 rounded-full border border-zinc-800 bg-zinc-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
+                                    title="Abrir modal de detección"
+                                >
+                                    Añadir aplicación
+                                </button>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-8">
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal} />
+                    <div
+                        className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-2xl"
+                        role="dialog"
+                        aria-modal="true"
+                        onClick={event => event.stopPropagation()}
+                    >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                {getApplicationIcon(iconCommands)}
+                                <div>
+                                    <p className="text-sm font-semibold text-zinc-100">
+                                        {modalDisplayName}
+                                    </p>
+                                    <p className="text-xs font-mono text-zinc-500">
+                                        {modalDisplayCwd}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={handleSaveApplication}
+                                    className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white"
+                                >
+                                    Save application
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="rounded-full border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-100"
+                                >
+                                    Ignore
+                                </button>
+                            </div>
+                        </div>
+
+                        {discoveryDetails?.description && (
+                            <p className="mt-3 text-sm text-zinc-400">{discoveryDetails.description}</p>
+                        )}
+
+                        <div className="mt-6">
+                            <p className="text-[10px] uppercase tracking-wide text-zinc-500">Detected runtimes</p>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {loadingDetails ? (
+                                    <span className="rounded-full border border-dashed border-zinc-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                                        Cargando...
+                                    </span>
+                                ) : runtimeTokens.length ? (
+                                    runtimeTokens.map(runtime => (
+                                        <span
+                                            key={runtime}
+                                            className="rounded-full border border-zinc-800 bg-zinc-900/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200"
+                                        >
+                                            [ {runtime} ]
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-[11px] text-zinc-500">Sin runtimes detectados</span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="mt-6 space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-[10px] uppercase tracking-wide text-zinc-500">Detected log paths</p>
+                                <button
+                                    type="button"
+                                    onClick={handleAddLogPath}
+                                    className="rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400 transition hover:border-zinc-600 hover:text-white"
+                                >
+                                    + Add path
+                                </button>
+                            </div>
+
+                            {logPaths.length > 0 ? (
+                                <div className="space-y-2">
+                                    {logPaths.map((path, index) => (
+                                        <div key={`${path}-${index}`} className="flex items-center gap-3">
+                                            <span className="text-sm text-zinc-500">•</span>
+                                            <input
+                                                type="text"
+                                                value={path}
+                                                onChange={event => handleLogPathChange(index, event.target.value)}
+                                                className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm font-mono text-zinc-100 focus:border-emerald-500 focus:outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveLogPath(index)}
+                                                className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 transition hover:border-zinc-600 hover:text-white"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-zinc-500">No se detectaron rutas; puedes agregarlas manualmente.</p>
+                            )}
+                        </div>
+
+                        {discoveryError && (
+                            <div className="mt-4 rounded-2xl border border-rose-500/40 bg-rose-500/5 px-4 py-3 text-sm text-rose-200">
+                                <p>{discoveryError}</p>
+                                <button
+                                    type="button"
+                                    onClick={handleRetryFetch}
+                                    className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-rose-200 underline-offset-2 hover:text-white"
+                                >
+                                    Reintentar
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="mt-6">
                             <button
                                 type="button"
-                                onClick={() => console.log('Ejecutar aplicación:', application.cwd)}
-                                className="shrink-0 rounded-lg border border-zinc-800 bg-zinc-950/60 p-2 text-zinc-400 transition hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
-                                title="Ejecutar aplicación"
+                                onClick={() => setTechnicalDetailsOpen(open => !open)}
+                                className="flex items-center gap-2 text-sm font-semibold text-zinc-200"
                             >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <span>{technicalDetailsOpen ? '▲' : '▼'}</span>
+                                <span>Show technical details</span>
+                            </button>
+
+                            {technicalDetailsOpen && (
+                                <div className="mt-3 space-y-2 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3 text-sm font-mono text-zinc-200">
+                                    {discoveryDetails?.detected_processes?.length ? (
+                                        discoveryDetails.detected_processes.map((process, index) => (
+                                            <p key={`${process.command ?? 'command'}-${index}`} className="text-zinc-200">
+                                                {process.command ?? 'Comando desconocido'}
+                                                {process.elapsed_seconds ? ` (${process.elapsed_seconds}s)` : ''}
+                                            </p>
+                                        ))
+                                    ) : (
+                                        <p className="text-zinc-500">No hay detalles técnicos disponibles</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={handleConfirm}
+                                disabled={loadingDetails}
+                                className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Confirmar
                             </button>
                         </div>
-                    </article>
-                ))}
-            </div>
-        </section>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

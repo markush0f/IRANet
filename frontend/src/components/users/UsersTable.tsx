@@ -43,11 +43,10 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
                                 <td className="px-4 py-3 text-zinc-300">{user.home}</td>
                                 <td className="px-4 py-3 text-zinc-300">{user.shell}</td>
                                 <td className="px-4 py-3 text-zinc-300">
-                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${
-                                        user.type === 'human'
+                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${user.type === 'human'
                                             ? 'bg-emerald-500/10 border border-emerald-500/40 text-emerald-300'
                                             : 'bg-rose-500/10 border border-rose-500/40 text-rose-300'
-                                    }`}>
+                                        }`}>
                                         {user.type}
                                     </span>
                                 </td>
