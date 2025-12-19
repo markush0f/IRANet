@@ -120,7 +120,7 @@ def _build_load_metrics(ts: datetime, host: str) -> List[MetricPoint]:
 async def collect_metrics(host: str) -> List[MetricPoint]:
     """Gather CPU, memory and load averages and persist the resulting points."""
     ts = datetime.now(timezone.utc)
-    logger.info("collecting metrics snapshot for host %s", host)
+    # logger.info("collecting metrics snapshot for host %s", host)
 
     points: List[MetricPoint] = []
     points.extend(_build_cpu_metrics(ts, host))

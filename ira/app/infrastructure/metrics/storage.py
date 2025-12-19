@@ -40,4 +40,4 @@ async def insert_metric_points(points: List[MetricPoint]) -> None:
                 for p in points
             ],
         )
-    logger.info("inserted %d metric points", len(points))
+    # logger.info("inserted %d metric points", len(points))

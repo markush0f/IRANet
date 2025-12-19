@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Optional
 from uuid import UUID
 
 from app.core.database import get_db_pool

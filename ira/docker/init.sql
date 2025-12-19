@@ -39,6 +39,7 @@ CREATE TABLE application_logs (
 
     UNIQUE (application_id, path)
 );
+
 CREATE TABLE
     IF NOT EXISTS applications (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
