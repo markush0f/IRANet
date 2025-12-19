@@ -4,20 +4,22 @@ from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from app.services.logs.service import (
     get_application_log_file_history,
     get_application_log_files,
-    stream_application_logs,
+    stream_application_log_file,
 )
 
 router = APIRouter(prefix="/logs", tags=["logs"])
 
 
-@router.websocket("/ws/applications/{application_id}")
-async def application_logs_ws(
+@router.websocket("/ws/applications/{application_id}/file")
+async def application_log_file_ws(
     websocket: WebSocket,
     application_id: UUID,
+    file_path: str,
 ) -> None:
     try:
-        await stream_application_logs(
+        await stream_application_log_file(
             application_id=application_id,
+            file_path=file_path,
             websocket=websocket,
         )
     except WebSocketDisconnect:
@@ -48,3 +50,6 @@ async def application_log_file_history(
         file_path=file_path,
         limit=limit,
     )
+
+
+# TODO get logs from file with specific date range

@@ -49,45 +49,42 @@ async def attach_logs_to_application(
         )
 
 
-async def stream_application_logs(
+async def stream_application_log_file(
     *,
     application_id: UUID,
+    file_path: str,
     websocket: WebSocket,
     poll_interval: float = 0.5,
 ) -> None:
-    channel = f"logs:{application_id}"
+    await websocket.accept()
 
-    await ws_manager.connect(channel, websocket)
+    allowed_base_paths = await query_active_application_log_paths(
+        application_id=application_id
+    )
 
-    paths = await query_active_application_log_paths(application_id=application_id)
+    requested = Path(file_path).resolve()
 
-    tasks = []
+    if not requested.exists() or not requested.is_file():
+        await websocket.close(code=4000)
+        return
 
-    async def forward(path: str, stream: AsyncIterator[str]) -> None:
-        async for line in stream:
-            await ws_manager.broadcast(
-                channel,
-                {
-                    "path": path,
-                    "message": line,
-                },
-            )
+    if not _is_allowed_log_file(
+        requested=requested,
+        allowed_base_paths=allowed_base_paths,
+    ):
+        await websocket.close(code=4001)
+        return
 
-    try:
-        for path in paths:
-            stream = tail_file(
-                path=path,
-                interval=poll_interval,
-            )
-
-            tasks.append(asyncio.create_task(forward(path, stream)))
-
-        await asyncio.gather(*tasks)
-
-    finally:
-        ws_manager.disconnect(channel, websocket)
-        for task in tasks:
-            task.cancel()
+    async for line in tail_file(
+        path=str(requested),
+        interval=poll_interval,
+    ):
+        await websocket.send_json(
+            {
+                "path": str(requested),
+                "message": line,
+            }
+        )
 
 
 async def get_application_log_file_history(
@@ -141,3 +138,15 @@ async def get_application_log_files(
         "total": total,
         "items": all_files[start:end],
     }
+
+
+def _is_allowed_log_file(
+    *,
+    requested: Path,
+    allowed_base_paths: list[str],
+) -> bool:
+    for base_path in allowed_base_paths:
+        for log_file in resolve_log_files(base_path):
+            if Path(log_file).resolve() == requested:
+                return True
+    return False
