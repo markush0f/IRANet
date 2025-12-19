@@ -2,14 +2,11 @@ from pathlib import Path
 from typing import List
 
 
-def resolve_log_files(path: str) -> List[str]:
+def resolve_log_files(base_path: str) -> List[str]:
     """
-    Resolve a log path into concrete log files.
-
-    - If path is a file, return it
-    - If path is a directory, return *.log files inside
+    Resolve a base log path into concrete log files.
     """
-    base = Path(path)
+    base = Path(base_path)
 
     if not base.exists():
         return []

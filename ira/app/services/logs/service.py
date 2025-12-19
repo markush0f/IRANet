@@ -1,6 +1,7 @@
 import asyncio
 from uuid import UUID
 from typing import AsyncIterator, Dict, List, Optional
+from pathlib import Path
 
 from fastapi import WebSocket
 from app.core.logger import get_logger
@@ -12,8 +13,10 @@ from app.infrastructure.logs.queries import (
 )
 from app.modules.logs.inspector import list_log_files
 from app.modules.logs.reader import read_last_lines
+from app.modules.logs.resolver import resolve_log_files
 from app.modules.logs.tail import tail_file
 from app.modules.scanner.logs import detect_log_paths
+
 
 logger = get_logger(__name__)
 
@@ -87,26 +90,27 @@ async def stream_application_logs(
             task.cancel()
 
 
-async def get_application_logs_history(
+async def get_application_log_file_history(
     *,
     application_id: UUID,
+    file_path: str,
     limit: int = 200,
-) -> Dict[str, List[str]]:
-    paths = await query_active_application_log_paths(application_id=application_id)
-
-    logger.info(
-        f"Fetching log history for application {application_id} with paths: {paths}"
+) -> List[str]:
+    allowed_base_paths = await query_active_application_log_paths(
+        application_id=application_id
     )
 
-    history: Dict[str, List[str]] = {}
+    requested = Path(file_path).resolve()
 
-    for path in paths:
-        history[path] = read_last_lines(
-            path=path,
-            limit=limit,
-        )
+    for base_path in allowed_base_paths:
+        for log_file in resolve_log_files(base_path):
+            if Path(log_file).resolve() == requested:
+                return read_last_lines(
+                    path=log_file,
+                    limit=limit,
+                )
 
-    return history
+    return []
 
 
 async def get_application_log_files(

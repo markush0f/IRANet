@@ -1,10 +1,9 @@
 from uuid import UUID
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
-from app.modules.scanner.logs import get_application_log_file_history
 from app.services.logs.service import (
+    get_application_log_file_history,
     get_application_log_files,
-    get_application_logs_history,
     stream_application_logs,
 )
 
