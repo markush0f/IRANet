@@ -14,19 +14,22 @@ from app.api.applications import router as applications_router
 from app.api.logs import router as logs_router
 
 from app.core.config import load_config
-from app.core.database import init_db_pool
 from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
+from app.core.database import engine
+
 
 logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db_pool()
     task = asyncio.create_task(metrics_scheduler())
-    yield
-    task.cancel()
+    try:
+        yield
+    finally:
+        task.cancel()
+        await engine.dispose()
 
 
 app = FastAPI(

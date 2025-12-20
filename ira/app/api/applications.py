@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.infrastructure.applications.queries import query_application_by_identifier
 from app.infrastructure.applications.storage import insert_application
 from app.models.requests.create_application_request import CreateApplicationRequest
-from app.services.applications.scanner import (
+from app.services.applications_service import (
     build_application_identifier,
     create_application,
     discover_application_details,

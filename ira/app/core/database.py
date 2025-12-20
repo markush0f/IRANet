@@ -1,26 +1,24 @@
-import asyncpg
-from typing import Optional
+from typing import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import get_database_dsn
 
-_pool: Optional[asyncpg.Pool] = None
+
+engine: AsyncEngine = create_async_engine(
+    get_database_dsn(),
+    echo=False,
+)
+
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
 
-async def init_db_pool():
-    dsn = get_database_dsn()
-    global _pool
-    if _pool is None:
-        _pool = await asyncpg.create_pool(dsn)
-
-
-async def get_db_pool() -> asyncpg.Pool:
-    if _pool is None:
-        raise RuntimeError("Database pool not initialized")
-    return _pool
-
-
-async def close_db_pool():
-    global _pool
-    if _pool:
-        await _pool.close()
-        _pool = None
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        yield session
