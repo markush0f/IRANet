@@ -9,11 +9,13 @@ from app.modules.processes.top.system import load_average
 from app.modules.system.cpu import get_cpu_global_top_percent
 from app.modules.system.meminfo import read_memory_and_swap_status
 from app.repositories.metric_point import MetricPointRepository
+from app.services.metrics.internet_metrics_service import InternetMetricsService
 
 
 class SystemMetricsService:
     def __init__(self, session: AsyncSession) -> None:
         self._repo = MetricPointRepository(session)
+        self.internet_metrics_service = InternetMetricsService(ping_host="1.1.1.1")
 
     def _build_cpu_metrics(
         self,
@@ -116,6 +118,12 @@ class SystemMetricsService:
         rows.extend(self._build_cpu_metrics(ts, host))
         rows.extend(self._build_memory_metrics(ts, host))
         rows.extend(self._build_load_metrics(ts, host))
+        rows.extend(
+            await self.internet_metrics_service.build_internet_metrics(
+                ts=ts,
+                host=host,
+            )
+        )
 
         entities = [
             MetricPoint(

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from datetime import datetime
 
 from app.core.database import get_session
-from app.services.metrics_service import SystemMetricsService
+from app.services.metrics.metrics_service import SystemMetricsService
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 
