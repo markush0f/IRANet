@@ -131,7 +131,7 @@ class SystemMetricsService:
 
         return rows
 
-    async def get_series(
+    async def get_metric_series(
         self,
         *,
         metric: str,

@@ -1,17 +1,11 @@
 from typing import Dict
 from uuid import UUID
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.infrastructure.applications.queries import query_application_by_identifier
-from app.infrastructure.applications.storage import insert_application
+from app.core.database import get_session
 from app.models.requests.create_application_request import CreateApplicationRequest
-from app.services.applications_service import (
-    build_application_identifier,
-    create_application,
-    discover_application_details,
-    discover_applications,
-    discover_applications_grouped,
-)
+from app.services.applications_system_service import ApplicationsSystemService
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 router = APIRouter(prefix="/applications", tags=["applications"])
@@ -19,11 +13,12 @@ router = APIRouter(prefix="/applications", tags=["applications"])
 
 @router.get("/discover")
 def discover(
+    session: AsyncSession = Depends(get_session),
     min_etimes_seconds: int = Query(
         15,
         ge=1,
         description="Minimum uptime in seconds for a process to be considered an application",
-    )
+    ),
 ):
     """
     Discover running applications.
@@ -33,16 +28,18 @@ def discover(
 
     No data is persisted. All results are returned with status='discovered'.
     """
-    return discover_applications(min_etimes_seconds=min_etimes_seconds)
+    service = ApplicationsSystemService(session)
+    return service.discover_applications(min_etimes_seconds=min_etimes_seconds)
 
 
 @router.get("/discover/basic/grouped")
 def discover_basic_grouped(
+    session: AsyncSession = Depends(get_session),
     min_etimes_seconds: int = Query(
         15,
         ge=1,
         description="Minimum uptime in seconds for a process to be considered an application",
-    )
+    ),
 ):
     """
     Discover running applications with minimal information.
@@ -56,11 +53,13 @@ def discover_basic_grouped(
 
     No data is persisted. All results are returned with status='discovered'.
     """
-    return discover_applications_grouped(min_etimes_seconds=min_etimes_seconds)
+    service = ApplicationsSystemService(session)
+    return service.discover_applications_grouped(min_etimes_seconds=min_etimes_seconds)
 
 
 @router.get("/discover/details")
 def discover_application_details_endpoint(
+    session: AsyncSession = Depends(get_session),
     cwd: str = Query(
         description="Project working directory of the discovered application",
     ),
@@ -77,7 +76,8 @@ def discover_application_details_endpoint(
     It re-runs discovery and builds a frontend-ready object
     for the given project path (cwd).
     """
-    details = discover_application_details(
+    service = ApplicationsSystemService(session)
+    details = service.discover_application_details(
         cwd=cwd,
         min_etimes_seconds=min_etimes_seconds,
     )
@@ -93,9 +93,11 @@ def discover_application_details_endpoint(
 
 @router.post("")
 async def create_application_endpoint(
-    payload: CreateApplicationRequest,
+    data: CreateApplicationRequest,
+    session: AsyncSession = Depends(get_session),
 ):
-    application_id = await create_application(payload)
+    service = ApplicationsSystemService(session)
+    application_id = await service.create_application(data = data)
 
     return {
         "id": str(application_id),

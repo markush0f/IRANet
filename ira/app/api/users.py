@@ -1,13 +1,8 @@
 from fastapi import APIRouter
 
-from app.services.user_service import (
-    get_active_users,
-    get_all_users,
-    get_human_users,
-    get_login_allowed_users,
-    get_system_users,
-    get_users_summary,
-)
+from app.services.user_system_service import UsersSystemService
+
+
 
 router = APIRouter(
     prefix="/users",
@@ -17,37 +12,46 @@ router = APIRouter(
 
 @router.get("")
 def list_all_users():
+    service = UsersSystemService()
     return {
-        "users": get_all_users(),
+        "users": service.get_all_users(),
     }
 
 
 @router.get("/login-allowed")
 def list_login_allowed_users():
+    service = UsersSystemService()
     return {
-        "users": get_login_allowed_users(),
+        "users": service.get_login_allowed_users(),
     }
 
 
 @router.get("/active")
 def list_active_users():
+    service = UsersSystemService()
     return {
-        "users": get_active_users(),
+        "users": service.get_active_users(),
     }
 
 
 @router.get("/summary")
 def users_summary():
-    return get_users_summary()
+    service = UsersSystemService()
+
+    return service.get_users_summary()
 
 @router.get("/human")
 def list_human_users():
+    service = UsersSystemService()
+
     return {
-        "users": get_human_users(),
+        "users": service.get_human_users(),
     }
 
 @router.get("/system")
 def list_system_users():
+    service = UsersSystemService()
+
     return {
-        "users": get_system_users(),
+        "users": service.get_system_users(),
     }

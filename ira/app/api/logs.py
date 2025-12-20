@@ -1,11 +1,10 @@
 from uuid import UUID
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.services.logs_service import (
-    get_application_log_file_history,
-    get_application_log_files,
-    stream_application_log_file,
-)
+from app.core.database import get_session
+from app.services.logs_service import ApplicationLogsService
+
 
 router = APIRouter(prefix="/logs", tags=["logs"])
 
@@ -15,9 +14,11 @@ async def application_log_file_ws(
     websocket: WebSocket,
     application_id: UUID,
     file_path: str,
+    session: AsyncSession = Depends(get_session),
 ) -> None:
+    service = ApplicationLogsService(session)
     try:
-        await stream_application_log_file(
+        await service.stream_application_log_file(
             application_id=application_id,
             file_path=file_path,
             websocket=websocket,
@@ -31,8 +32,11 @@ async def application_log_files(
     application_id: UUID,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    session: AsyncSession = Depends(get_session),
 ):
-    return await get_application_log_files(
+    service = ApplicationLogsService(session)
+
+    return await service.get_application_log_files(
         application_id=application_id,
         page=page,
         page_size=page_size,
@@ -44,8 +48,11 @@ async def application_log_file_history(
     application_id: UUID,
     file_path: str,
     limit: int = Query(200, ge=1, le=1000),
+    session: AsyncSession = Depends(get_session),
 ):
-    return await get_application_log_file_history(
+    service = ApplicationLogsService(session)
+    
+    return await service.get_application_log_file_history(
         application_id=application_id,
         file_path=file_path,
         limit=limit,

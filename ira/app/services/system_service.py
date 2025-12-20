@@ -1,5 +1,5 @@
 import os
-from time import time
+import time
 from typing import Any, Dict
 from app.modules.processes.top.state import read_tasks_summary_named
 from app.modules.processes.top.system import load_average

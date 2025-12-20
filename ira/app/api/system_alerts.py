@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.core.database import get_session
 from app.core.websocket_manager import ws_manager
-from app.services.alerts.service import get_alerts
+from app.services.system_alerts_service import SystemAlertsService
 
 router = APIRouter(tags=["alerts"])
 
@@ -21,8 +23,11 @@ async def alerts_ws(websocket: WebSocket) -> None:
 async def list_alerts(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=250),
+    session: AsyncSession = Depends(get_session),
 ):
     """
     Return paginated alerts stored in the database.
     """
-    return await get_alerts(page=page, page_size=page_size)
+
+    service = SystemAlertsService(session)
+    return await service.get_system_alerts_paginated(page=page, page_size=page_size)

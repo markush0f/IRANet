@@ -1,6 +1,6 @@
 import time
 from datetime import datetime, timezone
-from typing import Dict
+from typing import Any, Dict
 
 from app.core.logger import get_logger
 from app.core.websocket_manager import ws_manager
@@ -17,11 +17,8 @@ class SystemAlertsService:
 
     _COOLDOWN_SECONDS = 30
 
-    def __init__(
-        self,
-        session
-    ) -> None:
-        self._alerts_repository = SystemAlertRepository(session),
+    def __init__(self, session) -> None:
+        self.alerts_repository = SystemAlertRepository(session)
         self._last_alert_ts: Dict[str, float] = {}
 
     async def notify_critical_alert(
@@ -84,7 +81,7 @@ class SystemAlertsService:
         threshold: float,
     ) -> None:
         try:
-            await self._alerts_repository.insert_critical(
+            await self.alerts_repository.insert_critical(
                 host=host,
                 metric=alert_type,
                 level="critical",
@@ -144,3 +141,26 @@ class SystemAlertsService:
                 value=load_1m,
                 threshold=load_threshold,
             )
+
+    async def get_system_alerts_paginated(
+        self,
+        *,
+        page: int,
+        page_size: int,
+    ) -> Dict[str, Any]:
+        offset = (page - 1) * page_size
+
+        alerts, total = await self.alerts_repository.get_system_alerts(
+            limit=page_size,
+            offset=offset,
+        )
+
+        return {
+            "items": alerts,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total": total,
+                "total_pages": (total + page_size - 1) // page_size,
+            },
+        }

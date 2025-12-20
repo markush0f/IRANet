@@ -12,7 +12,7 @@ class SystemAlertRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def fetch_paginated(
+    async def get_system_alerts(
         self,
         *,
         limit: int,

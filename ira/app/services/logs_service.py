@@ -40,7 +40,7 @@ class ApplicationLogsService:
                 enabled=True,
             )
 
-    async def stream_log_file(
+    async def stream_application_log_file(
         self,
         *,
         application_id: UUID,
@@ -78,7 +78,7 @@ class ApplicationLogsService:
                 }
             )
 
-    async def get_file_history(
+    async def get_application_log_file_history(
         self,
         *,
         application_id: UUID,
@@ -101,7 +101,7 @@ class ApplicationLogsService:
 
         return []
 
-    async def list_log_files(
+    async def get_application_log_files(
         self,
         *,
         application_id: UUID,

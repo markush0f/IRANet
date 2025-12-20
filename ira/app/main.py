@@ -1,5 +1,7 @@
 import asyncio
 from contextlib import asynccontextmanager
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,7 +11,7 @@ from app.api.processes import router as processes_router
 from app.api.service import router as service_router
 from app.api.users import router as users_router
 from app.api.metrics import router as metrics_router
-from app.api.alerts import router as alerts_router
+from app.api.system_alerts import router as alerts_router
 from app.api.applications import router as applications_router
 from app.api.logs import router as logs_router
 
@@ -24,6 +26,7 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
     task = asyncio.create_task(metrics_scheduler())
     try:
         yield

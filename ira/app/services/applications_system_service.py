@@ -12,7 +12,7 @@ from app.repositories.applications import ApplicationRepository
 from app.services.logs_service import ApplicationLogsService
 
 
-class ApplicationsService:
+class ApplicationsSystemService:
     def __init__(self, session) -> None:
         self._applications_repo = ApplicationRepository(session)
         self._logs_service = ApplicationLogsService(session)

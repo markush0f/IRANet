@@ -1,7 +1,7 @@
 from app.modules.system.users import active_users, system_users
 
 
-class UsersService:
+class UsersSystemService:
     def get_all_users(self):
         return system_users()
 

@@ -9,7 +9,8 @@ from app.core.logger import get_logger
 
 
 logger = get_logger(__name__)
-load_dotenv()
+load_dotenv(override=True)
+
 
 def load_config() -> Dict[str, Any]:
     """
@@ -41,12 +42,13 @@ def load_config() -> Dict[str, Any]:
 
 
 def get_database_dsn() -> str:
-    """
-    Return the database DSN from environment variables.
-    """
     dsn = os.getenv("IRA_DATABASE_DSN")
-
     if not dsn:
         raise RuntimeError("IRA_DATABASE_DSN environment variable is not set")
+
+    if "+asyncpg" not in dsn:
+        raise RuntimeError(
+            "Async SQLAlchemy engine requires 'postgresql+asyncpg://' DSN"
+        )
 
     return dsn
