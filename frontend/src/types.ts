@@ -78,6 +78,11 @@ export interface ApplicationDiscoveryDetails {
     paths?: {
         log_paths?: string[];
     };
+    access?: {
+        ports?: number[];
+        urls?: string[];
+        available?: boolean;
+    };
     commands?: string[];
 }
 

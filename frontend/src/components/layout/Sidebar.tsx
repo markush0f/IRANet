@@ -39,6 +39,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                 </svg>
             ),
         },
+        {
+            id: 'network-metrics',
+            label: 'Network Metrics',
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M6 10h12M8 14h8M10 18h4" />
+                </svg>
+            ),
+        },
     ];
 
     const applicationsChildren: NavItem[] = [

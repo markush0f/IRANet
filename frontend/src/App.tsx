@@ -12,6 +12,7 @@ import DashboardView from './components/dashboard/DashboardView';
 import DockerView from './components/monitoring/DockerView';
 import ProcessesView from './components/monitoring/ProcessesView';
 import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
+import NetworkMetricsView from './components/monitoring/NetworkMetricsView';
 import AlertsView from './components/alerts/AlertsView';
 import ApplicationsView from './components/applications/ApplicationsView';
 import SystemApplicationsView from './components/system/SystemApplicationsView';
@@ -34,7 +35,7 @@ function App() {
       <Sidebar activeView={currentView} onNavigate={setCurrentView} />
 
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <AppHeader />
+        {/* <AppHeader /> */}
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto">
@@ -44,6 +45,8 @@ function App() {
             <CpuMetricsView />
           ) : currentView === 'memory-metrics' ? (
             <MemoryMetricsView />
+          ) : currentView === 'network-metrics' ? (
+            <NetworkMetricsView />
           ) : currentView === 'performance' ? (
             <PerformanceView />
           ) : currentView === 'users' ? (

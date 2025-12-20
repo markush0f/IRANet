@@ -142,8 +142,14 @@ export const getMetricSeries = async ({
     const params = new URLSearchParams();
     params.set('metric', metric);
     if (host) params.set('host', host);
-    if (fromTs) params.set('from_ts', fromTs);
-    if (toTs) params.set('to_ts', toTs);
+    if (fromTs) {
+        params.set('from_ts', fromTs);
+        params.set('ts_from', fromTs);
+    }
+    if (toTs) {
+        params.set('to_ts', toTs);
+        params.set('ts_to', toTs);
+    }
 
     const url = `${getBaseUrl()}/metrics/series?${params.toString()}`;
     const response = await fetch(url, { signal });

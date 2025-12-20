@@ -101,8 +101,8 @@ const AlertsView: React.FC = () => {
                                 type="button"
                                 onClick={() => setLevelFilter(filter.value)}
                                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wide border transition ${levelFilter === filter.value
-                                        ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                        : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                                    : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                                     }`}
                             >
                                 {filter.label}

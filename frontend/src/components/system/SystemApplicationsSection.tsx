@@ -121,8 +121,8 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                 setDiscoveryDetails(data);
                 setLogPaths(
                     data.detected_log_paths ??
-                        data.paths?.log_paths ??
-                        []
+                    data.paths?.log_paths ??
+                    []
                 );
             })
             .catch(error => {
@@ -131,8 +131,8 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                         error instanceof Error
                             ? error.message
                             : typeof error === 'string'
-                            ? error
-                            : 'No se pudo obtener la información de la aplicación';
+                                ? error
+                                : 'No se pudo obtener la información de la aplicación';
                     setDiscoveryError(message);
                 }
             })
@@ -156,6 +156,10 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         discoveryDetails?.detected_runtimes ??
         selectedApplication?.commands ??
         [];
+
+    const accessPorts = discoveryDetails?.access?.ports ?? [];
+    const accessUrls = discoveryDetails?.access?.urls ?? [];
+    const accessAvailable = discoveryDetails?.access?.available;
 
     const modalDisplayName =
         discoveryDetails?.name ?? selectedApplication?.cwd ?? 'Aplicación detectada';
@@ -321,6 +325,36 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             ) : (
                                 <p className="text-sm text-zinc-500">No se detectaron rutas; puedes agregarlas manualmente.</p>
                             )}
+                        </div>
+
+                        <div className="mt-6">
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-[10px] uppercase tracking-wide text-zinc-500">Detected access</p>
+                                {accessAvailable != null && (
+                                    <span
+                                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                                            accessAvailable ? 'text-emerald-300 border border-emerald-500/60' : 'text-rose-300 border border-rose-500/60'
+                                        }`}
+                                    >
+                                        {accessAvailable ? 'available' : 'unavailable'}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="mt-2 space-y-1 text-sm font-mono text-zinc-200">
+                                {accessPorts.length > 0 && (
+                                    <p className="text-zinc-200">
+                                        Puertos: {accessPorts.join(', ')}
+                                    </p>
+                                )}
+                                {accessUrls.length > 0 && (
+                                    <p className="text-zinc-200">
+                                        URLs: {accessUrls.join(', ')}
+                                    </p>
+                                )}
+                                {!accessPorts.length && !accessUrls.length && (
+                                    <p className="text-zinc-500">Sin puertos detectados</p>
+                                )}
+                            </div>
                         </div>
 
                         {discoveryError && (
