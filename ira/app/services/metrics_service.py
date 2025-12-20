@@ -3,6 +3,8 @@ from typing import Dict, List
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.models.dto.metric_point_dto import MetricPointDTO
+from app.models.entities.metric_point import MetricPoint
 from app.modules.processes.top.system import load_average
 from app.modules.system.cpu import get_cpu_global_top_percent
 from app.modules.system.meminfo import read_memory_and_swap_status
@@ -17,7 +19,7 @@ class SystemMetricsService:
         self,
         ts: datetime,
         host: str,
-    ) -> List[dict]:
+    ) -> List[MetricPointDTO]:
         cpu = get_cpu_global_top_percent()
 
         return [
@@ -51,7 +53,7 @@ class SystemMetricsService:
         self,
         ts: datetime,
         host: str,
-    ) -> List[dict]:
+    ) -> List[MetricPointDTO]:
         mem = read_memory_and_swap_status()["memory"]
 
         return [
@@ -79,7 +81,7 @@ class SystemMetricsService:
         self,
         ts: datetime,
         host: str,
-    ) -> List[dict]:
+    ) -> List[MetricPointDTO]:
         load = load_average()
 
         return [
@@ -107,15 +109,25 @@ class SystemMetricsService:
         self,
         *,
         host: str,
-    ) -> List[Dict[str, float]]:
+    ) -> List[MetricPointDTO]:
         ts = datetime.now(timezone.utc)
 
-        rows: List[Dict[str, float]] = []
+        rows: List[MetricPointDTO] = []
         rows.extend(self._build_cpu_metrics(ts, host))
         rows.extend(self._build_memory_metrics(ts, host))
         rows.extend(self._build_load_metrics(ts, host))
 
-        await self._repo.bulk_insert(rows)
+        entities = [
+            MetricPoint(
+                ts=row["ts"],
+                metric=row["metric"],
+                value=row["value"],
+                host=row["host"],
+            )
+            for row in rows
+        ]
+
+        await self._repo.bulk_insert(entities)
 
         return rows
 

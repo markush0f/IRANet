@@ -34,12 +34,10 @@ class MetricPointRepository:
 
     async def bulk_insert(
         self,
-        rows: List[dict],
+        entities: list[MetricPoint],
     ) -> None:
-        if not rows:
+        if not entities:
             return
 
-        stmt = insert(MetricPoint).values(rows)
-
-        await self._session.exec(stmt)
+        self._session.add_all(entities)
         await self._session.commit()

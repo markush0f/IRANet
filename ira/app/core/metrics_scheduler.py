@@ -31,6 +31,7 @@ async def metrics_scheduler() -> None:
                 points = await metrics_service.collect_metrics(host=host)
 
                 metrics: dict[str, float] = {}
+
                 for point in points:
                     metrics[point["metric"]] = point["value"]
 
