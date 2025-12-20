@@ -7,7 +7,7 @@ import os
 import socket
 
 from app.core.logger import get_logger
-from app.infrastructure.metrics.collector import collect_metrics
+from app.services.metrics.collector import collect_metrics
 from app.infrastructure.metrics.storage import insert_metric_points
 from app.services.alerts.notify import evaluate_alerts
 

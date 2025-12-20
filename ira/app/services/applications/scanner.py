@@ -2,8 +2,6 @@ from pathlib import Path
 from typing import List, Dict, Set
 from uuid import UUID
 
-from app.infrastructure.applications.queries import query_application_by_identifier
-from app.infrastructure.applications.storage import insert_application
 from app.models.requests.create_application_request import CreateApplicationRequest
 from app.modules.scanner.logs import detect_log_paths
 from app.modules.scanner.models import ScannedProcess
