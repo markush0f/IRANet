@@ -111,3 +111,10 @@ async def applications_list (
 ):
     service = ApplicationsService(session)
     return await service.list_applications()
+
+@router.get("/list/logs")
+async def applications_list_logs (
+    session: AsyncSession = Depends(get_session),
+):
+    service = ApplicationsService(session)
+    return await service.list_applications_with_logs_paths()

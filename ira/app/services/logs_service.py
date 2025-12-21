@@ -134,6 +134,15 @@ class ApplicationLogsService:
             "total": total,
             "items": all_files[start:end],
         }
+        
+    async def get_applications_path_logs(
+        self,
+        application_id
+    ) -> Sequence[str]:
+        paths = await self._repo.list_active_paths(
+            application_id=application_id,
+        )
+        return paths
 
     def _is_allowed_file(
     self,
@@ -146,3 +155,5 @@ class ApplicationLogsService:
                 if Path(log_file).resolve() == requested:
                     return True
         return False
+
+    

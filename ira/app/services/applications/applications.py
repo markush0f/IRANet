@@ -1,5 +1,6 @@
 from typing import Dict, List, Sequence
 from uuid import UUID
+from app.models.dto.application_logs_dto import ApplicationsLogsDTO
 from app.models.entities.application import Application
 from app.models.requests.create_application_request import CreateApplicationRequest
 from app.modules.scanner.models import ScannedProcess
@@ -10,6 +11,7 @@ from app.services.logs_service import ApplicationLogsService
 class ApplicationsService:
     def __init__(self, session) -> None:
         self.applications_repository = ApplicationRepository(session)
+
         self._logs_service = ApplicationLogsService(session)
 
     def build_application_identifier(
@@ -45,10 +47,33 @@ class ApplicationsService:
 
         return application.id
 
-    
-    async def list_applications (
-        self
-    ) -> Sequence[Application]:
+    async def list_applications(self) -> Sequence[Application]:
         applications = await self.applications_repository.list_all()
         return applications
-        
+
+    async def list_applications_with_logs_paths(
+        self,
+    ) -> Sequence[ApplicationsLogsDTO]:
+        applications = await self.applications_repository.list_all()
+
+        result: List[ApplicationsLogsDTO] = []
+
+        for application in applications:
+            log_paths = await self._logs_service.get_applications_path_logs(
+                application_id=application.id
+            )
+
+            result.append(
+                {
+                    "kind": application.kind,
+                    "identifier": application.identifier,
+                    "name": application.name,
+                    "workdir": application.workdir,
+                    "file_path": application.file_path,
+                    "port": application.port,
+                    "pid": application.pid,
+                    "log_paths": log_paths,
+                }
+            )
+
+        return result
