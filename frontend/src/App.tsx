@@ -64,6 +64,16 @@ function App() {
             <ApplicationsView />
           ) : currentView === 'system-applications' ? (
             <SystemApplicationsView />
+          ) : currentView === 'dashboard' ? (
+            <DashboardView
+              services={services}
+              onAddService={handleAddService}
+              onRefreshAll={handleRefreshAll}
+              onCheck={handleCheckStatus}
+              onViewLogs={openLogs}
+              onUpdateService={handleUpdateService}
+              onDeleteService={handleDeleteService}
+            />
           ) : (
             <DashboardView
               services={services}
@@ -89,18 +99,23 @@ function App() {
 
       <EnvBadge />
       <Toaster
-        position="bottom-right"
+        position="top-center"
         gutter={12}
         reverseOrder={false}
         containerStyle={{
-          width: '360px',
+          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.75rem',
-          alignItems: 'flex-end',
+          alignItems: 'center',
+          pointerEvents: 'none',
+          left: 0,
+          right: 0,
+          marginTop: '1rem',
         }}
         toastOptions={{
           duration: 5000,
+          style: { pointerEvents: 'auto' },
         }}
       />
     </div>

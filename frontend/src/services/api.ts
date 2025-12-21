@@ -167,6 +167,34 @@ export const getMetricSeries = async ({
     return data as MetricSample[];
 };
 
+export interface CreateApplicationPayload {
+    cwd: string;
+    name: string;
+    log_paths: string[];
+}
+
+export const createApplication = async (
+    payload: CreateApplicationPayload,
+    signal?: AbortSignal
+) => {
+    const url = `${getBaseUrl()}/applications`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal,
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al crear aplicación`);
+    }
+
+    return response.json();
+};
+
 export interface PacketLossEvent {
     start: string;
     end: string;

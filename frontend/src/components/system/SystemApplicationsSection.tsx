@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { ApplicationDiscoveryDetails, SystemApplication } from '../../types';
-import { getApplicationDiscoveryDetails } from '../../services/api';
+import { createApplication, getApplicationDiscoveryDetails } from '../../services/api';
+import { toast } from 'react-hot-toast';
 
 const KNOWN_LOGOS = [
     { matcher: 'python', label: '🐍', gradient: 'from-sky-500 to-emerald-500' },
@@ -42,10 +43,13 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<SystemApplication | null>(null);
     const [discoveryCwd, setDiscoveryCwd] = useState('');
+    const [applicationName, setApplicationName] = useState('');
     const [discoveryDetails, setDiscoveryDetails] = useState<ApplicationDiscoveryDetails | null>(null);
     const [discoveryError, setDiscoveryError] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [logPaths, setLogPaths] = useState<string[]>([]);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    const [savingApplication, setSavingApplication] = useState(false);
     const [technicalDetailsOpen, setTechnicalDetailsOpen] = useState(false);
     const [fetchKey, setFetchKey] = useState(0);
 
@@ -60,6 +64,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const openModal = (application: SystemApplication) => {
         setSelectedApplication(application);
         setDiscoveryCwd(application.cwd);
+        setApplicationName(application.name ?? '');
         setTechnicalDetailsOpen(false);
         setIsModalOpen(true);
         prepareDiscoveryRequest();
@@ -68,21 +73,51 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const closeModal = () => {
         setIsModalOpen(false);
         setDiscoveryCwd('');
+        setApplicationName('');
         setSelectedApplication(null);
         setDiscoveryDetails(null);
         setLogPaths([]);
         setDiscoveryError(null);
+        setSaveError(null);
         setLoadingDetails(false);
+        setSavingApplication(false);
         setTechnicalDetailsOpen(false);
     };
 
-    const handleSaveApplication = () => {
-        console.log('Guardar aplicación', { cwd: discoveryCwd, discoveryDetails, logPaths });
-        closeModal();
-    };
+    const handleSaveApplication = async () => {
+        const cwd = discoveryCwd.trim();
+        const name = applicationName.trim();
+        const cleanedPaths = logPaths.map(path => path.trim()).filter(Boolean);
 
-    const handleConfirm = () => {
-        console.log('Confirmar detección', { cwd: discoveryCwd, discoveryDetails, logPaths });
+        if (!cwd || !name) {
+            setSaveError('Nombre y CWD son obligatorios.');
+            return;
+        }
+
+        setSavingApplication(true);
+        setSaveError(null);
+
+        try {
+            await createApplication({
+                cwd,
+                name,
+                log_paths: cleanedPaths,
+            });
+            toast.custom(
+                () => (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-zinc-950 px-5 py-4 text-base text-emerald-200 shadow-xl">
+                        Aplicación creada correctamente
+                    </div>
+                ),
+                { duration: 4000 }
+            );
+            closeModal();
+        } catch (error) {
+            console.error('Error creating system application', error);
+            setSaveError('No se pudo guardar la aplicación. Verifica el backend.');
+        } finally {
+            setSavingApplication(false);
+        }
     };
 
     const handleRetryFetch = () => {
@@ -144,6 +179,19 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             controller.abort();
         };
     }, [isModalOpen, discoveryCwd, fetchKey]);
+
+    useEffect(() => {
+        if (!isModalOpen) {
+            return;
+        }
+        if (applicationName.trim()) {
+            return;
+        }
+        const suggestedName = discoveryDetails?.name ?? selectedApplication?.name ?? '';
+        if (suggestedName) {
+            setApplicationName(suggestedName);
+        }
+    }, [applicationName, discoveryDetails, isModalOpen, selectedApplication]);
 
     const runtimeTokens =
         discoveryDetails?.detected_runtimes?.filter(Boolean) ??
@@ -248,13 +296,6 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             <div className="flex gap-2">
                                 <button
                                     type="button"
-                                    onClick={handleSaveApplication}
-                                    className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white"
-                                >
-                                    Save application
-                                </button>
-                                <button
-                                    type="button"
                                     onClick={closeModal}
                                     className="rounded-full border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-100"
                                 >
@@ -266,6 +307,35 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                         {discoveryDetails?.description && (
                             <p className="mt-3 text-sm text-zinc-400">{discoveryDetails.description}</p>
                         )}
+
+                        {saveError && (
+                            <div className="mt-3 rounded-2xl border border-rose-500/40 bg-rose-500/5 px-4 py-3 text-sm text-rose-200">
+                                {saveError}
+                            </div>
+                        )}
+
+                        <div className="mt-4 space-y-3">
+                            <div>
+                                <label className="text-[10px] uppercase tracking-wide text-zinc-500">Nombre</label>
+                                <input
+                                    type="text"
+                                    value={applicationName}
+                                    onChange={event => setApplicationName(event.target.value)}
+                                    className="mt-2 w-full rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-100 focus:border-emerald-500 focus:outline-none"
+                                    placeholder="IRABackend"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] uppercase tracking-wide text-zinc-500">CWD</label>
+                                <input
+                                    type="text"
+                                    value={discoveryCwd}
+                                    onChange={event => setDiscoveryCwd(event.target.value)}
+                                    className="mt-2 w-full rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm font-mono text-zinc-100 focus:border-emerald-500 focus:outline-none"
+                                    placeholder="/home/markus/projects/IRANet/ira"
+                                />
+                            </div>
+                        </div>
 
                         <div className="mt-6">
                             <p className="text-[10px] uppercase tracking-wide text-zinc-500">Detected runtimes</p>
@@ -399,11 +469,11 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                         <div className="mt-6 flex justify-end">
                             <button
                                 type="button"
-                                onClick={handleConfirm}
-                                disabled={loadingDetails}
+                                onClick={handleSaveApplication}
+                                disabled={loadingDetails || savingApplication}
                                 className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Confirmar
+                                {savingApplication ? 'Guardando...' : 'Confirmar'}
                             </button>
                         </div>
                     </div>

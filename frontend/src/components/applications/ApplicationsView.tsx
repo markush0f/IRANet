@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Database, Server, Satellite, Shield, Activity } from 'lucide-react';
+import { createApplication } from '../../services/api';
+import { toast } from 'react-hot-toast';
 
 type Application = {
     id: string;
@@ -70,10 +72,13 @@ const ApplicationsView: React.FC = () => {
     const [form, setForm] = useState({
         name: '',
         description: '',
-        logPath: '/var/log/app.log',
+        cwd: '',
+        logPaths: '/var/log/app.log',
         enabled: true,
         iconKey: 'activity',
     });
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const logsByApp = useMemo(() => {
         return logs.reduce<Record<string, ApplicationLog[]>>((acc, log) => {
@@ -87,9 +92,25 @@ const ApplicationsView: React.FC = () => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleCreate = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!form.name.trim()) return;
+        if (!form.name.trim() || !form.cwd.trim()) {
+            setError('Nombre y CWD son obligatorios.');
+            return;
+        }
+
+        const logPaths = form.logPaths
+            .split('\n')
+            .map(path => path.trim())
+            .filter(Boolean);
+
+        if (!logPaths.length) {
+            setError('Debes incluir al menos una ruta de logs.');
+            return;
+        }
+
+        setSaving(true);
+        setError(null);
 
         const id = crypto.randomUUID?.() ?? `app-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const newApplication: Application = {
@@ -103,21 +124,43 @@ const ApplicationsView: React.FC = () => {
         const newLog: ApplicationLog = {
             id: crypto.randomUUID?.() ?? `log-${Date.now()}-${Math.random().toString(36).slice(2)}`,
             applicationId: id,
-            logPath: form.logPath.trim() || '/var/log/app.log',
+            logPath: logPaths[0] ?? '/var/log/app.log',
             enabled: form.enabled,
             createdAt: new Date().toISOString(),
         };
 
-        setApplications(prev => [newApplication, ...prev]);
-        setLogs(prev => [newLog, ...prev]);
-        setForm({
-            name: '',
-            description: '',
-            logPath: '/var/log/app.log',
-            enabled: true,
-            iconKey: form.iconKey,
-        });
-        setMode('list');
+        try {
+            await createApplication({
+                cwd: form.cwd.trim(),
+                name: form.name.trim(),
+                log_paths: logPaths,
+            });
+
+            setApplications(prev => [newApplication, ...prev]);
+            setLogs(prev => [newLog, ...prev]);
+            toast.custom(
+                () => (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-zinc-950 px-5 py-4 text-base text-emerald-200 shadow-xl">
+                        Aplicación creada correctamente
+                    </div>
+                ),
+                { duration: 4000 }
+            );
+            setForm({
+                name: '',
+                description: '',
+                cwd: '',
+                logPaths: '/var/log/app.log',
+                enabled: true,
+                iconKey: form.iconKey,
+            });
+            setMode('list');
+        } catch (err) {
+            console.error('Error creating application', err);
+            setError('No se pudo crear la aplicación. Verifica el backend.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const formattedDate = (value: string) => {
@@ -198,6 +241,11 @@ const ApplicationsView: React.FC = () => {
             ) : (
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 shadow-lg space-y-5">
                     <h3 className="text-xl font-semibold text-zinc-100">Nueva aplicación</h3>
+                    {error && (
+                        <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">
+                            {error}
+                        </div>
+                    )}
                     <form className="space-y-4" onSubmit={handleCreate}>
                         <div className="grid gap-2">
                             <label className="text-[11px] uppercase tracking-wide text-zinc-500">Nombre</label>
@@ -207,6 +255,17 @@ const ApplicationsView: React.FC = () => {
                                 value={form.name}
                                 onChange={event => handleChange('name', event.target.value)}
                                 className="w-full rounded-lg border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">CWD</label>
+                            <input
+                                type="text"
+                                required
+                                value={form.cwd}
+                                onChange={event => handleChange('cwd', event.target.value)}
+                                className="w-full rounded-lg border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
+                                placeholder="/home/markus/projects/IRANet/ira"
                             />
                         </div>
                         <div className="grid gap-2">
@@ -239,12 +298,13 @@ const ApplicationsView: React.FC = () => {
                             </div>
                         </div>
                         <div className="grid gap-2">
-                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Ruta del log</label>
-                            <input
-                                type="text"
-                                value={form.logPath}
-                                onChange={event => handleChange('logPath', event.target.value)}
+                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Rutas de logs (una por línea)</label>
+                            <textarea
+                                value={form.logPaths}
+                                onChange={event => handleChange('logPaths', event.target.value)}
                                 className="w-full rounded-lg border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
+                                rows={3}
+                                placeholder="/home/markus/projects/IRANet/ira/logs"
                             />
                         </div>
                         <div className="flex items-center gap-3">
@@ -262,9 +322,10 @@ const ApplicationsView: React.FC = () => {
                         <div className="flex justify-end">
                             <button
                                 type="submit"
-                                className="rounded-full border border-transparent bg-indigo-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                                disabled={saving}
+                                className="rounded-full border border-transparent bg-indigo-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-800"
                             >
-                                Guardar aplicación
+                                {saving ? 'Guardando...' : 'Guardar aplicación'}
                             </button>
                         </div>
                     </form>
