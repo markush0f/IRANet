@@ -195,6 +195,40 @@ export const createApplication = async (
     return response.json();
 };
 
+export interface RemoteApplicationRecord {
+    id: string;
+    kind: string;
+    name: string;
+    workdir: string;
+    identifier: string;
+    status: string;
+    enabled: boolean;
+    created_at?: string | null;
+    last_seen_at?: string | null;
+    pid?: number | null;
+    port?: number | null;
+    file_path?: string | null;
+    log_paths?: string[] | null;
+}
+
+export const getApplicationsList = async (signal?: AbortSignal): Promise<RemoteApplicationRecord[]> => {
+    const url = `${getBaseUrl()}/applications/list`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener aplicaciones`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as RemoteApplicationRecord[];
+    }
+    if (data && typeof data === 'object' && Array.isArray((data as any).applications)) {
+        return (data as any).applications as RemoteApplicationRecord[];
+    }
+    return [];
+};
+
 export interface PacketLossEvent {
     start: string;
     end: string;

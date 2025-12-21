@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Database, Server, Satellite, Shield, Activity } from 'lucide-react';
-import { createApplication } from '../../services/api';
+import { createApplication, getApplicationsList, type RemoteApplicationRecord } from '../../services/api';
 import { toast } from 'react-hot-toast';
 
 type Application = {
@@ -9,6 +9,7 @@ type Application = {
     description?: string;
     createdAt: string;
     iconKey: string;
+    logPaths?: string[];
 };
 
 type ApplicationLog = {
@@ -79,6 +80,46 @@ const ApplicationsView: React.FC = () => {
     });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loadingList, setLoadingList] = useState(false);
+    const [listError, setListError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        setLoadingList(true);
+        setListError(null);
+
+        getApplicationsList(controller.signal)
+            .then(records => {
+                if (!records.length) {
+                    setApplications([]);
+                    return;
+                }
+
+                setApplications(records.map((record: RemoteApplicationRecord) => {
+                    const recordId = record.id ?? record.identifier ?? crypto.randomUUID?.() ?? `app-${Date.now()}`;
+                    return {
+                        id: recordId,
+                        name: record.name || record.identifier || record.workdir || 'Aplicación',
+                        description: record.workdir,
+                        createdAt: record.created_at ?? record.last_seen_at ?? new Date().toISOString(),
+                        iconKey: 'server',
+                        logPaths: record.log_paths ?? [],
+                    };
+                }));
+            })
+            .catch(err => {
+                if (err instanceof DOMException && err.name === 'AbortError') {
+                    return;
+                }
+                console.error('Error loading applications list', err);
+                setListError('No se pudo cargar la lista de aplicaciones.');
+            })
+            .finally(() => {
+                setLoadingList(false);
+            });
+
+        return () => controller.abort();
+    }, []);
 
     const logsByApp = useMemo(() => {
         return logs.reduce<Record<string, ApplicationLog[]>>((acc, log) => {
@@ -119,6 +160,7 @@ const ApplicationsView: React.FC = () => {
             description: form.description.trim() || undefined,
             createdAt: new Date().toISOString(),
             iconKey: form.iconKey,
+            logPaths,
         };
 
         const newLog: ApplicationLog = {
@@ -197,6 +239,11 @@ const ApplicationsView: React.FC = () => {
 
             {mode === 'list' ? (
                 <div className="space-y-6">
+                    {listError && (
+                        <div className="rounded-2xl border border-rose-500/40 bg-rose-500/5 px-4 py-3 text-sm text-rose-200">
+                            {listError}
+                        </div>
+                    )}
                     <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 shadow-lg">
                         <div className="overflow-x-auto">
                             <table className="min-w-full text-xs divide-y divide-zinc-800">
@@ -209,26 +256,48 @@ const ApplicationsView: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-800">
-                                    {applications.map(app => {
+                                    {loadingList ? (
+                                        <tr>
+                                            <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
+                                                Cargando aplicaciones...
+                                            </td>
+                                        </tr>
+                                    ) : applications.length === 0 ? (
+                                        <tr>
+                                            <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
+                                                No hay aplicaciones registradas.
+                                            </td>
+                                        </tr>
+                                    ) : applications.map(app => {
                                         const IconComponent = iconFromKey(app.iconKey);
                                         return (
                                             <tr key={app.id} className="hover:bg-zinc-900/60 transition-colors">
                                                 <td className="px-4 py-3 font-semibold text-zinc-100">
                                                     <div className="flex items-center gap-3">
                                                         <IconComponent className="h-4 w-4 text-indigo-400" />
-                                                        <span>{app.name}</span>
-                                                    </div>
-                                                </td>
+                                                    <span>{app.name}</span>
+                                                </div>
+                                            </td>
                                             <td className="px-4 py-3 text-zinc-300">{app.description ?? '—'}</td>
                                             <td className="px-4 py-3 text-zinc-400 font-mono">{formattedDate(app.createdAt)}</td>
                                             <td className="px-4 py-3 text-zinc-300">
-                                                {(logsByApp[app.id] ?? []).map(log => (
-                                                    <div key={log.id} className="text-[11px] leading-relaxed">
-                                                        <span className="font-mono text-zinc-200">{log.logPath}</span>
-                                                        <span className="ml-2 rounded-full bg-zinc-800/60 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
-                                                            {log.enabled ? 'Activo' : 'Desactivado'}
-                                                        </span>
-                                                    </div>
+                                                {(app.logPaths && app.logPaths.length > 0) ? (
+                                                    app.logPaths.map((path, index) => (
+                                                        <div key={`${app.id}-path-${index}`} className="text-[11px] leading-relaxed">
+                                                            <span className="font-mono text-zinc-200">{path}</span>
+                                                        </div>
+                                                    ))
+                                                ) : (logsByApp[app.id]?.length ? (
+                                                    (logsByApp[app.id] ?? []).map(log => (
+                                                        <div key={log.id} className="text-[11px] leading-relaxed">
+                                                            <span className="font-mono text-zinc-200">{log.logPath}</span>
+                                                            <span className="ml-2 rounded-full bg-zinc-800/60 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
+                                                                {log.enabled ? 'Activo' : 'Desactivado'}
+                                                            </span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-[11px] text-zinc-500">Sin logs</span>
                                                 ))}
                                             </td>
                                         </tr>
