@@ -1,11 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import SQLModel, Field
 
 
 class ApplicationLog(SQLModel, table=True):
-    __tablename__ = "application_logs" # type: ignore
+    __tablename__ = "application_logs"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
@@ -18,4 +19,7 @@ class ApplicationLog(SQLModel, table=True):
     enabled: bool = True
     discovered: bool = True
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )

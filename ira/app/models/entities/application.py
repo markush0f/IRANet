@@ -1,12 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID, uuid4
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import SQLModel, Field
 
 
 class Application(SQLModel, table=True):
-    __tablename__ = "applications" # type: ignore
+    __tablename__ = "applications"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
@@ -22,5 +23,12 @@ class Application(SQLModel, table=True):
     status: str
     enabled: bool = False
 
-    last_seen_at: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_seen_at: Optional[datetime] = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )

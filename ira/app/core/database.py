@@ -11,6 +11,9 @@ from app.core.config import get_database_dsn
 engine: AsyncEngine = create_async_engine(
     get_database_dsn(),
     echo=False,
+    connect_args={
+        "statement_cache_size": 0,
+    },
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -20,9 +23,6 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
-
-
