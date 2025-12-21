@@ -13,6 +13,7 @@ import DockerView from './components/monitoring/DockerView';
 import ProcessesView from './components/monitoring/ProcessesView';
 import MemoryMetricsView from './components/monitoring/MemoryMetricsView';
 import NetworkMetricsView from './components/monitoring/NetworkMetricsView';
+import PacketLossEventsView from './components/monitoring/PacketLossEventsView';
 import AlertsView from './components/alerts/AlertsView';
 import ApplicationsView from './components/applications/ApplicationsView';
 import SystemApplicationsView from './components/system/SystemApplicationsView';
@@ -47,6 +48,8 @@ function App() {
             <MemoryMetricsView />
           ) : currentView === 'network-metrics' ? (
             <NetworkMetricsView />
+          ) : currentView === 'packet-loss-events' ? (
+            <PacketLossEventsView />
           ) : currentView === 'performance' ? (
             <PerformanceView />
           ) : currentView === 'users' ? (

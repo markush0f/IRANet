@@ -166,3 +166,46 @@ export const getMetricSeries = async ({
 
     return data as MetricSample[];
 };
+
+export interface PacketLossEvent {
+    start: string;
+    end: string;
+    duration_seconds: number;
+    max_percent: number;
+    avg_percent: number;
+}
+
+interface PacketLossEventsRequest {
+    host: string;
+    fromTs?: string;
+    toTs?: string;
+    signal?: AbortSignal;
+}
+
+export const getPacketLossEvents = async ({
+    host,
+    fromTs,
+    toTs,
+    signal,
+}: PacketLossEventsRequest): Promise<PacketLossEvent[]> => {
+    const params = new URLSearchParams();
+    params.set('host', host);
+    if (fromTs) params.set('ts_from', fromTs);
+    if (toTs) params.set('ts_to', toTs);
+
+    const url = `${getBaseUrl()}/internet/packet-loss/events?${params.toString()}`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener eventos de packet loss`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as PacketLossEvent[];
+    }
+    if (data && typeof data === 'object' && Array.isArray((data as any).events)) {
+        return (data as any).events as PacketLossEvent[];
+    }
+    return [];
+};
