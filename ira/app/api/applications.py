@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.database import get_session
 from app.models.requests.create_application_request import CreateApplicationRequest
-from app.services.applications_system_service import ApplicationsSystemService
+from app.services.applications.applications import ApplicationsService
+from app.services.applications.applications_system_service import ApplicationsSystemService
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 
@@ -92,14 +93,21 @@ def discover_application_details_endpoint(
 
 
 @router.post("")
-async def create_application_endpoint(
+async def create_application(
     data: CreateApplicationRequest,
     session: AsyncSession = Depends(get_session),
 ):
-    service = ApplicationsSystemService(session)
+    service = ApplicationsService(session)
     application_id = await service.create_application(data = data)
 
     return {
         "id": str(application_id),
         "status": "created",
     }
+    
+@router.get("/list")
+async def applications_list (
+    session: AsyncSession = Depends(get_session),
+):
+    service = ApplicationsService(session)
+    return await service.list_applications()

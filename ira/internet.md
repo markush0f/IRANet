@@ -11,9 +11,9 @@ Usa esta checklist para ir implementando y validando cada parte del backend de m
 
 **Recopilar:**
 
-* [ ] `net.latency.avg_ms`
-* [ ] `net.latency.min_ms`
-* [ ] `net.latency.max_ms`
+* [x] `net.latency.avg_ms`
+* [x] `net.latency.min_ms`
+* [x] `net.latency.max_ms`
 
 **Tipo:** gauge
 **Intervalo recomendado:** 5 segundos
@@ -28,7 +28,7 @@ Usa esta checklist para ir implementando y validando cada parte del backend de m
 
 **Recopilar:**
 
-* [ ] `net.jitter.ms`
+* [x] `net.jitter.ms`
 
 **Tipo:** gauge
 **Intervalo:** 5 segundos

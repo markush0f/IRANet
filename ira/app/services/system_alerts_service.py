@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 class SystemAlertsService:
     CPU_CRITICAL = 80
-    MEMORY_AVAILABLE_CRITICAL = 80
+    MEMORY_AVAILABLE_CRITICAL = 30
     LOAD_FACTOR_CRITICAL = 80
 
     _COOLDOWN_SECONDS = 30

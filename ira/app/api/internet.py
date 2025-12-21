@@ -1,14 +1,28 @@
-from fastapi import APIRouter, Query
+from datetime import datetime
 
-from app.services.metrics.internet_metrics_service import InternetService
+from fastapi import APIRouter, Depends, Query
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.core.database import get_session
+from app.repositories.metric_point import MetricPointRepository
+from app.services.internet.internet_events_service import InternetEventsService
 
 
 router = APIRouter(prefix="/internet", tags=["internet"])
 
 
-@router.get("/snapshot")
-async def internet_snapshot(
-    ping_host: str = Query("1.1.1.1"),
+@router.get("/packet-loss/events")
+async def packet_loss_events(
+    host: str = Query(...),
+    ts_from: datetime = Query(...),
+    ts_to: datetime = Query(...),
+    session: AsyncSession = Depends(get_session),
 ):
-    service = InternetService(ping_host=ping_host)
-    return await service.get_snapshot()
+    repository = MetricPointRepository(session)
+    service = InternetEventsService(repository)
+
+    return await service.get_packet_loss_events(
+        host=host,
+        ts_from=ts_from,
+        ts_to=ts_to,
+    )

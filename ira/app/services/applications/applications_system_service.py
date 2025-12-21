@@ -97,33 +97,6 @@ class ApplicationsSystemService:
             },
         }
 
-    async def create_application(
-        self,
-        *,
-        data: CreateApplicationRequest,
-    ) -> UUID:
-        identifier = self.build_application_identifier(data.cwd)
-
-        existing = await self._applications_repo.get_by_identifier(identifier)
-
-        if existing:
-            return existing.id
-
-        application = await self._applications_repo.create(
-            kind="process",
-            identifier=identifier,
-            name=data.name,
-            workdir=data.cwd,
-            enabled=True,
-        )
-
-        await self._logs_service.attach_logs(
-            application_id=application.id,
-            workdir=data.cwd,
-        )
-
-        return application.id
-
     def _build_discovered_application(
         self,
         proc: ScannedProcess,
@@ -168,9 +141,3 @@ class ApplicationsSystemService:
             grouped[proc.cwd].add(proc.comm)
 
         return grouped
-
-    def build_application_identifier(
-        self,
-        workdir: str,
-    ) -> str:
-        return f"process:{workdir}"
