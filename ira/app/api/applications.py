@@ -1,3 +1,4 @@
+from re import L
 from typing import Dict
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -91,7 +92,6 @@ def discover_application_details_endpoint(
 
     return details
 
-
 @router.post("")
 async def create_application(
     data: CreateApplicationRequest,
@@ -105,16 +105,17 @@ async def create_application(
         "status": "created",
     }
     
-@router.get("/list")
+
+@router.get("/all/list/")
 async def applications_list (
     session: AsyncSession = Depends(get_session),
 ):
     service = ApplicationsService(session)
-    return await service.list_applications()
+    return await service.applications_lists()
 
 @router.get("/list/logs")
-async def applications_list_logs (
+async def applications_list_with_path_logs(
     session: AsyncSession = Depends(get_session),
 ):
     service = ApplicationsService(session)
-    return await service.list_applications_with_logs_paths()
+    return await service.applications_list_with_path_logs()

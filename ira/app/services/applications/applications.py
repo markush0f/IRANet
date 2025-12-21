@@ -51,10 +51,37 @@ class ApplicationsService:
         applications = await self.applications_repository.list_all()
         return applications
 
-    async def list_applications_with_logs_paths(
+    async def applications_lists(
         self,
     ) -> Sequence[ApplicationsLogsDTO]:
         applications = await self.applications_repository.list_all()
+
+        result: List[ApplicationsLogsDTO] = []
+
+        for application in applications:
+            log_paths = await self._logs_service.get_applications_path_logs(
+                application_id=application.id
+            )
+
+            result.append(
+                {
+                    "kind": application.kind,
+                    "identifier": application.identifier,
+                    "name": application.name,
+                    "workdir": application.workdir,
+                    "file_path": application.file_path,
+                    "port": application.port,
+                    "pid": application.pid,
+                    "log_paths": log_paths,
+                }
+            )
+
+        return result
+
+    async def applications_list_with_path_logs(
+        self,
+    ) -> Sequence[ApplicationsLogsDTO]:
+        applications = await self.applications_repository.applications_with_path_logs()
 
         result: List[ApplicationsLogsDTO] = []
 

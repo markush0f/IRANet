@@ -2,11 +2,13 @@ from typing import Optional, Sequence
 from uuid import UUID
 from datetime import datetime, timezone
 
-from sqlalchemy import desc
+from sqlalchemy import select, exists
+
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.entities.application import Application
+from app.models.entities.application_log import ApplicationLog
 
 
 class ApplicationRepository:
@@ -26,9 +28,7 @@ class ApplicationRepository:
         self,
     ) -> Sequence[Application]:
         result = await self._session.exec(
-            select(Application).order_by(
-                Application.created_at.desc() # type: ignore
-            )
+            select(Application).order_by(Application.created_at.desc())  # type: ignore
         )
         return result.all()
 
@@ -83,3 +83,18 @@ class ApplicationRepository:
 
         self._session.add(app)
         await self._session.commit()
+
+    async def applications_with_path_logs(
+    self,
+    ) -> Sequence[Application]:
+        stmt = (
+            select(Application)
+            .where(
+                select(ApplicationLog.application_id)
+                .where(ApplicationLog.application_id == Application.id)
+                .exists()
+            )
+        )
+
+        result = await self._session.exec(stmt)
+        return result.all()
