@@ -6,6 +6,7 @@ import type {
     UsersSummary,
     RemoteUser,
     MetricSample,
+    SystemDiskResponse,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -110,6 +111,17 @@ export const getSystemUsers = async (signal?: AbortSignal): Promise<RemoteUser[]
 
     const data = await response.json();
     return (data.users ?? []) as RemoteUser[];
+};
+
+export const getSystemDisk = async (signal?: AbortSignal): Promise<SystemDiskResponse> => {
+    const url = `${getBaseUrl()}/system/disk`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener /system/disk`);
+    }
+
+    return response.json() as Promise<SystemDiskResponse>;
 };
 
 export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {

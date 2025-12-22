@@ -193,3 +193,18 @@ export interface UsersSummary {
     active: number;
     active_users: string[];
 }
+
+export interface DiskPartition {
+    mountpoint: string;
+    filesystem: string;
+    device: string;
+    total_bytes: number;
+    used_bytes: number;
+    free_bytes: number;
+    used_percent: number;
+    status: 'ok' | 'warning' | 'critical';
+}
+
+export interface SystemDiskResponse {
+    partitions: DiskPartition[];
+}

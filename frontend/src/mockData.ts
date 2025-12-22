@@ -1,4 +1,4 @@
-import type { Service, LogEntry, SystemInfo, SystemApplication } from './types';
+import type { Service, LogEntry, SystemInfo, SystemApplication, SystemDiskResponse } from './types';
 
 export const INITIAL_SERVICES: Service[] = [
     {
@@ -182,6 +182,81 @@ export const MOCK_SYSTEM_INFO: SystemInfo = {
         version: '22.04',
         codename: 'jammy'
     }
+};
+
+export const MOCK_SYSTEM_DISK: SystemDiskResponse = {
+    partitions: [
+        {
+            mountpoint: '/',
+            filesystem: 'ext4',
+            device: '/dev/sdc',
+            total_bytes: 1081101176832,
+            used_bytes: 161450713088,
+            free_bytes: 864658108416,
+            used_percent: 15.7,
+            status: 'ok',
+        },
+        {
+            mountpoint: '/mnt/wslg/distro',
+            filesystem: 'ext4',
+            device: '/dev/sdc',
+            total_bytes: 1081101176832,
+            used_bytes: 161450713088,
+            free_bytes: 864658108416,
+            used_percent: 15.7,
+            status: 'ok',
+        },
+        {
+            mountpoint: '/mnt/wsl/docker-desktop/docker-desktop-user-distro',
+            filesystem: 'ext4',
+            device: '/dev/sdd',
+            total_bytes: 1081101176832,
+            used_bytes: 60317696,
+            free_bytes: 1026048503808,
+            used_percent: 0,
+            status: 'ok',
+        },
+        {
+            mountpoint: '/mnt/wsl/docker-desktop/cli-tools',
+            filesystem: 'iso9660',
+            device: '/dev/loop0',
+            total_bytes: 516966400,
+            used_bytes: 516966400,
+            free_bytes: 0,
+            used_percent: 100,
+            status: 'critical',
+        },
+        {
+            mountpoint: '/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/e9671acd244849c57167c658fa2f969752048f7ab184a3dcf5c46cb4d56ae124',
+            filesystem: 'ext4',
+            device: '/dev/sdc',
+            total_bytes: 1081101176832,
+            used_bytes: 161450713088,
+            free_bytes: 864658108416,
+            used_percent: 15.7,
+            status: 'ok',
+        },
+        {
+            mountpoint: '/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/e7a41e89de2226762f2d051c9f74291ef99f11025d9f20dd76fbf76bd17129cc',
+            filesystem: 'ext4',
+            device: '/dev/sdc',
+            total_bytes: 1081101176832,
+            used_bytes: 161450713088,
+            free_bytes: 864658108416,
+            used_percent: 15.7,
+            status: 'ok',
+        },
+        {
+            mountpoint: '/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/40c5566262bb36594fa18e7cbac550299a1baaadb1907fb3c6f526128dd781c3',
+            filesystem: 'ext4',
+            device: '/dev/sdc',
+            total_bytes: 1081101176832,
+            used_bytes: 161450713088,
+            free_bytes: 864658108416,
+            used_percent: 15.7,
+            status: 'ok',
+        },
+    ],
 };
 
 export const MOCK_SYSTEM_APPLICATIONS: SystemApplication[] = [
