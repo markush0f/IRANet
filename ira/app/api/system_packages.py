@@ -4,7 +4,7 @@ from app.core.logger import get_logger
 
 from app.models.dto.system_packages import SystemPackagesSortBy, SystemPackagesSortDir
 from app.modules.system.packages.types import AptAction
-from app.services.system_packages.packages_service import SystemPackagesService
+from app.services.system.packages_service import SystemPackagesService
 
 
 logger = get_logger(__name__)
