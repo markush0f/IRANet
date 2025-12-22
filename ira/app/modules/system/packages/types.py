@@ -24,3 +24,13 @@ class PaginatedSystemPackages(TypedDict):
     page_size: int
     total: int
     items: List[SystemPackage]
+
+
+AptAction = Literal["install", "upgrade", "remove"]
+
+
+class AptHistoryEntry(TypedDict):
+    date: str
+    action: AptAction
+    packages: List[str]
+    command: str
