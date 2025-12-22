@@ -229,6 +229,24 @@ export const getApplicationsList = async (signal?: AbortSignal): Promise<RemoteA
     return [];
 };
 
+export const getApplicationsLogsList = async (signal?: AbortSignal): Promise<RemoteApplicationRecord[]> => {
+    const url = `${getBaseUrl()}/applications/list/logs`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener aplicaciones con logs`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as RemoteApplicationRecord[];
+    }
+    if (data && typeof data === 'object' && Array.isArray((data as any).applications)) {
+        return (data as any).applications as RemoteApplicationRecord[];
+    }
+    return [];
+};
+
 export interface PacketLossEvent {
     start: string;
     end: string;

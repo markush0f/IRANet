@@ -17,6 +17,7 @@ import PacketLossEventsView from './components/monitoring/PacketLossEventsView';
 import AlertsView from './components/alerts/AlertsView';
 import ApplicationsView from './components/applications/ApplicationsView';
 import SystemApplicationsView from './components/system/SystemApplicationsView';
+import ApplicationsLogsView from './components/logs/ApplicationsLogsView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -64,6 +65,8 @@ function App() {
             <ApplicationsView />
           ) : currentView === 'system-applications' ? (
             <SystemApplicationsView />
+          ) : currentView === 'logs' ? (
+            <ApplicationsLogsView />
           ) : currentView === 'dashboard' ? (
             <DashboardView
               services={services}
