@@ -5,7 +5,7 @@ from app.infrastructure.docker.client import (
     list_exited_containers,
     list_running_containers,
 )
-from app.services.system_service.simple_services_service import SimpleServicesService
+from app.services.system_services.simple_services_service import SimpleServicesService
 
 
 logger = get_logger(__name__)
