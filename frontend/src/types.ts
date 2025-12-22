@@ -78,6 +78,20 @@ export interface SystemdServiceSimple {
     tasks_current?: number | null;
 }
 
+export interface SystemPackage {
+    name: string;
+    version: string;
+    arch: string;
+    origin: string;
+}
+
+export interface SystemPackagesResponse {
+    page: number;
+    page_size: number;
+    total: number;
+    items: SystemPackage[];
+}
+
 export interface SystemApplication {
     cwd: string;
     commands: string[];

@@ -119,6 +119,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
             )
         },
         {
+            id: 'system-packages',
+            label: 'Paquetes del sistema',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14l-8-4m8 4v10m0 0l-8 4m8-4l8 4" />
+                </svg>
+            )
+        },
+        {
             id: 'alerts',
             label: 'Alertas',
             icon: (

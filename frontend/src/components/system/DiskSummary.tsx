@@ -23,14 +23,17 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
     formatBytes,
 }) => {
     return (
-        <div className="mb-6 rounded-lg border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
                 <div>
-                    <div className="text-xs uppercase tracking-wider text-zinc-500">Uso total</div>
-                    <div className="mt-3 h-40">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                        Uso total
+                    </div>
+
+                    <div className="mt-2 h-32">
                         {totalLoading ? (
                             <div className="flex h-full items-center justify-center text-xs text-zinc-500">
-                                Cargando grafica…
+                                Loading chart…
                             </div>
                         ) : totalInfo ? (
                             <ResponsiveContainer width="100%" height="100%">
@@ -38,14 +41,17 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
                                     <Pie
                                         data={[
                                             {
-                                                name: 'Usado',
+                                                name: 'Used',
                                                 value: Math.max(totalInfo.total_bytes - totalInfo.free_bytes, 0),
                                             },
-                                            { name: 'Libre', value: Math.max(totalInfo.free_bytes, 0) },
+                                            {
+                                                name: 'Free',
+                                                value: Math.max(totalInfo.free_bytes, 0),
+                                            },
                                         ]}
                                         dataKey="value"
-                                        innerRadius={48}
-                                        outerRadius={70}
+                                        innerRadius={42}
+                                        outerRadius={62}
                                         paddingAngle={2}
                                         stroke="none"
                                     >
@@ -56,62 +62,67 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
                             </ResponsiveContainer>
                         ) : (
                             <div className="flex h-full items-center justify-center text-xs text-zinc-500">
-                                Sin datos.
+                                No data.
                             </div>
                         )}
                     </div>
+
                     {totalInfo && (
-                        <div className="mt-4 space-y-2 text-xs text-zinc-400">
-                            <div className="flex items-center justify-between">
-                                <span>Usado</span>
+                        <div className="mt-2 space-y-1 text-xs text-zinc-400">
+                            <div className="flex justify-between">
+                                <span>Used</span>
                                 <span className="text-zinc-200">{totalInfo.used_percent.toFixed(2)}%</span>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex justify-between">
                                 <span>Total</span>
                                 <span className="text-zinc-200">{formatBytes(totalInfo.total_bytes)}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span>Libre</span>
+                            <div className="flex justify-between">
+                                <span>Free</span>
                                 <span className="text-zinc-200">{formatBytes(totalInfo.free_bytes)}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span>Particiones</span>
-                                <span className="text-zinc-200">{totalInfo.partitions_count}</span>
-                            </div>
-                        </div>
-                    )}
-                    {totalError && (
-                        <div className="mt-3 rounded-md border border-red-600/60 bg-red-950/60 px-3 py-2 text-xs text-red-300">
-                            {totalError}
                         </div>
                     )}
                 </div>
 
-                <div className="lg:border-l lg:border-zinc-800 lg:pl-6">
-                    <div className="text-xs uppercase tracking-wider text-zinc-500">Resumen</div>
-                    <div className="mt-2 text-lg font-semibold text-zinc-100">Particiones detectadas</div>
-                    <p className="mt-1 text-sm text-zinc-500">Vista agregada del almacenamiento del sistema.</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        <div className="bg-zinc-950 border border-zinc-800 rounded-md px-4 py-2 text-center">
-                            <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Total</div>
-                            <div className="text-xl font-bold text-zinc-100">{summary.total}</div>
+                <div className="lg:border-l lg:border-zinc-800 lg:pl-4">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                        Partitions
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-center">
+                            <div className="text-[9px] text-zinc-500 uppercase">Total</div>
+                            <div className="text-lg font-semibold text-zinc-100">
+                                {summary.total}
+                            </div>
                         </div>
-                        <div className="bg-emerald-950 border border-emerald-900 rounded-md px-4 py-2 text-center">
-                            <div className="text-[10px] text-emerald-400 uppercase tracking-wider">OK</div>
-                            <div className="text-xl font-bold text-emerald-300">{summary.ok}</div>
+
+                        <div className="bg-emerald-950 border border-emerald-900 rounded-md px-3 py-1.5 text-center">
+                            <div className="text-[9px] text-emerald-400 uppercase">OK</div>
+                            <div className="text-lg font-semibold text-emerald-300">
+                                {summary.ok}
+                            </div>
                         </div>
-                        <div className="bg-amber-950 border border-amber-900 rounded-md px-4 py-2 text-center">
-                            <div className="text-[10px] text-amber-400 uppercase tracking-wider">Warn</div>
-                            <div className="text-xl font-bold text-amber-300">{summary.warning}</div>
+
+                        <div className="bg-amber-950 border border-amber-900 rounded-md px-3 py-1.5 text-center">
+                            <div className="text-[9px] text-amber-400 uppercase">Warn</div>
+                            <div className="text-lg font-semibold text-amber-300">
+                                {summary.warning}
+                            </div>
                         </div>
-                        <div className="bg-red-950 border border-red-900 rounded-md px-4 py-2 text-center">
-                            <div className="text-[10px] text-red-400 uppercase tracking-wider">Crit</div>
-                            <div className="text-xl font-bold text-red-300">{summary.critical}</div>
+
+                        <div className="bg-red-950 border border-red-900 rounded-md px-3 py-1.5 text-center">
+                            <div className="text-[9px] text-red-400 uppercase">Crit</div>
+                            <div className="text-lg font-semibold text-red-300">
+                                {summary.critical}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
     );
 };
 

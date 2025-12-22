@@ -10,6 +10,7 @@ import type {
     DiskProcessesResponse,
     DiskTotalResponse,
     SystemdServiceSimple,
+    SystemPackagesResponse,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -172,6 +173,42 @@ export const getSystemDiskTotal = async (signal?: AbortSignal): Promise<DiskTota
     }
 
     return response.json() as Promise<DiskTotalResponse>;
+};
+
+export interface GetSystemPackagesParams {
+    page?: number;
+    pageSize?: number;
+    query?: string;
+    sortBy?: 'name' | 'version' | 'arch';
+    sortDir?: 'asc' | 'desc';
+    signal?: AbortSignal;
+}
+
+export const getSystemPackages = async ({
+    page = 1,
+    pageSize = 50,
+    query = '',
+    sortBy = 'name',
+    sortDir = 'asc',
+    signal,
+}: GetSystemPackagesParams = {}): Promise<SystemPackagesResponse> => {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('page_size', String(pageSize));
+    if (query.trim()) {
+        params.set('q', query.trim());
+    }
+    params.set('sort_by', sortBy);
+    params.set('sort_dir', sortDir);
+
+    const url = `${getBaseUrl()}/system/packages/?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener paquetes del sistema`);
+    }
+
+    return response.json() as Promise<SystemPackagesResponse>;
 };
 
 export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
