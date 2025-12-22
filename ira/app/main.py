@@ -6,9 +6,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
-from app.api.system_service import router as system_router
+from app.api.system import router as system_router
 from app.api.processes import router as processes_router
-from app.api.system_service import router as service_router
+from app.api.system_services import router as system_service_router
 from app.api.users import router as users_router
 from app.api.metrics import router as metrics_router
 from app.api.system_alerts import router as alerts_router
@@ -58,7 +58,7 @@ config = load_config()
 app.include_router(health_router)
 app.include_router(system_router)
 app.include_router(processes_router)
-app.include_router(service_router)
+app.include_router(system_service_router)
 app.include_router(users_router)
 app.include_router(metrics_router)
 app.include_router(alerts_router)
