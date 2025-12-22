@@ -3,7 +3,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
 from app.core.websocket_manager import ws_manager
-from app.services.system_alerts_service import SystemAlertsService
+from app.services.system.system_alerts_service import SystemAlertsService
 
 router = APIRouter(tags=["alerts"])
 

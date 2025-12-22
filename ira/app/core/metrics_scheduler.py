@@ -8,7 +8,7 @@ import socket
 from app.core.database import AsyncSessionLocal
 from app.core.logger import get_logger
 from app.services.metrics.metrics_service import SystemMetricsService
-from app.services.system_alerts_service import SystemAlertsService
+from app.services.system.system_alerts_service import SystemAlertsService
 
 COLLECT_INTERVAL_SECONDS = 5
 

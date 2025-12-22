@@ -1,12 +1,14 @@
 import os
 import time
-from typing import Any, Dict
+from typing import Any, Dict, List
 from app.modules.processes.top.state import read_tasks_summary_named
 from app.modules.processes.top.system import load_average
 from app.modules.system.cpu import get_cpu_global_top_percent
+from app.modules.system.disk import get_disk_partitions, get_processes_using_mountpoint
 from app.modules.system.host import host_info
 from app.modules.system.meminfo import read_memory_and_swap_status
 from app.modules.system.proc import read_uptime_seconds
+from app.modules.system.types import DiskProcessUsage
 
 
 class SystemService:
@@ -14,8 +16,8 @@ class SystemService:
         return {
             "host": host_info(),
         }
-        
-    def _format_uptime(self,seconds: int) -> str:
+
+    def _format_uptime(self, seconds: int) -> str:
         """
         Format uptime like top (DD days, HH:MM).
         """
@@ -27,8 +29,9 @@ class SystemService:
             return f"{days} days, {hours:02d}:{minutes:02d}"
         return f"{hours:02d}:{minutes:02d}"
 
-
-    def build_system_snapshot(self,) -> Dict[str, Any]:
+    def build_system_snapshot(
+        self,
+    ) -> Dict[str, Any]:
         """
         Build a full system snapshot suitable for frontend consumption.
 
@@ -55,8 +58,9 @@ class SystemService:
             "swap": memory_status["swap"],
         }
 
-
-    def build_system_resources_snapshot(self,) -> Dict[str, Any]:
+    def build_system_resources_snapshot(
+        self,
+    ) -> Dict[str, Any]:
         """
         Build a lightweight system resources snapshot.
 
@@ -73,9 +77,9 @@ class SystemService:
             "swap": memory_status["swap"],
         }
 
-
-
-    def build_system_alerts_snapshot(self,) -> Dict[str, Any]:
+    def build_system_alerts_snapshot(
+        self,
+    ) -> Dict[str, Any]:
         """
         Build a system alerts snapshot.
 
@@ -103,3 +107,43 @@ class SystemService:
                 "swap_active": swap_active,
             },
         }
+
+
+    def _resolve_status(self,used_percent: float) -> str:
+        WARNING_THRESHOLD = 75.0
+        CRITICAL_THRESHOLD = 85.0
+        if used_percent >= CRITICAL_THRESHOLD:
+            return "critical"
+        if used_percent >= WARNING_THRESHOLD:
+            return "warning"
+        return "ok"
+
+    def get_system_disk(self) -> List[Dict]:
+        partitions = get_disk_partitions()
+        snapshot: List[Dict] = []
+
+        for partition in partitions:
+            snapshot.append(
+                {
+                    "mountpoint": partition["mountpoint"],
+                    "filesystem": partition["filesystem"],
+                    "device": partition["device"],
+                    "total_bytes": partition["total_bytes"],
+                    "used_bytes": partition["used_bytes"],
+                    "free_bytes": partition["free_bytes"],
+                    "used_percent": partition["used_percent"],
+                    "status": self._resolve_status(partition["used_percent"]),
+                }
+            )
+
+        return snapshot
+    
+    def get_disk_processes(
+    self,
+    mountpoint: str,
+    limit: int = 10,
+    ) -> List[DiskProcessUsage]:
+        return get_processes_using_mountpoint(
+            mountpoint=mountpoint,
+            limit=limit,
+        )
