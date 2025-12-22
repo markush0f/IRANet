@@ -208,3 +208,17 @@ export interface DiskPartition {
 export interface SystemDiskResponse {
     partitions: DiskPartition[];
 }
+
+export interface DiskProcessRecord {
+    pid: number;
+    name: string;
+    user: string;
+    read_bytes: number;
+    write_bytes: number;
+    paths: string[];
+}
+
+export interface DiskProcessesResponse {
+    mountpoint: string;
+    processes: DiskProcessRecord[];
+}

@@ -7,6 +7,7 @@ import type {
     RemoteUser,
     MetricSample,
     SystemDiskResponse,
+    DiskProcessesResponse,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -122,6 +123,24 @@ export const getSystemDisk = async (signal?: AbortSignal): Promise<SystemDiskRes
     }
 
     return response.json() as Promise<SystemDiskResponse>;
+};
+
+export const getDiskProcesses = async (
+    mountpoint: string,
+    limit = 10,
+    signal?: AbortSignal
+): Promise<DiskProcessesResponse> => {
+    const params = new URLSearchParams();
+    params.set('mountpoint', mountpoint);
+    params.set('limit', String(limit));
+    const url = `${getBaseUrl()}/system/disk/processes?${params.toString()}`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener procesos de disco`);
+    }
+
+    return response.json() as Promise<DiskProcessesResponse>;
 };
 
 export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {

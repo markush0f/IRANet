@@ -1,4 +1,11 @@
-import type { Service, LogEntry, SystemInfo, SystemApplication, SystemDiskResponse } from './types';
+import type {
+    Service,
+    LogEntry,
+    SystemInfo,
+    SystemApplication,
+    SystemDiskResponse,
+    DiskProcessesResponse,
+} from './types';
 
 export const INITIAL_SERVICES: Service[] = [
     {
@@ -255,6 +262,130 @@ export const MOCK_SYSTEM_DISK: SystemDiskResponse = {
             free_bytes: 864658108416,
             used_percent: 15.7,
             status: 'ok',
+        },
+    ],
+};
+
+export const MOCK_DISK_PROCESSES: DiskProcessesResponse = {
+    mountpoint: '/',
+    processes: [
+        {
+            pid: 25,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 128786432,
+            write_bytes: 2048000,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+            ],
+        },
+        {
+            pid: 456,
+            name: 'bash',
+            user: 'markus',
+            read_bytes: 72482816,
+            write_bytes: 1708032,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/ptyhost.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+            ],
+        },
+        {
+            pid: 454,
+            name: 'bash',
+            user: 'markus',
+            read_bytes: 68943872,
+            write_bytes: 139264,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/ptyhost.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+            ],
+        },
+        {
+            pid: 402,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 38424576,
+            write_bytes: 5447680,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/exthost1/remoteexthost.log',
+            ],
+        },
+        {
+            pid: 401,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 31805440,
+            write_bytes: 5709824,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/exthost2/remoteexthost.log',
+            ],
+        },
+        {
+            pid: 2236,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 34021376,
+            write_bytes: 917504,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/exthost2/remoteexthost.log',
+            ],
+        },
+        {
+            pid: 91,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 13361152,
+            write_bytes: 0,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+            ],
+        },
+        {
+            pid: 826,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 10760192,
+            write_bytes: 0,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/exthost1/remoteexthost.log',
+            ],
+        },
+        {
+            pid: 1038,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 9760768,
+            write_bytes: 0,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/exthost2/remoteexthost.log',
+            ],
+        },
+        {
+            pid: 827,
+            name: 'node',
+            user: 'markus',
+            read_bytes: 9080832,
+            write_bytes: 0,
+            paths: [
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteTelemetry.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/remoteagent.log',
+                '/home/markus/.vscode-server/data/logs/20251222T022702/exthost1/remoteexthost.log',
+            ],
         },
     ],
 };
