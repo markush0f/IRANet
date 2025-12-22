@@ -49,3 +49,12 @@ def system_disk_processes(
             limit=limit,
         ),
     }
+
+@router.get("/disk/total")
+def system_root_disk():
+    service = SystemService()
+    return service.get_root_disk_usage()
+
+
+# SI LO ESTAS EJECUTANDO DESDE WSL, LO QUE PASA ES QUE WSL SOLO VE EL DISCO VIRTUAL QUE TIENE
+# ASIGNADO, NO EL USO REAL DEL DISCO DE WINDOWS

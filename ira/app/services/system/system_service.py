@@ -1,6 +1,8 @@
 import os
 import time
 from typing import Any, Dict, List
+
+import psutil
 from app.modules.processes.top.state import read_tasks_summary_named
 from app.modules.processes.top.system import load_average
 from app.modules.system.cpu import get_cpu_global_top_percent
@@ -8,7 +10,7 @@ from app.modules.system.disk import get_disk_partitions, get_processes_using_mou
 from app.modules.system.host import host_info
 from app.modules.system.meminfo import read_memory_and_swap_status
 from app.modules.system.proc import read_uptime_seconds
-from app.modules.system.types import DiskProcessUsage
+from app.modules.system.types import DiskPartition, DiskProcessUsage
 
 
 class SystemService:
@@ -108,8 +110,7 @@ class SystemService:
             },
         }
 
-
-    def _resolve_status(self,used_percent: float) -> str:
+    def _resolve_status(self, used_percent: float) -> str:
         WARNING_THRESHOLD = 75.0
         CRITICAL_THRESHOLD = 85.0
         if used_percent >= CRITICAL_THRESHOLD:
@@ -137,13 +138,52 @@ class SystemService:
             )
 
         return snapshot
-    
+
     def get_disk_processes(
-    self,
-    mountpoint: str,
-    limit: int = 10,
+        self,
+        mountpoint: str,
+        limit: int = 10,
     ) -> List[DiskProcessUsage]:
         return get_processes_using_mountpoint(
             mountpoint=mountpoint,
             limit=limit,
         )
+
+    def get_system_disk_total(
+        self,
+    ) -> Dict:
+        partitions: List[DiskPartition] = get_disk_partitions()
+
+        total_bytes = 0
+        free_bytes = 0
+
+        for p in partitions:
+            total_bytes += p["total_bytes"]
+            free_bytes += p["free_bytes"]
+
+        used_percent = (
+            0.0
+            if total_bytes == 0
+            else ((total_bytes - free_bytes) / total_bytes) * 100
+        )
+
+        return {
+            "type": "aggregated",
+            "total_bytes": total_bytes,
+            "free_bytes": free_bytes,
+            "used_percent": round(used_percent, 2),
+            "partitions_count": len(partitions),
+        }
+
+
+    def get_root_disk_usage(self) -> dict:
+        usage = psutil.disk_usage("/")
+
+        return {
+            "mountpoint": "/",
+            "type": "physical",
+            "total_bytes": usage.total,
+            "free_bytes": usage.free,
+            "used_bytes": usage.used,
+            "used_percent": usage.percent,
+        }
