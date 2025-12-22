@@ -80,10 +80,10 @@ const DockerView: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12">
-            <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+            <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Docker Containers</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Docker Containers</h2>
                     <div className="h-1 w-24 bg-indigo-600 rounded-full mt-4" />
                     <p className="text-zinc-400 mt-2 text-sm">
                         Listado de contenedores Docker obtenidos desde el backend. Filtra por estado, busca por nombre, imagen o id y simula acciones de parada/arranque.
@@ -95,7 +95,7 @@ const DockerView: React.FC = () => {
                     )}
                 </div>
                 {!loading && (
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="flex flex-col items-start lg:items-end gap-2">
                         <div className="flex items-center gap-2">
                             <span className="text-[11px] text-zinc-500">Filter:</span>
                             <div className="inline-flex rounded-full bg-zinc-900 p-1 border border-zinc-800">
@@ -173,7 +173,7 @@ const DockerView: React.FC = () => {
                         return (
                         <div
                             key={container.id}
-                            className={`bg-zinc-900 rounded-xl border p-5 shadow-xl flex flex-col gap-4 ${
+                            className={`bg-zinc-900 rounded-xl border p-4 sm:p-5 shadow-xl flex flex-col gap-4 ${
                                 isRunning ? 'border-zinc-800' : 'border-rose-500/60'
                             }`}
                         >

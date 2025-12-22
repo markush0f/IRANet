@@ -21,8 +21,8 @@ const LogsViewer: React.FC<LogsViewerProps> = ({ logs, serviceName, isOpen, onCl
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-zinc-900 w-full max-w-4xl h-[80vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in border border-zinc-800" onClick={e => e.stopPropagation()}>
-                <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+            <div className="bg-zinc-900 w-full max-w-4xl h-[85vh] sm:h-[80vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in border border-zinc-800" onClick={e => e.stopPropagation()}>
+                <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
                     <div>
                         <h2 className="text-lg font-bold text-zinc-100">System Logs</h2>
                         <p className="text-sm text-zinc-500">Live stream from <span className="font-mono text-zinc-300">{serviceName}</span></p>
@@ -59,7 +59,7 @@ const LogsViewer: React.FC<LogsViewerProps> = ({ logs, serviceName, isOpen, onCl
                     <div ref={bottomRef} />
                 </div>
 
-                <div className="p-3 bg-zinc-900 border-t border-zinc-800 text-right">
+                <div className="px-4 py-3 bg-zinc-900 border-t border-zinc-800 text-right">
                     <span className="text-xs text-zinc-500 flex items-center justify-end gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></span>
                         Live Connection Active

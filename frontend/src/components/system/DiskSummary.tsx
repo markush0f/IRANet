@@ -23,7 +23,7 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
     formatBytes,
 }) => {
     return (
-        <div className="mb-6 rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+        <div className="mb-6 rounded-lg border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
                 <div>
                     <div className="text-xs uppercase tracking-wider text-zinc-500">Uso total</div>

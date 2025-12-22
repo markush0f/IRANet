@@ -58,7 +58,7 @@ const AlertsView: React.FC = () => {
     const formatMoment = (alert: AlertRecord) => formatTimestamp(alert.first_seen_at ?? alert.timestamp ?? alert.last_seen_at ?? '');
 
     return (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12 h-screen flex flex-col">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
             {/* Header */}
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -68,7 +68,7 @@ const AlertsView: React.FC = () => {
                             Monitoreo en tiempo real de eventos del sistema
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <button
                             onClick={refresh}
                             type="button"
@@ -144,7 +144,7 @@ const AlertsView: React.FC = () => {
                                         key={alert.id}
                                         className={`p-4 hover:bg-zinc-800/40 transition-colors cursor-pointer border-l-8 ${levelStyle.border}`}
                                     >
-                                        <div className="flex items-start justify-between gap-4 mb-2">
+                                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${levelStyle.bg}`}>
                                                 {alert.level}
                                             </span>

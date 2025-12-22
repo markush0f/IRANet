@@ -40,10 +40,10 @@ const ApplicationsLogsView: React.FC = () => {
     }, [applications]);
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-6">
             <div>
                 <p className="text-xs uppercase tracking-wide text-zinc-500">Logs</p>
-                <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Aplicaciones con logs</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Aplicaciones con logs</h2>
                 <p className="text-sm text-zinc-400 mt-2 max-w-2xl">
                     Listado de aplicaciones que tienen rutas de logs configuradas.
                 </p>
@@ -55,7 +55,7 @@ const ApplicationsLogsView: React.FC = () => {
                 </div>
             )}
 
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 shadow-lg">
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-5 shadow-lg">
                 <div className="overflow-x-auto">
                     <table className="min-w-full text-xs divide-y divide-zinc-800">
                         <thead className="bg-zinc-950/70">

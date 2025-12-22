@@ -211,10 +211,10 @@ const ApplicationsView: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Applications</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Applications</h2>
                     <p className="text-sm text-zinc-400 mt-1">Modelo sencillo de aplicaciones + bitácoras basado en las tablas del backend.</p>
                 </div>
                 {mode === 'list' && (
@@ -244,7 +244,7 @@ const ApplicationsView: React.FC = () => {
                             {listError}
                         </div>
                     )}
-                    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 shadow-lg">
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-5 shadow-lg">
                         <div className="overflow-x-auto">
                             <table className="min-w-full text-xs divide-y divide-zinc-800">
                                 <thead className="bg-zinc-950/70">
@@ -308,7 +308,7 @@ const ApplicationsView: React.FC = () => {
                     </div>
                 </div>
             ) : (
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 shadow-lg space-y-5">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-6 shadow-lg space-y-5">
                     <h3 className="text-xl font-semibold text-zinc-100">Nueva aplicación</h3>
                     {error && (
                         <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">
@@ -388,11 +388,11 @@ const ApplicationsView: React.FC = () => {
                                 Habilitar log al crear
                             </label>
                         </div>
-                        <div className="flex justify-end">
+                        <div className="flex justify-stretch sm:justify-end">
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="rounded-full border border-transparent bg-indigo-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-800"
+                                className="w-full sm:w-auto rounded-full border border-transparent bg-indigo-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-800"
                             >
                                 {saving ? 'Guardando...' : 'Guardar aplicación'}
                             </button>

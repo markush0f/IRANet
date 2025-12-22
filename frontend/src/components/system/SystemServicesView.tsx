@@ -72,10 +72,10 @@ const SystemServicesView: React.FC = () => {
     });
 
     return (
-        <div className="max-w-6xl mx-auto px-8 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Servicios del sistema</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Servicios del sistema</h2>
                     <div className="h-1 w-28 bg-indigo-600 rounded-full mt-4" />
                     <p className="text-zinc-400 mt-2 text-sm">
                         Estado de servicios systemd con vista compacta y detalles clave.
@@ -93,7 +93,7 @@ const SystemServicesView: React.FC = () => {
                             <select
                                 value={limit}
                                 onChange={(event) => setLimit(Number(event.target.value))}
-                                className="appearance-none bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                className="w-full sm:w-auto appearance-none bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                             >
                                 {[4, 8, 12, 16, 20, 30, 50].map((value) => (
                                     <option key={value} value={value}>
@@ -155,7 +155,7 @@ const SystemServicesView: React.FC = () => {
                         return (
                             <div
                                 key={service.id}
-                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-xl space-y-4"
+                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 sm:p-5 shadow-xl space-y-4"
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
@@ -177,7 +177,7 @@ const SystemServicesView: React.FC = () => {
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 text-xs">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                                     <div className="text-zinc-500">Subestado</div>
                                     <div className="text-zinc-200">{formatNullable(service.sub_state)}</div>
                                     <div className="text-zinc-500">PID principal</div>

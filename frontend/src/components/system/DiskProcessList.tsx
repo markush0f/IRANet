@@ -41,7 +41,7 @@ const DiskProcessList: React.FC<DiskProcessListProps> = ({
     return (
         <div className="space-y-3">
             {processes.processes.map(process => (
-                <div key={process.pid} className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3">
+                <div key={process.pid} className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 sm:px-4 py-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                             <div className="text-sm font-semibold text-zinc-100">{process.name}</div>

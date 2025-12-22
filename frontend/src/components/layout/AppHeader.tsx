@@ -9,7 +9,7 @@ const AppHeader: React.FC = () => {
 
     return (
         <header className="bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900 shrink-0 z-20">
-            <div className="px-8 h-20 flex items-center justify-end">
+            <div className="px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-end">
                 <div className="flex items-center gap-4">
                     <div className="hidden md:flex flex-col items-end mr-4">
                         <span className="text-xs text-zinc-400">Environment</span>

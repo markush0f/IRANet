@@ -81,7 +81,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onCheck, onViewLogs,
 
     return (
         <div
-            className="group relative bg-zinc-900 rounded-xl border border-zinc-800 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/50 hover:border-zinc-700 hover:-translate-y-1"
+            className="group relative bg-zinc-900 rounded-xl border border-zinc-800 p-4 sm:p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/50 hover:border-zinc-700 hover:-translate-y-1"
         >
             <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -155,7 +155,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onCheck, onViewLogs,
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <button
                     onClick={() => onCheck(service.id)}
                     disabled={service.status === 'loading'}

@@ -57,7 +57,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
             </table>
         </div>
         {!loading && (
-            <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex justify-between items-center">
+            <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
                     Mostrando <span className="text-zinc-200 font-semibold">{users.length}</span> usuarios
                 </span>

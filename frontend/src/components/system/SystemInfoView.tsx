@@ -52,14 +52,14 @@ const SystemInfoView: React.FC = () => {
 
     if (loading || !info) {
         return (
-            <div className="max-w-7xl mx-auto px-8 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
                 <SystemInfoHeader loading />
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <SystemInfoHeader error={error} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -96,7 +96,7 @@ const SystemInfoView: React.FC = () => {
                     <p className="text-sm text-zinc-400 mb-4">
                         Marca de tiempo Unix del arranque del sistema y fecha legible.
                     </p>
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
                         <div>
                             <div className="text-xs uppercase tracking-wide text-zinc-500 font-semibold mb-1">Boot time (epoch)</div>
                             <div className="text-lg font-mono text-zinc-100">{info.boot_time}</div>

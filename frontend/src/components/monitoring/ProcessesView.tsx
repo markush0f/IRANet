@@ -81,19 +81,19 @@ const ProcessesView: React.FC = () => {
     }, [processes, userFilter, stateFilter, search]);
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-8 h-screen flex flex-col">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
             <header className="mb-6 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h2 className="text-3xl font-bold text-zinc-100">System Processes</h2>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100">System Processes</h2>
                         <p className="text-base text-zinc-400">Real-time process monitoring</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <select
                             value={limit}
                             onChange={e => setLimit(Number(e.target.value))}
-                            className="bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2 text-sm text-zinc-200"
+                            className="w-full sm:w-auto bg-zinc-900 border border-zinc-800 rounded-full px-4 py-2 text-sm text-zinc-200"
                         >
                             <option value={5}>Top 5</option>
                             <option value={10}>Top 10</option>
@@ -113,13 +113,13 @@ const ProcessesView: React.FC = () => {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search process..."
-                        className="px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
+                        className="w-full sm:w-auto px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
                     />
 
                     <select
                         value={userFilter}
                         onChange={e => setUserFilter(e.target.value)}
-                        className="px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
+                        className="w-full sm:w-auto px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
                     >
                         <option value="all">All users</option>
                         {users.map(u => (
@@ -130,7 +130,7 @@ const ProcessesView: React.FC = () => {
                     <select
                         value={stateFilter}
                         onChange={e => setStateFilter(e.target.value as any)}
-                        className="px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
+                        className="w-full sm:w-auto px-4 py-2 rounded-full text-sm bg-zinc-900 border border-zinc-800 text-zinc-300"
                     >
                         <option value="all">All states</option>
                         <option value="running">Running</option>

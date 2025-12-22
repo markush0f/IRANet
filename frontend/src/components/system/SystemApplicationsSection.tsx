@@ -215,7 +215,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
 
     return (
         <>
-            <section className="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <section className="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-xl">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <p className="text-xs uppercase tracking-wide text-zinc-500">Aplicaciones</p>
@@ -272,10 +272,10 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             </section>
 
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-8">
+                <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-6 sm:py-8">
                     <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal} />
                     <div
-                        className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-2xl"
+                        className="relative z-10 w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4 sm:p-6 shadow-2xl"
                         role="dialog"
                         aria-modal="true"
                         onClick={event => event.stopPropagation()}
@@ -466,12 +466,12 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             )}
                         </div>
 
-                        <div className="mt-6 flex justify-end">
+                        <div className="mt-6 flex justify-stretch sm:justify-end">
                             <button
                                 type="button"
                                 onClick={handleSaveApplication}
                                 disabled={loadingDetails || savingApplication}
-                                className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                className="w-full sm:w-auto rounded-full border border-emerald-500/60 bg-emerald-500/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {savingApplication ? 'Guardando...' : 'Confirmar'}
                             </button>

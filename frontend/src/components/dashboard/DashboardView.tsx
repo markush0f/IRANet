@@ -220,7 +220,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
     const hostToUse = overrideHost.trim() || hostname;
 
     return (
-        <main className="max-w-7xl mx-auto px-8 py-10">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <section className="space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
@@ -234,7 +234,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                                 id="dashboard-host-input"
                                 type="text"
                                 placeholder="DESKTOP-B5V272O"
-                                className="w-56 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
+                                className="w-full sm:w-56 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
                                 value={overrideHost}
                                 onChange={event => setOverrideHost(event.target.value)}
                             />

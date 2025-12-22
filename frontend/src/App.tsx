@@ -29,16 +29,47 @@ function App() {
   const { services, handleAddService, handleDeleteService, handleRefreshAll, handleCheckStatus, handleUpdateService } = useServices();
   const { logsOpen, currentLogs, currentServiceId, openLogs, closeLogs } = useLogsModal();
   const [currentView, setCurrentView] = useState('system');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useSystemAlerts();
 
   const currentServiceName = services.find(s => s.id === currentServiceId)?.name || 'Unknown Service';
 
   return (
-    <div className="flex h-screen bg-zinc-950 selection:bg-indigo-500/30 selection:text-indigo-200 overflow-hidden">
-      <Sidebar activeView={currentView} onNavigate={setCurrentView} />
+    <div className="flex min-h-screen lg:h-screen bg-zinc-950 selection:bg-indigo-500/30 selection:text-indigo-200 lg:overflow-hidden">
+      <Sidebar
+        activeView={currentView}
+        onNavigate={(viewId) => {
+          setCurrentView(viewId);
+          setIsSidebarOpen(false);
+        }}
+        isMobileOpen={isSidebarOpen}
+        onMobileClose={() => setIsSidebarOpen(false)}
+      />
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex-1 flex flex-col min-h-screen lg:min-h-0 overflow-hidden">
+        <div className="lg:hidden sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-zinc-900 bg-zinc-950/90 px-4 py-3 backdrop-blur">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-300"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            Menú
+          </button>
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            IRANet
+          </span>
+        </div>
         {/* <AppHeader /> */}
 
         {/* Scrollable Content Area */}

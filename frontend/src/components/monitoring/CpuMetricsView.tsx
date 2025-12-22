@@ -43,12 +43,12 @@ const CpuMetricsView: React.FC = () => {
     const hostToUse = overrideHost.trim() || hostname;
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12">
-            <Card className="space-y-6 p-6">
-                <Flex alignItems="start" justifyContent="between" className="gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+            <Card className="space-y-6 p-4 sm:p-6">
+                <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Serie de métricas</Text>
-                        <Title className="text-3xl text-zinc-100">Uso de CPU en tiempo real</Title>
+                        <Title className="text-2xl sm:text-3xl text-zinc-100">Uso de CPU en tiempo real</Title>
                         <Text className="text-sm text-zinc-400 max-w-3xl">
                             La gráfica se actualiza cada 5 segundos y puede analizarse desde un rango manual o en modo streaming.
                             Si el hostname no se detecta automáticamente, puedes forzar uno para consultar la API correcta.
@@ -71,14 +71,14 @@ const CpuMetricsView: React.FC = () => {
                             id="host-input"
                             type="text"
                             placeholder="DESKTOP-B5V272O"
-                            className="w-48 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
+                            className="w-full sm:w-56 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
                             value={overrideHost}
                             onChange={event => setOverrideHost(event.target.value)}
                         />
                     </div>
                 </Flex>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6 shadow-xl">
                     {error && (
                         <div className="mb-4 rounded-lg border border-red-600/60 bg-red-950/60 px-4 py-3 text-sm text-red-300">
                             {error}

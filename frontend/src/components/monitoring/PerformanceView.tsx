@@ -27,16 +27,16 @@ const PerformanceView: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <div className="mb-8">
-                <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">System Performance</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">System Performance</h2>
                 <div className="h-1 w-20 bg-indigo-600 rounded-full mt-4"></div>
                 <p className="text-zinc-400 mt-2 text-sm">Real-time telemetry from cluster nodes.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* CPU Usage Card */}
-                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-xl">
+                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 sm:p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800">
@@ -52,7 +52,7 @@ const PerformanceView: React.FC = () => {
                         <span className="text-2xl font-mono font-bold text-zinc-100">{Math.round(dataPoints[dataPoints.length - 1])}%</span>
                     </div>
 
-                    <div className="h-40 w-full bg-zinc-950/50 rounded-lg border border-zinc-800/50 relative overflow-hidden">
+                    <div className="h-32 sm:h-40 w-full bg-zinc-950/50 rounded-lg border border-zinc-800/50 relative overflow-hidden">
                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                             {/* Grid Lines */}
                             <line x1="0" y1="25" x2="100" y2="25" stroke="#27272a" strokeWidth="0.5" />
@@ -84,7 +84,7 @@ const PerformanceView: React.FC = () => {
                 </div>
 
                 {/* Memory Usage Card */}
-                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-xl">
+                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 sm:p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800">
@@ -99,7 +99,7 @@ const PerformanceView: React.FC = () => {
                         </div>
                         <span className="text-2xl font-mono font-bold text-zinc-100">{Math.round(memoryPoints[memoryPoints.length - 1])}%</span>
                     </div>
-                    <div className="h-40 w-full bg-zinc-950/50 rounded-lg border border-zinc-800/50 relative overflow-hidden">
+                    <div className="h-32 sm:h-40 w-full bg-zinc-950/50 rounded-lg border border-zinc-800/50 relative overflow-hidden">
                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                             <line x1="0" y1="25" x2="100" y2="25" stroke="#27272a" strokeWidth="0.5" />
                             <line x1="0" y1="50" x2="100" y2="50" stroke="#27272a" strokeWidth="0.5" />
@@ -128,7 +128,7 @@ const PerformanceView: React.FC = () => {
                 </div>
 
                 {/* Network I/O Card */}
-                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-xl">
+                <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4 sm:p-6 shadow-xl">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800">
@@ -147,7 +147,7 @@ const PerformanceView: React.FC = () => {
                             <div className="text-xs font-mono font-bold text-rose-400">RX: {Math.round(networkRx[networkRx.length - 1])}</div>
                         </div>
                     </div>
-                    <div className="h-40 w-full bg-zinc-950/50 rounded-lg border border-zinc-800/50 relative overflow-hidden">
+                    <div className="h-32 sm:h-40 w-full bg-zinc-950/50 rounded-lg border border-zinc-800/50 relative overflow-hidden">
                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                             <line x1="0" y1="25" x2="100" y2="25" stroke="#27272a" strokeWidth="0.5" />
                             <line x1="0" y1="50" x2="100" y2="50" stroke="#27272a" strokeWidth="0.5" />
@@ -175,55 +175,57 @@ const PerformanceView: React.FC = () => {
 
             {/* Mock Process List Table */}
             <div className="mt-8 bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-                <div className="px-6 py-4 border-b border-zinc-800">
+                <div className="px-4 sm:px-6 py-4 border-b border-zinc-800">
                     <h3 className="text-sm font-bold text-zinc-200">Top Processes</h3>
                 </div>
-                <table className="w-full text-left text-xs">
-                    <thead className="bg-zinc-950/50 text-zinc-500 font-bold uppercase tracking-wider">
-                        <tr>
-                            <th className="px-6 py-3">PID</th>
-                            <th className="px-6 py-3">Process</th>
-                            <th className="px-6 py-3">User</th>
-                            <th className="px-6 py-3">CPU %</th>
-                            <th className="px-6 py-3">Mem %</th>
-                            <th className="px-6 py-3">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-800 text-zinc-300">
-                        <tr className="hover:bg-zinc-800/30 transition-colors">
-                            <td className="px-6 py-3 font-mono">1192</td>
-                            <td className="px-6 py-3 font-bold text-white">postgres</td>
-                            <td className="px-6 py-3">postgres</td>
-                            <td className="px-6 py-3 text-emerald-400">12.4</td>
-                            <td className="px-6 py-3 text-emerald-400">28.1</td>
-                            <td className="px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Running</span></td>
-                        </tr>
-                        <tr className="hover:bg-zinc-800/30 transition-colors">
-                            <td className="px-6 py-3 font-mono">8221</td>
-                            <td className="px-6 py-3 font-bold text-white">redis-server</td>
-                            <td className="px-6 py-3">redis</td>
-                            <td className="px-6 py-3 text-zinc-400">4.2</td>
-                            <td className="px-6 py-3 text-zinc-400">14.1</td>
-                            <td className="px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Running</span></td>
-                        </tr>
-                        <tr className="hover:bg-zinc-800/30 transition-colors">
-                            <td className="px-6 py-3 font-mono">4452</td>
-                            <td className="px-6 py-3 font-bold text-white">nginx: master</td>
-                            <td className="px-6 py-3">root</td>
-                            <td className="px-6 py-3 text-zinc-400">1.8</td>
-                            <td className="px-6 py-3 text-zinc-400">3.5</td>
-                            <td className="px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Running</span></td>
-                        </tr>
-                        <tr className="hover:bg-zinc-800/30 transition-colors">
-                            <td className="px-6 py-3 font-mono">9921</td>
-                            <td className="px-6 py-3 font-bold text-white">node</td>
-                            <td className="px-6 py-3">app</td>
-                            <td className="px-6 py-3 text-amber-400">45.2</td>
-                            <td className="px-6 py-3 text-amber-400">33.4</td>
-                            <td className="px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">High CPU</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-left text-xs">
+                        <thead className="bg-zinc-950/50 text-zinc-500 font-bold uppercase tracking-wider">
+                            <tr>
+                                <th className="px-4 sm:px-6 py-3">PID</th>
+                                <th className="px-4 sm:px-6 py-3">Process</th>
+                                <th className="px-4 sm:px-6 py-3">User</th>
+                                <th className="px-4 sm:px-6 py-3">CPU %</th>
+                                <th className="px-4 sm:px-6 py-3">Mem %</th>
+                                <th className="px-4 sm:px-6 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-800 text-zinc-300">
+                            <tr className="hover:bg-zinc-800/30 transition-colors">
+                                <td className="px-4 sm:px-6 py-3 font-mono">1192</td>
+                                <td className="px-4 sm:px-6 py-3 font-bold text-white">postgres</td>
+                                <td className="px-4 sm:px-6 py-3">postgres</td>
+                                <td className="px-4 sm:px-6 py-3 text-emerald-400">12.4</td>
+                                <td className="px-4 sm:px-6 py-3 text-emerald-400">28.1</td>
+                                <td className="px-4 sm:px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Running</span></td>
+                            </tr>
+                            <tr className="hover:bg-zinc-800/30 transition-colors">
+                                <td className="px-4 sm:px-6 py-3 font-mono">8221</td>
+                                <td className="px-4 sm:px-6 py-3 font-bold text-white">redis-server</td>
+                                <td className="px-4 sm:px-6 py-3">redis</td>
+                                <td className="px-4 sm:px-6 py-3 text-zinc-400">4.2</td>
+                                <td className="px-4 sm:px-6 py-3 text-zinc-400">14.1</td>
+                                <td className="px-4 sm:px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Running</span></td>
+                            </tr>
+                            <tr className="hover:bg-zinc-800/30 transition-colors">
+                                <td className="px-4 sm:px-6 py-3 font-mono">4452</td>
+                                <td className="px-4 sm:px-6 py-3 font-bold text-white">nginx: master</td>
+                                <td className="px-4 sm:px-6 py-3">root</td>
+                                <td className="px-4 sm:px-6 py-3 text-zinc-400">1.8</td>
+                                <td className="px-4 sm:px-6 py-3 text-zinc-400">3.5</td>
+                                <td className="px-4 sm:px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Running</span></td>
+                            </tr>
+                            <tr className="hover:bg-zinc-800/30 transition-colors">
+                                <td className="px-4 sm:px-6 py-3 font-mono">9921</td>
+                                <td className="px-4 sm:px-6 py-3 font-bold text-white">node</td>
+                                <td className="px-4 sm:px-6 py-3">app</td>
+                                <td className="px-4 sm:px-6 py-3 text-amber-400">45.2</td>
+                                <td className="px-4 sm:px-6 py-3 text-amber-400">33.4</td>
+                                <td className="px-4 sm:px-6 py-3"><span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">High CPU</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
             </div>
         </div>

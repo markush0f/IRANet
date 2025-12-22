@@ -43,7 +43,7 @@ const DiskPartitionRow: React.FC<DiskPartitionRowProps> = ({
 
     return (
         <div>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 hover:bg-zinc-800/50 transition-colors">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 px-4 sm:px-6 py-4 hover:bg-zinc-800/50 transition-colors">
                 {/* Mobile & Desktop - Partition Info */}
                 <div className="md:col-span-3 flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${statusDot[partition.status]} flex-shrink-0`}></div>
@@ -105,7 +105,7 @@ const DiskPartitionRow: React.FC<DiskPartitionRowProps> = ({
                 </div>
 
                 {/* Mobile Only - Additional Details */}
-                <div className="md:hidden mt-2 pt-2 border-t border-zinc-800 grid grid-cols-3 gap-2 text-xs">
+                <div className="md:hidden mt-2 pt-2 border-t border-zinc-800 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                     <div>
                         <div className="text-zinc-500">Device</div>
                         <div className="text-zinc-300 font-mono">{partition.device}</div>
@@ -122,7 +122,7 @@ const DiskPartitionRow: React.FC<DiskPartitionRowProps> = ({
             </div>
 
             {isExpanded && (
-                <div className="bg-zinc-950 border-t border-zinc-800 px-6 py-4">
+                <div className="bg-zinc-950 border-t border-zinc-800 px-4 sm:px-6 py-4">
                     <DiskProcessList
                         processes={processes}
                         isLoading={isLoading}

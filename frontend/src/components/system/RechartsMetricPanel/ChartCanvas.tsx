@@ -80,7 +80,7 @@ const ChartCanvas: React.FC<ChartCanvasProps> = ({
     }
 
     return (
-        <div className="h-[300px] pt-14 pb-10">
+        <div className="h-[240px] sm:h-[300px] pt-12 sm:pt-14 pb-8 sm:pb-10">
             <ResponsiveContainer width="100%" height="100%">
                 {selectedChartType === 'area' && (
                     <AreaChart {...commonProps}>

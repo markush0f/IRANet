@@ -49,12 +49,12 @@ const NetworkMetricsView: React.FC = () => {
     const hostToUse = overrideHost.trim() || hostname;
 
     return (
-        <div className="max-w-7xl mx-auto px-8 py-12">
-            <Card className="space-y-6 p-6">
-                <Flex alignItems="start" justifyContent="between" className="gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+            <Card className="space-y-6 p-4 sm:p-6">
+                <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Serie de métricas</Text>
-                        <Title className="text-3xl text-zinc-100">Latencia de red en tiempo real</Title>
+                        <Title className="text-2xl sm:text-3xl text-zinc-100">Latencia de red en tiempo real</Title>
                         <Text className="text-sm text-zinc-400 max-w-3xl">
                             Monitorea latencia y jitter en milisegundos con actualizaciones cada 5 segundos.
                             Puedes alternar entre métricas y definir un hostname para consultar la instancia correcta.
@@ -77,14 +77,14 @@ const NetworkMetricsView: React.FC = () => {
                             id="network-host-input"
                             type="text"
                             placeholder="DESKTOP-B5V272O"
-                            className="w-48 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-sky-500 focus:outline-none"
+                            className="w-full sm:w-56 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-sky-500 focus:outline-none"
                             value={overrideHost}
                             onChange={event => setOverrideHost(event.target.value)}
                         />
                     </div>
                 </Flex>
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl space-y-4">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6 shadow-xl space-y-4">
                     <div className="flex gap-2 flex-wrap">
                         {networkMetrics.map(metric => (
                             <button

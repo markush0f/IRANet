@@ -19,7 +19,7 @@ const ManualControl: React.FC<ManualControlProps> = ({
     loading,
     latestValueLabel,
 }) => (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-3">
+    <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
         <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Intervalo manual</p>
             <span className="text-[11px] text-zinc-500">

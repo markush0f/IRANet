@@ -42,7 +42,7 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-5 h-[260px]">
+            <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 h-[220px] sm:h-[260px]">
                 {samples.length ? (
                     <svg
                         viewBox="0 0 600 220"
@@ -77,7 +77,7 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-3">
+                <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Intervalo manual</p>
                         <span className="text-[11px] text-zinc-500">
@@ -110,7 +110,7 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
                     </div>
                 </div>
 
-                <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-3">
+                <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">En vivo</p>

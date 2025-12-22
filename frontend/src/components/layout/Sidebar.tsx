@@ -11,9 +11,11 @@ interface NavItem {
 interface SidebarProps {
     activeView: string;
     onNavigate: (viewId: string) => void;
+    isMobileOpen?: boolean;
+    onMobileClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen = false, onMobileClose }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [servicesOpen, setServicesOpen] = useState(true);
     const [metricsOpen, setMetricsOpen] = useState(true);
@@ -225,7 +227,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
     ];
 
     return (
-        <div className={`h-screen bg-zinc-950 border-r border-zinc-900 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'} sticky top-0`}>
+        <div
+            className={`h-screen bg-zinc-950 border-r border-zinc-900 flex flex-col transition-all duration-300 ${
+                isCollapsed ? 'w-20' : 'w-64'
+            } fixed inset-y-0 left-0 z-40 transform ${
+                isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+            } lg:translate-x-0 lg:static lg:top-0 lg:sticky`}
+        >
             {/* Header / Logo Area */}
             <div className="h-20 flex items-center px-6 border-b border-zinc-900 justify-between">
                 {!isCollapsed && (
@@ -243,14 +251,26 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate }) => {
                         </div>
                     </div>
                 )}
-                <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="text-zinc-500 hover:text-zinc-300 transition-colors hidden lg:block"
-                >
-                    <svg className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                    </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="text-zinc-500 hover:text-zinc-300 transition-colors hidden lg:block"
+                    >
+                        <svg className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={onMobileClose}
+                        className="text-zinc-500 hover:text-zinc-300 transition-colors lg:hidden"
+                        type="button"
+                        aria-label="Cerrar menú"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             {/* Navigation */}
