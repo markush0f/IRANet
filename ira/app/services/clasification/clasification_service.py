@@ -1,6 +1,8 @@
 from typing import Dict, List
 
 from app.models.entities.service import Service
+from app.services.clasification.discovery_orchestrator_service import ServiceDiscoveryOrchestrator
+
 
 # Temporary hardcoded database signatures.
 # This will be replaced by database-driven configuration in the future.
@@ -15,10 +17,13 @@ DATABASE_SIGNATURES: Dict[str, List[str]] = {
 }
 
 
-class ServicesClasificationService:
+class ClasificationService:
 
-    def classify_database_services(self, services: List[Service]) -> List[dict]:
-        databases = []
+    def classify_database_services(self) -> List[Dict]:
+        orchestrator = ServiceDiscoveryOrchestrator()
+        services: List[Service] = orchestrator.discover_all()
+
+        databases: List[Dict] = []
 
         for service in services:
             identifier = " ".join(

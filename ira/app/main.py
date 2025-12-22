@@ -16,6 +16,8 @@ from app.api.applications import router as applications_router
 from app.api.internet import router as internet_router
 from app.api.logs import router as logs_router
 from app.api.system_packages import router as system_packages_router
+from app.api.services_clasification import router as services_clasification_router
+
 from app.core.config import load_config
 from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
@@ -66,6 +68,7 @@ app.include_router(applications_router)
 app.include_router(logs_router)
 app.include_router(internet_router)
 app.include_router(system_packages_router)
+app.include_router(services_clasification_router)
 
 
 @app.get("/config")
