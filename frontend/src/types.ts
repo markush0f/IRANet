@@ -58,6 +58,26 @@ export interface SystemInfo {
     };
 }
 
+export interface SystemdServiceSimple {
+    id: string;
+    description?: string | null;
+    active_state: string;
+    sub_state: string;
+    main_pid: number;
+    user?: string | null;
+    group?: string | null;
+    working_directory?: string | null;
+    exec_start?: string | null;
+    restarts?: number | null;
+    result?: string | null;
+    exec_main_code?: string | null;
+    exec_main_status?: number | null;
+    cpu_usage_ns?: number | null;
+    memory_current?: number | null;
+    memory_peak?: number | null;
+    tasks_current?: number | null;
+}
+
 export interface SystemApplication {
     cwd: string;
     commands: string[];
@@ -221,4 +241,12 @@ export interface DiskProcessRecord {
 export interface DiskProcessesResponse {
     mountpoint: string;
     processes: DiskProcessRecord[];
+}
+
+export interface DiskTotalResponse {
+    type: 'aggregated';
+    total_bytes: number;
+    free_bytes: number;
+    used_percent: number;
+    partitions_count: number;
 }

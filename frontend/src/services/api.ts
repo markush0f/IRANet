@@ -8,6 +8,8 @@ import type {
     MetricSample,
     SystemDiskResponse,
     DiskProcessesResponse,
+    DiskTotalResponse,
+    SystemdServiceSimple,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -31,6 +33,24 @@ export const getSystemInfo = async (signal?: AbortSignal): Promise<SystemInfo> =
         : raw) as SystemInfo;
 
     return data;
+};
+
+export const getSystemdServicesSimple = async (
+    limit = 4,
+    signal?: AbortSignal
+): Promise<SystemdServiceSimple[]> => {
+    const url = `${getBaseUrl()}/services/systemd/simple?limit=${encodeURIComponent(limit)}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener servicios systemd`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as SystemdServiceSimple[];
+    }
+    return [];
 };
 
 export const getDockerContainers = async (signal?: AbortSignal): Promise<DockerContainer[]> => {
@@ -141,6 +161,17 @@ export const getDiskProcesses = async (
     }
 
     return response.json() as Promise<DiskProcessesResponse>;
+};
+
+export const getSystemDiskTotal = async (signal?: AbortSignal): Promise<DiskTotalResponse> => {
+    const url = `${getBaseUrl()}/system/disk/total`;
+    const response = await fetch(url, { signal });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener /system/disk/total`);
+    }
+
+    return response.json() as Promise<DiskTotalResponse>;
 };
 
 export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
