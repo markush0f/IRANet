@@ -21,6 +21,7 @@ import SystemApplicationsView from './components/system/SystemApplicationsView';
 import ApplicationsLogsView from './components/logs/ApplicationsLogsView';
 import SystemServicesView from './components/system/SystemServicesView';
 import SystemPackagesView from './components/system/SystemPackagesView';
+import SystemAptPackagesView from './components/system/SystemAptPackagesView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -105,6 +106,8 @@ function App() {
             <SystemServicesView />
           ) : currentView === 'system-packages' ? (
             <SystemPackagesView />
+          ) : currentView === 'apt-packages' ? (
+            <SystemAptPackagesView />
           ) : currentView === 'logs' ? (
             <ApplicationsLogsView />
           ) : currentView === 'dashboard' ? (

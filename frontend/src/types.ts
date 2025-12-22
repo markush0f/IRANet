@@ -92,6 +92,26 @@ export interface SystemPackagesResponse {
     items: SystemPackage[];
 }
 
+export type SystemPackageHistoryAction = 'install' | 'upgrade' | 'remove' | string;
+
+export interface SystemPackageHistoryEvent {
+    date?: string;
+    timestamp?: string;
+    action: SystemPackageHistoryAction;
+    command?: string | null;
+    packages?: string[] | null;
+    package?: string | null;
+}
+
+export interface SystemPackageHistoryResponse {
+    items: SystemPackageHistoryEvent[];
+    total?: number;
+}
+
+export interface SystemPackageInstalledAtResponse {
+    installed_at?: string | null;
+}
+
 export interface SystemApplication {
     cwd: string;
     commands: string[];

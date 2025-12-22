@@ -128,6 +128,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
             )
         },
         {
+            id: 'apt-packages',
+            label: 'Paquetes APT',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6m4-8h4l2 2v2h-8V6l2-2z" />
+                </svg>
+            )
+        },
+        {
             id: 'alerts',
             label: 'Alertas',
             icon: (

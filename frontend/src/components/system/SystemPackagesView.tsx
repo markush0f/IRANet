@@ -78,51 +78,59 @@ const SystemPackagesView: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+            {/* Header */}
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">System</p>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Paquetes del sistema</h2>
-                    <p className="text-sm text-zinc-400 mt-2 max-w-2xl">
+                    <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+                        System
+                    </p>
+                    <h2 className="text-xl font-semibold text-zinc-100">
+                        Paquetes del sistema
+                    </h2>
+                    <p className="text-xs text-zinc-500 mt-1 max-w-xl">
                         Listado de paquetes instalados con búsqueda, ordenamiento y paginación.
                     </p>
                     {error && (
-                        <p className="mt-3 text-xs text-amber-400">{error}</p>
+                        <p className="mt-2 text-xs text-amber-400">
+                            {error}
+                        </p>
                     )}
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 text-[11px] text-zinc-500">
                         <span>Orden</span>
+
                         <button
                             type="button"
                             onClick={() => toggleSort('name')}
-                            className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${
-                                sortBy === 'name'
-                                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                    : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                            }`}
+                            className={`rounded-md border px-2.5 py-1 font-semibold uppercase tracking-wide ${sortBy === 'name'
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                                : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                                }`}
                         >
                             Nombre {sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                         </button>
+
                         <button
                             type="button"
                             onClick={() => toggleSort('version')}
-                            className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${
-                                sortBy === 'version'
-                                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                    : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                            }`}
+                            className={`rounded-md border px-2.5 py-1 font-semibold uppercase tracking-wide ${sortBy === 'version'
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                                : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                                }`}
                         >
                             Versión {sortBy === 'version' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                         </button>
+
                         <button
                             type="button"
                             onClick={() => toggleSort('arch')}
-                            className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${
-                                sortBy === 'arch'
-                                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                    : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                            }`}
+                            className={`rounded-md border px-2.5 py-1 font-semibold uppercase tracking-wide ${sortBy === 'arch'
+                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                                : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                                }`}
                         >
                             Arch {sortBy === 'arch' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                         </button>
@@ -130,7 +138,8 @@ const SystemPackagesView: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Search + pagination info */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative flex-1 min-w-[220px] max-w-md">
                     <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-zinc-500">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -141,10 +150,11 @@ const SystemPackagesView: React.FC = () => {
                         value={query}
                         onChange={(event) => handleQueryChange(event.target.value)}
                         placeholder="Buscar paquetes..."
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-md pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     />
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+
+                <div className="flex items-center gap-3 text-[11px] text-zinc-500">
                     <span>{pageLabel}</span>
                     <div className="relative">
                         <select
@@ -153,7 +163,7 @@ const SystemPackagesView: React.FC = () => {
                                 setPageSize(Number(event.target.value));
                                 setPage(1);
                             }}
-                            className="appearance-none bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            className="appearance-none bg-zinc-900 border border-zinc-800 text-zinc-200 text-[11px] rounded-md pl-3 pr-7 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                         >
                             {PAGE_SIZES.map((size) => (
                                 <option key={size} value={size}>
@@ -170,34 +180,54 @@ const SystemPackagesView: React.FC = () => {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-5 shadow-lg">
+            {/* Table */}
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 shadow-md">
                 {loading ? (
-                    <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-10">
-                        <div className="w-6 h-6 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
+                    <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-8">
+                        <div className="w-5 h-5 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
                         <span>Cargando paquetes...</span>
                     </div>
                 ) : items.length === 0 ? (
-                    <div className="text-sm text-zinc-400">
+                    <div className="text-sm text-zinc-400 px-4 py-6">
                         No hay paquetes que coincidan con el filtro.
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-xs divide-y divide-zinc-800">
-                            <thead className="bg-zinc-950/70">
+                            <thead className="bg-zinc-950">
                                 <tr>
-                                    <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Nombre</th>
-                                    <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Versión</th>
-                                    <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Arch</th>
-                                    <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Origen</th>
+                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                        Nombre
+                                    </th>
+                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                        Versión
+                                    </th>
+                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                        Arch
+                                    </th>
+                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                        Origen
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-800">
                                 {items.map((pkg) => (
-                                    <tr key={`${pkg.name}-${pkg.version}`} className="hover:bg-zinc-900/60 transition-colors">
-                                        <td className="px-4 py-3 font-semibold text-zinc-100">{pkg.name}</td>
-                                        <td className="px-4 py-3 text-zinc-300 font-mono">{pkg.version}</td>
-                                        <td className="px-4 py-3 text-zinc-300">{pkg.arch}</td>
-                                        <td className="px-4 py-3 text-zinc-300">{pkg.origin}</td>
+                                    <tr
+                                        key={`${pkg.name}-${pkg.version}`}
+                                        className="hover:bg-zinc-900/50 transition-colors"
+                                    >
+                                        <td className="px-4 py-2.5 font-semibold text-zinc-100">
+                                            {pkg.name}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-zinc-300 font-mono">
+                                            {pkg.version}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-zinc-300">
+                                            {pkg.arch}
+                                        </td>
+                                        <td className="px-4 py-2.5 text-zinc-300">
+                                            {pkg.origin}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -206,16 +236,18 @@ const SystemPackagesView: React.FC = () => {
                 )}
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Footer pagination */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-[11px] text-zinc-500">
                     Página {page} de {totalPages}
                 </div>
+
                 <div className="flex flex-wrap gap-2">
                     <button
                         type="button"
                         onClick={() => setPage(1)}
                         disabled={page === 1}
-                        className="rounded-full border border-zinc-800 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
+                        className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
                         Inicio
                     </button>
@@ -223,7 +255,7 @@ const SystemPackagesView: React.FC = () => {
                         type="button"
                         onClick={() => setPage(prev => Math.max(1, prev - 1))}
                         disabled={page === 1}
-                        className="rounded-full border border-zinc-800 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
+                        className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
                         Anterior
                     </button>
@@ -231,7 +263,7 @@ const SystemPackagesView: React.FC = () => {
                         type="button"
                         onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={page >= totalPages}
-                        className="rounded-full border border-zinc-800 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
+                        className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
                         Siguiente
                     </button>
@@ -239,7 +271,7 @@ const SystemPackagesView: React.FC = () => {
                         type="button"
                         onClick={() => setPage(totalPages)}
                         disabled={page >= totalPages}
-                        className="rounded-full border border-zinc-800 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
+                        className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
                         Fin
                     </button>
@@ -247,6 +279,7 @@ const SystemPackagesView: React.FC = () => {
             </div>
         </div>
     );
+
 };
 
 export default SystemPackagesView;

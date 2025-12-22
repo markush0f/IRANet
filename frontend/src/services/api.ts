@@ -11,6 +11,8 @@ import type {
     DiskTotalResponse,
     SystemdServiceSimple,
     SystemPackagesResponse,
+    SystemPackageHistoryResponse,
+    SystemPackageInstalledAtResponse,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -209,6 +211,103 @@ export const getSystemPackages = async ({
     }
 
     return response.json() as Promise<SystemPackagesResponse>;
+};
+
+export interface GetAptPackagesParams {
+    page?: number;
+    pageSize?: number;
+    query?: string;
+    sortBy?: 'name' | 'version' | 'arch';
+    sortDir?: 'asc' | 'desc';
+    signal?: AbortSignal;
+}
+
+export const getAptPackages = async ({
+    page = 1,
+    pageSize = 50,
+    query = '',
+    sortBy = 'name',
+    sortDir = 'asc',
+    signal,
+}: GetAptPackagesParams = {}): Promise<SystemPackagesResponse> => {
+    const params = new URLSearchParams();
+    if (query.trim()) {
+        params.set('q', query.trim());
+    } else {
+        params.set('page', String(page));
+        params.set('page_size', String(pageSize));
+    }
+    params.set('sort_by', sortBy);
+    params.set('sort_dir', sortDir);
+
+    const url = `${getBaseUrl()}/system/packages?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener paquetes APT`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return { page: 1, page_size: data.length, total: data.length, items: data } as SystemPackagesResponse;
+    }
+    return data as SystemPackagesResponse;
+};
+
+export interface GetPackageHistoryParams {
+    packageName?: string;
+    action?: 'install' | 'upgrade' | 'remove' | 'all';
+    dateFrom?: string;
+    dateTo?: string;
+    sortDir?: 'asc' | 'desc';
+    signal?: AbortSignal;
+}
+
+export const getPackageHistory = async ({
+    packageName,
+    action,
+    dateFrom,
+    dateTo,
+    sortDir = 'desc',
+    signal,
+}: GetPackageHistoryParams = {}): Promise<SystemPackageHistoryResponse> => {
+    const params = new URLSearchParams();
+    if (packageName) params.set('package', packageName);
+    if (action && action !== 'all') params.set('action', action);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
+    if (sortDir) params.set('sort_dir', sortDir);
+
+    const url = `${getBaseUrl()}/system/packages/history?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener historial de paquetes`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return { items: data } as SystemPackageHistoryResponse;
+    }
+    return data as SystemPackageHistoryResponse;
+};
+
+export const getPackageInstalledAt = async (
+    packageName: string,
+    signal?: AbortSignal
+): Promise<SystemPackageInstalledAtResponse> => {
+    const url = `${getBaseUrl()}/system/packages/history/installed-at/${encodeURIComponent(packageName)}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener fecha de instalacion`);
+    }
+
+    const data = await response.json();
+    if (typeof data === 'string') {
+        return { installed_at: data };
+    }
+    return data as SystemPackageInstalledAtResponse;
 };
 
 export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
