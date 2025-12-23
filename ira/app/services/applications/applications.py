@@ -11,7 +11,6 @@ from app.services.logs_service import ApplicationLogsService
 class ApplicationsService:
     def __init__(self, session) -> None:
         self.applications_repository = ApplicationRepository(session)
-
         self._logs_service = ApplicationLogsService(session)
 
     def build_application_identifier(
@@ -65,6 +64,7 @@ class ApplicationsService:
 
             result.append(
                 {
+                    "id": application.id,
                     "kind": application.kind,
                     "identifier": application.identifier,
                     "name": application.name,
@@ -92,6 +92,7 @@ class ApplicationsService:
 
             result.append(
                 {
+                    "id": application.id,
                     "kind": application.kind,
                     "identifier": application.identifier,
                     "name": application.name,

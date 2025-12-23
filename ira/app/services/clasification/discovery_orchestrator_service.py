@@ -1,4 +1,5 @@
-from typing import List
+import subprocess
+from typing import List, Optional
 
 
 from app.models.entities.service import Service
@@ -24,6 +25,8 @@ class ServiceDiscoveryOrchestrator:
                 continue
 
             cmdline = read_process_cmdline(pid)
+            pid_int = int(pid)
+            port = self._get_listening_port_by_pid(pid_int)
 
             services.append(
                 Service(
@@ -31,6 +34,8 @@ class ServiceDiscoveryOrchestrator:
                     source="process",
                     status="running",
                     process=" ".join(cmdline) if cmdline else name,
+                    pid=pid_int,
+                    port=port,
                 )
             )
 
@@ -42,6 +47,10 @@ class ServiceDiscoveryOrchestrator:
                     source="application",
                     status="running",
                     process=" ".join(proc.cmdline),
+                    pid=proc.pid,
+                    port=(
+                        self._get_listening_port_by_pid(proc.pid) if proc.pid else None
+                    ),
                 )
             )
 
@@ -55,18 +64,49 @@ class ServiceDiscoveryOrchestrator:
                         source="docker",
                         status=c["status"],
                         image=",".join(c["image"]) if c.get("image") else None,
+                        pid=None,
+                        port=None,
                     )
                 )
 
         # Systemd discovery
         for svc in discover_simple_services():
+            pid = svc.main_pid if svc.main_pid and svc.main_pid > 0 else None
+
             services.append(
                 Service(
                     name=svc.id,
                     source="systemd",
                     status=svc.active_state,
                     process=svc.exec_start,
+                    pid=pid,
+                    port=self._get_listening_port_by_pid(pid) if pid else None,
                 )
             )
 
         return services
+
+    def _get_listening_port_by_pid(self, pid: int) -> Optional[int]:
+        try:
+            output = subprocess.check_output(
+                ["ss", "-tulnp"],
+                text=True,
+            )
+        except Exception:
+            return None
+
+        pid_token = f"pid={pid},"
+
+        for line in output.splitlines():
+            if pid_token not in line:
+                continue
+
+            parts = line.split()
+            for part in parts:
+                if ":" in part:
+                    try:
+                        return int(part.rsplit(":", 1)[-1])
+                    except ValueError:
+                        continue
+
+        return None

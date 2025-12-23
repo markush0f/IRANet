@@ -1,7 +1,9 @@
 from typing import Optional, Sequence, TypedDict
+from uuid import UUID
 
 
 class ApplicationsLogsDTO(TypedDict):
+    id: UUID
     kind: str
     identifier: Optional[str]
     name: str

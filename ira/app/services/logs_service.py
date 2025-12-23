@@ -41,12 +41,13 @@ class ApplicationLogsService:
             )
 
     async def stream_application_log_file(
-        self,
-        *,
-        application_id: UUID,
-        file_path: str,
-        websocket: WebSocket,
-        poll_interval: float = 0.5,
+    self,
+    *,
+    application_id: UUID,
+    file_path: str,
+    websocket: WebSocket,
+    poll_interval: float = 0.5,
+    history_limit: int = 200,
     ) -> None:
         await websocket.accept()
 
@@ -67,6 +68,22 @@ class ApplicationLogsService:
             await websocket.close(code=4001)
             return
 
+        # 1. Send history first
+        history = read_last_lines(
+            path=str(requested),
+            limit=history_limit,
+        )
+
+        for line in history:
+            await websocket.send_json(
+                {
+                    "path": str(requested),
+                    "message": line,
+                    "type": "history",
+                }
+            )
+
+        # 2. Stream new lines
         async for line in tail_file(
             path=str(requested),
             interval=poll_interval,
@@ -75,6 +92,7 @@ class ApplicationLogsService:
                 {
                     "path": str(requested),
                     "message": line,
+                    "type": "live",
                 }
             )
 

@@ -35,12 +35,30 @@ def discover_simple_services(
         "--type=service",
         "--all",
         "--no-legend",
+        "--plain",  # Avoid special symbols like ●
         "--no-pager",
     ]
 
     units_output = subprocess.check_output(list_units_cmd, text=True)
 
-    unit_names = [line.split()[0] for line in units_output.splitlines()]
+    unit_names: list[str] = []
+
+    # Defensive parsing of systemctl output
+    for line in units_output.splitlines():
+        parts = line.split()
+        if not parts:
+            continue
+
+        unit = parts[0]
+
+        # Skip invalid unit names (e.g. bullet symbol)
+        if unit == "●":
+            continue
+
+        unit_names.append(unit)
+
+    if not unit_names:
+        return []
 
     show_cmd = [
         "systemctl",
