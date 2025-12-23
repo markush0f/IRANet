@@ -41,7 +41,7 @@ const SystemPackagesView: React.FC = () => {
                     return;
                 }
                 console.error('Error fetching system packages', e);
-                setError('No se pudieron cargar los paquetes del sistema.');
+                setError('System packages could not be loaded.');
             } finally {
                 setLoading(false);
             }
@@ -57,10 +57,10 @@ const SystemPackagesView: React.FC = () => {
     const items = data?.items ?? [];
 
     const pageLabel = useMemo(() => {
-        if (!total) return '0 resultados';
+        if (!total) return '0 results';
         const start = (page - 1) * pageSize + 1;
         const end = Math.min(page * pageSize, total);
-        return `${start}-${end} de ${total}`;
+        return `${start}-${end} of ${total}`;
     }, [page, pageSize, total]);
 
     const handleQueryChange = (value: string) => {
@@ -86,10 +86,10 @@ const SystemPackagesView: React.FC = () => {
                         System
                     </p>
                     <h2 className="text-xl font-semibold text-zinc-100">
-                        Paquetes del sistema
+                        System packages
                     </h2>
                     <p className="text-xs text-zinc-500 mt-1 max-w-xl">
-                        Listado de paquetes instalados con búsqueda, ordenamiento y paginación.
+                        Installed packages list with search, sorting, and pagination.
                     </p>
                     {error && (
                         <p className="mt-2 text-xs text-amber-400">
@@ -100,7 +100,7 @@ const SystemPackagesView: React.FC = () => {
 
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-                        <span>Orden</span>
+                        <span>Sort</span>
 
                         <button
                             type="button"
@@ -110,7 +110,7 @@ const SystemPackagesView: React.FC = () => {
                                 : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                                 }`}
                         >
-                            Nombre {sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+                            Name {sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                         </button>
 
                         <button
@@ -121,7 +121,7 @@ const SystemPackagesView: React.FC = () => {
                                 : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                                 }`}
                         >
-                            Versión {sortBy === 'version' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+                            Version {sortBy === 'version' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
                         </button>
 
                         <button
@@ -149,7 +149,7 @@ const SystemPackagesView: React.FC = () => {
                     <input
                         value={query}
                         onChange={(event) => handleQueryChange(event.target.value)}
-                        placeholder="Buscar paquetes..."
+                        placeholder="Search packages..."
                         className="w-full bg-zinc-900 border border-zinc-800 rounded-md pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     />
                 </div>
@@ -167,7 +167,7 @@ const SystemPackagesView: React.FC = () => {
                         >
                             {PAGE_SIZES.map((size) => (
                                 <option key={size} value={size}>
-                                    {size} / pág
+                                    {size} / page
                                 </option>
                             ))}
                         </select>
@@ -185,11 +185,11 @@ const SystemPackagesView: React.FC = () => {
                 {loading ? (
                     <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-8">
                         <div className="w-5 h-5 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
-                        <span>Cargando paquetes...</span>
+                        <span>Loading packages...</span>
                     </div>
                 ) : items.length === 0 ? (
                     <div className="text-sm text-zinc-400 px-4 py-6">
-                        No hay paquetes que coincidan con el filtro.
+                        No packages match the filter.
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -197,16 +197,16 @@ const SystemPackagesView: React.FC = () => {
                             <thead className="bg-zinc-950">
                                 <tr>
                                     <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
-                                        Nombre
+                                        Name
                                     </th>
                                     <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
-                                        Versión
+                                        Version
                                     </th>
                                     <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
                                         Arch
                                     </th>
                                     <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
-                                        Origen
+                                        Origin
                                     </th>
                                 </tr>
                             </thead>
@@ -239,7 +239,7 @@ const SystemPackagesView: React.FC = () => {
             {/* Footer pagination */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-[11px] text-zinc-500">
-                    Página {page} de {totalPages}
+                    Page {page} of {totalPages}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -249,7 +249,7 @@ const SystemPackagesView: React.FC = () => {
                         disabled={page === 1}
                         className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
-                        Inicio
+                        First
                     </button>
                     <button
                         type="button"
@@ -257,7 +257,7 @@ const SystemPackagesView: React.FC = () => {
                         disabled={page === 1}
                         className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
-                        Anterior
+                        Previous
                     </button>
                     <button
                         type="button"
@@ -265,7 +265,7 @@ const SystemPackagesView: React.FC = () => {
                         disabled={page >= totalPages}
                         className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
-                        Siguiente
+                        Next
                     </button>
                     <button
                         type="button"
@@ -273,7 +273,7 @@ const SystemPackagesView: React.FC = () => {
                         disabled={page >= totalPages}
                         className="rounded-md border border-zinc-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                     >
-                        Fin
+                        Last
                     </button>
                 </div>
             </div>

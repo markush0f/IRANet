@@ -27,7 +27,7 @@ const normalizeAction = (value?: string | null) => {
 
 const HistoryTimeline: React.FC<HistoryTimelineProps> = ({ events, emptyMessage, packageFallback }) => {
     if (events.length === 0) {
-        return <div className="text-sm text-zinc-500">{emptyMessage ?? 'Sin eventos registrados.'}</div>;
+        return <div className="text-sm text-zinc-500">{emptyMessage ?? 'No events recorded.'}</div>;
     }
 
     return (

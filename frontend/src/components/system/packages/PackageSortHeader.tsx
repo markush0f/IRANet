@@ -20,7 +20,7 @@ const PackageSortHeader: React.FC<PackageSortHeaderProps> = ({ sortBy, sortDir, 
                     : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
             }`}
         >
-            Nombre {sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+            Name {sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
         </button>
         <button
             type="button"
@@ -31,7 +31,7 @@ const PackageSortHeader: React.FC<PackageSortHeaderProps> = ({ sortBy, sortDir, 
                     : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
             }`}
         >
-            Versión {sortBy === 'version' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+            Version {sortBy === 'version' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
         </button>
         <button
             type="button"

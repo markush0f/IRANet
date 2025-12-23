@@ -90,7 +90,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         const cleanedPaths = logPaths.map(path => path.trim()).filter(Boolean);
 
         if (!cwd || !name) {
-            setSaveError('Nombre y CWD son obligatorios.');
+            setSaveError('Name and CWD are required.');
             return;
         }
 
@@ -106,7 +106,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             toast.custom(
                 () => (
                     <div className="rounded-2xl border border-emerald-500/30 bg-zinc-950 px-5 py-4 text-base text-emerald-200 shadow-xl">
-                        Aplicación creada correctamente
+                        Application created successfully
                     </div>
                 ),
                 { duration: 4000 }
@@ -114,7 +114,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             closeModal();
         } catch (error) {
             console.error('Error creating system application', error);
-            setSaveError('No se pudo guardar la aplicación. Verifica el backend.');
+            setSaveError('The application could not be saved. Please check the backend.');
         } finally {
             setSavingApplication(false);
         }
@@ -167,7 +167,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             ? error.message
                             : typeof error === 'string'
                                 ? error
-                                : 'No se pudo obtener la información de la aplicación';
+                                : 'Application information could not be retrieved';
                     setDiscoveryError(message);
                 }
             })
@@ -210,7 +210,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const accessAvailable = discoveryDetails?.access?.available;
 
     const modalDisplayName =
-        discoveryDetails?.name ?? selectedApplication?.cwd ?? 'Aplicación detectada';
+        discoveryDetails?.name ?? selectedApplication?.cwd ?? 'Detected application';
     const modalDisplayCwd = discoveryDetails?.cwd ?? discoveryCwd;
 
     return (
@@ -218,7 +218,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             <section className="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-xl">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p className="text-xs uppercase tracking-wide text-zinc-500">Aplicaciones</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Applications</p>
                         <h3 className="text-lg font-semibold text-zinc-100">System applications</h3>
                     </div>
                 </div>
@@ -244,7 +244,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
 
                             <div className="flex items-end justify-between gap-3">
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] uppercase tracking-wide text-zinc-500">Comandos</p>
+                                    <p className="text-[10px] uppercase tracking-wide text-zinc-500">Commands</p>
                                     <div className="mt-2 flex flex-wrap gap-2">
                                         {application.commands.map(command => (
                                             <span
@@ -261,9 +261,9 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                     type="button"
                                     onClick={() => openModal(application)}
                                     className="shrink-0 rounded-full border border-zinc-800 bg-zinc-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
-                                    title="Abrir modal de detección"
+                                    title="Open detection modal"
                                 >
-                                    Añadir aplicación
+                                    Add application
                                 </button>
                             </div>
                         </article>
@@ -316,7 +316,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
 
                         <div className="mt-4 space-y-3">
                             <div>
-                                <label className="text-[10px] uppercase tracking-wide text-zinc-500">Nombre</label>
+                                <label className="text-[10px] uppercase tracking-wide text-zinc-500">Name</label>
                                 <input
                                     type="text"
                                     value={applicationName}
@@ -342,7 +342,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             <div className="mt-2 flex flex-wrap gap-2">
                                 {loadingDetails ? (
                                     <span className="rounded-full border border-dashed border-zinc-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-                                        Cargando...
+                                        Loading...
                                     </span>
                                 ) : runtimeTokens.length ? (
                                     runtimeTokens.map(runtime => (
@@ -354,7 +354,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                         </span>
                                     ))
                                 ) : (
-                                    <span className="text-[11px] text-zinc-500">Sin runtimes detectados</span>
+                                    <span className="text-[11px] text-zinc-500">No runtimes detected</span>
                                 )}
                             </div>
                         </div>
@@ -393,7 +393,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-zinc-500">No se detectaron rutas; puedes agregarlas manualmente.</p>
+                                <p className="text-sm text-zinc-500">No paths detected; you can add them manually.</p>
                             )}
                         </div>
 
@@ -413,7 +413,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             <div className="mt-2 space-y-1 text-sm font-mono text-zinc-200">
                                 {accessPorts.length > 0 && (
                                     <p className="text-zinc-200">
-                                        Puertos: {accessPorts.join(', ')}
+                                        Ports: {accessPorts.join(', ')}
                                     </p>
                                 )}
                                 {accessUrls.length > 0 && (
@@ -422,7 +422,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                     </p>
                                 )}
                                 {!accessPorts.length && !accessUrls.length && (
-                                    <p className="text-zinc-500">Sin puertos detectados</p>
+                                    <p className="text-zinc-500">No ports detected</p>
                                 )}
                             </div>
                         </div>
@@ -435,7 +435,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                     onClick={handleRetryFetch}
                                     className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-rose-200 underline-offset-2 hover:text-white"
                                 >
-                                    Reintentar
+                                    Retry
                                 </button>
                             </div>
                         )}
@@ -455,12 +455,12 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                     {discoveryDetails?.detected_processes?.length ? (
                                         discoveryDetails.detected_processes.map((process, index) => (
                                             <p key={`${process.command ?? 'command'}-${index}`} className="text-zinc-200">
-                                                {process.command ?? 'Comando desconocido'}
+                                                {process.command ?? 'Unknown command'}
                                                 {process.elapsed_seconds ? ` (${process.elapsed_seconds}s)` : ''}
                                             </p>
                                         ))
                                     ) : (
-                                        <p className="text-zinc-500">No hay detalles técnicos disponibles</p>
+                                        <p className="text-zinc-500">No technical details available</p>
                                     )}
                                 </div>
                             )}
@@ -473,7 +473,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                 disabled={loadingDetails || savingApplication}
                                 className="w-full sm:w-auto rounded-full border border-emerald-500/60 bg-emerald-500/10 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {savingApplication ? 'Guardando...' : 'Confirmar'}
+                                {savingApplication ? 'Saving...' : 'Confirm'}
                             </button>
                         </div>
                     </div>

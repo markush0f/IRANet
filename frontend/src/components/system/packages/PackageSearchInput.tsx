@@ -16,7 +16,7 @@ const PackageSearchInput: React.FC<PackageSearchInputProps> = ({ value, placehol
         <input
             value={value}
             onChange={(event) => onChange(event.target.value)}
-            placeholder={placeholder ?? 'Buscar paquetes...'}
+            placeholder={placeholder ?? 'Search packages...'}
             className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
         />
     </div>

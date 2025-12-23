@@ -44,7 +44,7 @@ const SystemServicesView: React.FC = () => {
                     return;
                 }
                 console.error('Error fetching systemd services', e);
-                setError('No se pudieron cargar los servicios del sistema.');
+                setError('System services could not be loaded.');
             } finally {
                 setTimeout(() => setLoading(false), 250);
             }

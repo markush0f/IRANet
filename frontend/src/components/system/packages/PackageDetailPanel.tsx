@@ -32,21 +32,21 @@ const PackageDetailPanel: React.FC<PackageDetailPanelProps> = ({
         ) : (
             <div className="mt-4 space-y-4">
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Nombre</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Name</p>
                     <p className="text-sm text-zinc-100 font-semibold">{selectedPackage.name}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Versión</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Version</p>
                     <p className="text-sm text-zinc-100 font-mono">{selectedPackage.version}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Arquitectura</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Architecture</p>
                     <p className="text-sm text-zinc-100">{selectedPackage.arch}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Instalado</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Installed</p>
                     <p className="text-sm text-zinc-100 font-mono">
-                        {loading ? 'Cargando…' : formatDateTime(installedAt)}
+                        {loading ? 'Loading…' : formatDateTime(installedAt)}
                     </p>
                 </div>
 
@@ -55,15 +55,15 @@ const PackageDetailPanel: React.FC<PackageDetailPanelProps> = ({
                 )}
 
                 <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Historial del paquete</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Package history</p>
                     <div className="mt-3 max-h-[320px] overflow-y-auto pr-1">
                         {loading ? (
-                            <div className="text-sm text-zinc-500">Cargando historial…</div>
+                            <div className="text-sm text-zinc-500">Loading history…</div>
                         ) : (
                             <HistoryTimeline
                                 events={history}
                                 packageFallback={selectedPackage.name}
-                                emptyMessage="Sin eventos registrados."
+                                emptyMessage="No events recorded."
                             />
                         )}
                     </div>

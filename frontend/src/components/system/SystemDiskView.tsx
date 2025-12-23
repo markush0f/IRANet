@@ -51,18 +51,18 @@ const SystemDiskView = () => {
 
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
                     <DiskHeader
-                        title="Estado del Disco"
-                        subtitle="Monitoreo de almacenamiento del sistema"
+                        title="Disk Status"
+                        subtitle="System storage monitoring"
                         error={error}
                     />
 
                     <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-zinc-950 border-y border-zinc-800 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                        <div className="col-span-3">Partición</div>
+                        <div className="col-span-3">Partition</div>
                         <div className="col-span-2">Device</div>
                         <div className="col-span-1">FS</div>
-                        <div className="col-span-2">Usado</div>
-                        <div className="col-span-2">Disponible</div>
-                        <div className="col-span-2">Uso</div>
+                        <div className="col-span-2">Used</div>
+                        <div className="col-span-2">Available</div>
+                        <div className="col-span-2">Usage</div>
                     </div>
 
                     <div className="divide-y divide-zinc-800">

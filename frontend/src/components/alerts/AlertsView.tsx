@@ -21,18 +21,18 @@ const formatTimestamp = (value: string) => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Ahora';
-    if (minutes < 60) return `Hace ${minutes}m`;
-    if (hours < 24) return `Hace ${hours}h`;
-    if (days < 7) return `Hace ${days}d`;
+    if (minutes < 1) return 'Now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
 
     return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
 const LEVEL_FILTERS = [
-    { value: 'all', label: 'Todas', count: 0 },
-    { value: 'critical', label: 'Críticas', count: 0 },
-    { value: 'error', label: 'Errores', count: 0 },
+    { value: 'all', label: 'All', count: 0 },
+    { value: 'critical', label: 'Critical', count: 0 },
+    { value: 'error', label: 'Errors', count: 0 },
     { value: 'warning', label: 'Warnings', count: 0 },
     { value: 'info', label: 'Info', count: 0 },
     { value: 'debug', label: 'Debug', count: 0 },
@@ -63,9 +63,9 @@ const AlertsView: React.FC = () => {
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">Alertas del sistema</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">System Alerts</h2>
                         <p className="text-zinc-400 text-xs md:text-sm mt-1">
-                            Monitoreo en tiempo real de eventos del sistema
+                            Real-time monitoring of system events
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -77,7 +77,7 @@ const AlertsView: React.FC = () => {
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
-                            Refrescar
+                            Refresh
                         </button>
                         <div className="px-3 py-2 rounded-full bg-zinc-800/50 border border-zinc-700">
                             <span className="text-xs font-mono text-zinc-300">{total}</span>
@@ -125,14 +125,14 @@ const AlertsView: React.FC = () => {
                         <div className="flex items-center justify-center h-full p-12">
                             <div className="text-center">
                                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                                <p className="text-sm text-zinc-400">Cargando alertas...</p>
+                                <p className="text-sm text-zinc-400">Loading alerts...</p>
                             </div>
                         </div>
                     ) : filteredAlerts.length === 0 ? (
                         <div className="flex items-center justify-center h-full p-12">
                             <div className="text-center">
                                 <div className="text-4xl mb-3">📭</div>
-                                <p className="text-sm text-zinc-400">No hay alertas que coincidan con el filtro</p>
+                                <p className="text-sm text-zinc-400">No alerts match the current filter</p>
                             </div>
                         </div>
                     ) : (
@@ -168,7 +168,7 @@ const AlertsView: React.FC = () => {
                 {/* Footer */}
                 <div className="px-4 py-3 border-t border-zinc-800 bg-zinc-950/70 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-[11px] text-zinc-400 font-mono">
-                        {filteredAlerts.length} de {total} alertas
+                        {filteredAlerts.length} of {total} alerts
                     </div>
                     {hasMore && (
                         <button
@@ -180,14 +180,14 @@ const AlertsView: React.FC = () => {
                             {loadingMore ? (
                                 <>
                                     <div className="w-3 h-3 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin"></div>
-                                    Cargando...
+                                    Loading...
                                 </>
                             ) : (
                                 <>
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
-                                    Cargar más
+                                    Load more
                                 </>
                             )}
                         </button>

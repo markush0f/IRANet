@@ -11,8 +11,8 @@ const SystemInfoHeader: React.FC<SystemInfoHeaderProps> = ({ loading, error }) =
         <div className="h-1 w-20 bg-indigo-600 rounded-full mt-4" />
         <p className="text-zinc-400 mt-2 text-sm">
             {loading
-                ? 'Cargando información del sistema desde el backend...'
-                : 'Snapshot de la máquina donde se está ejecutando el agente.'}
+                ? 'Loading system information from the backend...'
+                : 'Snapshot of the machine where the agent is running.'}
         </p>
         {error && (
             <p className="mt-3 text-xs text-amber-400">

@@ -29,8 +29,8 @@ const fallbackAlerts: AlertRecord[] = [
     {
         id: 'fallback-1',
         level: 'info',
-        message: 'No hay alertas recientes. Este es un mensaje de respaldo.',
-        source: 'Sistema local',
+        message: 'No recent alerts. This is a fallback message.',
+        source: 'Local system',
         timestamp: new Date().toISOString(),
     },
 ];
@@ -63,7 +63,7 @@ const coerceAlertRecord = (raw: unknown, index: number): AlertRecord => {
         (payload.message as string | undefined) ??
         (payload.alert as string | undefined) ??
         (payload.description as string | undefined) ??
-        'Alerta recibida.';
+        'Alert received.';
 
     return {
         id,

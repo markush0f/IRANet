@@ -99,14 +99,14 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
             setLastLoadedAt(new Date());
         } catch (err) {
             console.error(`Error updating ${metric} live metrics`, err);
-            setError('No se pudieron actualizar las métricas en vivo.');
+            setError('Live metrics could not be updated.');
         }
     }, [hostname, metric]);
 
     const startLive = useCallback(async () => {
         const host = hostname?.trim();
         if (!host) {
-            setError('Necesitas un hostname válido para iniciar las métricas en vivo.');
+            setError('You need a valid hostname to start live metrics.');
             return;
         }
 
@@ -135,7 +135,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
             }, POLL_INTERVAL_MS);
         } catch (err) {
             console.error(`Error starting live ${metric} metrics`, err);
-            setError('No se pudieron cargar las métricas en vivo.');
+            setError('Live metrics could not be loaded.');
         } finally {
             setLiveLoading(false);
         }
@@ -144,7 +144,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
     const handleManualFetch = useCallback(async () => {
         const host = hostname?.trim();
         if (!host) {
-            setError('Necesitas un hostname válido para cargar métricas manuales.');
+            setError('You need a valid hostname to load manual metrics.');
             return;
         }
 
@@ -157,7 +157,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
         const toTs = toIsoString(manualEnd);
 
         if (!fromTs || !toTs) {
-            setError('Verifica que las fechas estén bien formadas.');
+            setError('Please verify the dates are valid.');
             setLoading(false);
             return;
         }
@@ -181,7 +181,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
             setLastLoadedAt(new Date());
         } catch (err) {
             console.error(`Error loading manual ${metric} metrics`, err);
-            setError('No se pudieron cargar las métricas para el intervalo seleccionado.');
+            setError('Metrics for the selected range could not be loaded.');
         } finally {
             setLoading(false);
         }

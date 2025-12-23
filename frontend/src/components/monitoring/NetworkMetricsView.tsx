@@ -9,9 +9,9 @@ const NetworkMetricsView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [overrideHost, setOverrideHost] = useState('');
     const networkMetrics = [
-        { id: 'net.latency.avg_ms', label: 'Latencia promedio' },
-        { id: 'net.latency.max_ms', label: 'Latencia máxima' },
-        { id: 'net.latency.min_ms', label: 'Latencia mínima' },
+        { id: 'net.latency.avg_ms', label: 'Average latency' },
+        { id: 'net.latency.max_ms', label: 'Max latency' },
+        { id: 'net.latency.min_ms', label: 'Min latency' },
         { id: 'net.jitter.ms', label: 'Jitter' },
     ];
     const [activeNetworkMetric, setActiveNetworkMetric] = useState(networkMetrics[0]);
@@ -35,7 +35,7 @@ const NetworkMetricsView: React.FC = () => {
                 }
 
                 console.error('Error loading system info for Network view', err);
-                setError('No se pudo cargar el hostname del sistema.');
+                setError('System hostname could not be loaded.');
             } finally {
                 setLoading(false);
             }
@@ -53,23 +53,23 @@ const NetworkMetricsView: React.FC = () => {
             <Card className="space-y-6 p-4 sm:p-6">
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
-                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Serie de métricas</Text>
-                        <Title className="text-2xl sm:text-3xl text-zinc-100">Latencia de red en tiempo real</Title>
+                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Metrics series</Text>
+                        <Title className="text-2xl sm:text-3xl text-zinc-100">Real-time network latency</Title>
                         <Text className="text-sm text-zinc-400 max-w-3xl">
-                            Monitorea latencia y jitter en milisegundos con actualizaciones cada 5 segundos.
-                            Puedes alternar entre métricas y definir un hostname para consultar la instancia correcta.
+                            Monitor latency and jitter in milliseconds with updates every 5 seconds.
+                            You can switch metrics and set a hostname to query the correct instance.
                         </Text>
                     </div>
                     <Badge color="sky" size="xs">
-                        Actualización cada 5 segundos
+                        Updates every 5 seconds
                     </Badge>
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
                     <Text className="text-sm text-zinc-400">
-                        {loading && 'Cargando información del host…'}
-                        {!loading && hostname && `Host detectado: ${hostname}`}
-                        {!loading && !hostname && 'No se detectó ningún hostname por defecto.'}
+                        {loading && 'Loading host information…'}
+                        {!loading && hostname && `Detected host: ${hostname}`}
+                        {!loading && !hostname && 'No default hostname detected.'}
                     </Text>
                     <div className="flex flex-col gap-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Host override</Text>
@@ -109,7 +109,7 @@ const NetworkMetricsView: React.FC = () => {
                     <RechartsMetricPanel
                         hostname={hostToUse || undefined}
                         metric={activeNetworkMetric.id}
-                        seriesLabel={`Serie de métricas de ${activeNetworkMetric.label.toLowerCase()}`}
+                        seriesLabel={`Metrics series for ${activeNetworkMetric.label.toLowerCase()}`}
                         valueFormatter={value => `${value.toFixed(2)} ms`}
                         strokeColor="#38bdf8"
                         fillColor="#0ea5e9"

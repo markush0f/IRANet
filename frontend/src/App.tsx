@@ -21,7 +21,8 @@ import SystemApplicationsView from './components/system/SystemApplicationsView';
 import ApplicationsLogsView from './components/logs/ApplicationsLogsView';
 import SystemServicesView from './components/system/SystemServicesView';
 import SystemPackagesView from './components/system/SystemPackagesView';
-import SystemAptPackagesView from './components/system/SystemAptPackagesView';
+import SystemPackagesHistoryView from './components/system/SystemPackagesHistoryView';
+import SystemDatabasesView from './components/system/SystemDatabasesView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -66,7 +67,7 @@ function App() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-            Menú
+            Menu
           </button>
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
             IRANet
@@ -104,10 +105,12 @@ function App() {
             <SystemApplicationsView />
           ) : currentView === 'system-services' ? (
             <SystemServicesView />
+          ) : currentView === 'system-databases' ? (
+            <SystemDatabasesView />
           ) : currentView === 'system-packages' ? (
             <SystemPackagesView />
-          ) : currentView === 'apt-packages' ? (
-            <SystemAptPackagesView />
+          ) : currentView === 'packages-history' ? (
+            <SystemPackagesHistoryView />
           ) : currentView === 'logs' ? (
             <ApplicationsLogsView />
           ) : currentView === 'dashboard' ? (

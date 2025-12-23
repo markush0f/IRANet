@@ -62,7 +62,7 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
                     </svg>
                 ) : (
                     <div className="flex h-full items-center justify-center text-xs text-zinc-500">
-                        No hay datos para mostrar. Puedes iniciar el seguimiento en vivo o elegir un rango.
+                        No data to display. You can start live tracking or choose a range.
                     </div>
                 )}
                 <div className="absolute left-4 top-4 text-[11px] uppercase tracking-wide text-zinc-400">
@@ -79,46 +79,46 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Intervalo manual</p>
-                        <span className="text-[11px] text-zinc-500">
-                            {latestValueLabel ? `Último valor ${latestValueLabel}` : 'Sin datos'}
-                        </span>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Manual range</p>
+                    <span className="text-[11px] text-zinc-500">
+                        {latestValueLabel ? `Latest value ${latestValueLabel}` : 'No data'}
+                    </span>
                     </div>
                     <div className="grid gap-3">
-                        <label className="text-[11px] uppercase tracking-wide text-zinc-500">Desde</label>
+                    <label className="text-[11px] uppercase tracking-wide text-zinc-500">From</label>
                         <input
                             type="datetime-local"
                             className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
                             value={manualStart}
                             onChange={e => setManualStart(e.target.value)}
                         />
-                        <label className="text-[11px] uppercase tracking-wide text-zinc-500">Hasta</label>
+                    <label className="text-[11px] uppercase tracking-wide text-zinc-500">To</label>
                         <input
                             type="datetime-local"
                             className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
                             value={manualEnd}
                             onChange={e => setManualEnd(e.target.value)}
                         />
-                        <button
-                            type="button"
-                            onClick={handleManualFetch}
-                            disabled={loading}
-                            className="inline-flex w-full justify-center rounded-lg border border-transparent bg-indigo-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-700"
-                        >
-                            {loading ? 'Cargando rango…' : 'Ver intervalo'}
-                        </button>
+                    <button
+                        type="button"
+                        onClick={handleManualFetch}
+                        disabled={loading}
+                        className="inline-flex w-full justify-center rounded-lg border border-transparent bg-indigo-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-700"
+                    >
+                        {loading ? 'Loading range…' : 'View range'}
+                    </button>
                     </div>
                 </div>
 
                 <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">En vivo</p>
-                            <p className="text-[11px] text-zinc-500">Actualizaciones cada 5 segundos</p>
-                        </div>
-                        <span className="text-[11px] text-zinc-500">{isLiveState ? 'Activo' : 'Detenido'}</span>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Live</p>
+                        <p className="text-[11px] text-zinc-500">Updates every 5 seconds</p>
                     </div>
-                    <label className="text-[11px] uppercase tracking-wide text-zinc-500">Desde (inicio del streaming)</label>
+                    <span className="text-[11px] text-zinc-500">{isLiveState ? 'Active' : 'Stopped'}</span>
+                </div>
+                <label className="text-[11px] uppercase tracking-wide text-zinc-500">From (stream start)</label>
                     <input
                         type="datetime-local"
                         className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
@@ -132,24 +132,24 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
                             disabled={liveLoading}
                             className="flex-1 rounded-lg border border-transparent bg-emerald-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-emerald-700"
                         >
-                            {liveLoading ? 'Inicializando…' : 'Iniciar en vivo'}
-                        </button>
+                        {liveLoading ? 'Starting…' : 'Start live'}
+                    </button>
                         <button
                             type="button"
                             onClick={stopLive}
                             disabled={!isLiveState}
                             className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-semibold text-zinc-200 transition hover:border-zinc-500 hover:text-white disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-500"
                         >
-                            Detener
-                        </button>
-                    </div>
+                        Stop
+                    </button>
                 </div>
+            </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 text-[11px] text-zinc-500">
-                <span>Máx {valueToDisplay(manualSummary.max)}</span>
-                <span>Mín {valueToDisplay(manualSummary.min)}</span>
-                <span>Promedio {valueToDisplay(manualSummary.avg)}</span>
+                <span>Max {valueToDisplay(manualSummary.max)}</span>
+                <span>Min {valueToDisplay(manualSummary.min)}</span>
+                <span>Average {valueToDisplay(manualSummary.avg)}</span>
             </div>
 
             {error && (

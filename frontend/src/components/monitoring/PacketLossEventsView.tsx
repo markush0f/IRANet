@@ -70,7 +70,7 @@ const PacketLossEventsView: React.FC = () => {
                 }
 
                 console.error('Error loading system info for packet loss view', err);
-                setError('No se pudo cargar el hostname del sistema.');
+                setError('System hostname could not be loaded.');
             } finally {
                 setLoadingHost(false);
             }
@@ -94,7 +94,7 @@ const PacketLossEventsView: React.FC = () => {
 
     const handleFetch = async () => {
         if (!hostToUse) {
-            setError('Necesitas un hostname válido para consultar los eventos.');
+            setError('You need a valid hostname to query events.');
             return;
         }
 
@@ -102,12 +102,12 @@ const PacketLossEventsView: React.FC = () => {
         const toTs = toIsoString(manualEnd);
 
         if (!fromTs || !toTs) {
-            setError('Verifica que las fechas estén bien formadas.');
+            setError('Please verify the dates are valid.');
             return;
         }
 
         if (fromTs >= toTs) {
-            setError('La fecha final debe ser posterior a la inicial.');
+            setError('The end date must be after the start date.');
             return;
         }
 
@@ -123,7 +123,7 @@ const PacketLossEventsView: React.FC = () => {
             setEvents(data);
         } catch (err) {
             console.error('Error loading packet loss events', err);
-            setError('No se pudieron cargar los eventos de packet loss.');
+            setError('Packet loss events could not be loaded.');
         } finally {
             setLoading(false);
         }
@@ -135,10 +135,10 @@ const PacketLossEventsView: React.FC = () => {
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Internet</Text>
-                        <Title className="text-2xl sm:text-3xl text-zinc-100">Eventos de pérdida de paquetes</Title>
+                        <Title className="text-2xl sm:text-3xl text-zinc-100">Packet loss events</Title>
                         <Text className="text-sm text-zinc-400 max-w-3xl">
-                            Consulta eventos de packet loss por rango de tiempo para el host seleccionado.
-                            Revisa duración, máximos y promedios para identificar picos de degradación.
+                            Query packet loss events over a time range for the selected host.
+                            Review duration, max, and average to identify degradation spikes.
                         </Text>
                     </div>
                     <Badge color="rose" size="xs">
@@ -148,9 +148,9 @@ const PacketLossEventsView: React.FC = () => {
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
                     <Text className="text-sm text-zinc-400">
-                        {loadingHost && 'Cargando información del host…'}
-                        {!loadingHost && hostname && `Host detectado: ${hostname}`}
-                        {!loadingHost && !hostname && 'No se detectó ningún hostname por defecto.'}
+                        {loadingHost && 'Loading host information…'}
+                        {!loadingHost && hostname && `Detected host: ${hostname}`}
+                        {!loadingHost && !hostname && 'No default hostname detected.'}
                     </Text>
                     <div className="flex flex-col gap-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Host override</Text>
@@ -168,7 +168,7 @@ const PacketLossEventsView: React.FC = () => {
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6 shadow-xl space-y-5">
                     <div className="grid gap-4 md:grid-cols-3">
                         <div className="flex flex-col gap-2">
-                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Desde</Text>
+                            <Text className="text-xs uppercase tracking-wide text-zinc-500">From</Text>
                             <input
                                 type="datetime-local"
                                 className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-rose-500 focus:outline-none"
@@ -177,7 +177,7 @@ const PacketLossEventsView: React.FC = () => {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Hasta</Text>
+                            <Text className="text-xs uppercase tracking-wide text-zinc-500">To</Text>
                             <input
                                 type="datetime-local"
                                 className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-rose-500 focus:outline-none"
@@ -186,14 +186,14 @@ const PacketLossEventsView: React.FC = () => {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Acciones</Text>
+                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Actions</Text>
                             <button
                                 type="button"
                                 onClick={handleFetch}
                                 disabled={loading}
                                 className="h-[42px] rounded-lg border border-rose-500/50 bg-rose-500/10 px-4 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-500"
                             >
-                                {loading ? 'Consultando…' : 'Consultar eventos'}
+                                {loading ? 'Querying…' : 'Query events'}
                             </button>
                         </div>
                     </div>
@@ -206,22 +206,22 @@ const PacketLossEventsView: React.FC = () => {
 
                     <div className="grid gap-4 md:grid-cols-3">
                         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Eventos</Text>
+                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Events</Text>
                             <div className="text-2xl font-semibold text-zinc-100">{summary.total}</div>
                         </div>
                         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Máximo observado</Text>
+                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Max observed</Text>
                             <div className="text-2xl font-semibold text-zinc-100">{summary.max.toFixed(1)}%</div>
                         </div>
                         <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Promedio</Text>
+                            <Text className="text-xs uppercase tracking-wide text-zinc-500">Average</Text>
                             <div className="text-2xl font-semibold text-zinc-100">{summary.avg.toFixed(1)}%</div>
                         </div>
                     </div>
 
                     {events.length === 0 ? (
                         <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-center text-sm text-zinc-500">
-                            No hay eventos en el rango seleccionado.
+                            No events in the selected range.
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -236,7 +236,7 @@ const PacketLossEventsView: React.FC = () => {
                                                 {formatTimestamp(event.start)} → {formatTimestamp(event.end)}
                                             </div>
                                             <div className="text-xs text-zinc-500">
-                                                Duración: {event.duration_seconds.toFixed(2)}s
+                                                Duration: {event.duration_seconds.toFixed(2)}s
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">

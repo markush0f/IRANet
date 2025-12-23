@@ -69,7 +69,7 @@ const DiskPartitionRow: React.FC<DiskPartitionRowProps> = ({
                 <div className="hidden md:flex md:col-span-2 items-center">
                     <div>
                         <div className="text-sm font-medium text-zinc-300">{formatBytes(partition.used_bytes)}</div>
-                        <div className="text-[10px] text-zinc-500">de {formatBytes(partition.total_bytes)}</div>
+                        <div className="text-[10px] text-zinc-500">of {formatBytes(partition.total_bytes)}</div>
                     </div>
                 </div>
 
@@ -97,10 +97,10 @@ const DiskPartitionRow: React.FC<DiskPartitionRowProps> = ({
                         className="text-xs font-semibold uppercase tracking-wide text-indigo-300 hover:text-indigo-200"
                         onClick={onToggle}
                     >
-                        {isExpanded ? 'Ocultar procesos' : 'Ver procesos'}
+                        {isExpanded ? 'Hide processes' : 'View processes'}
                     </button>
                     <div className="hidden md:block text-[10px] text-zinc-500">
-                        Click para consultar actividad de disco
+                        Click to view disk activity
                     </div>
                 </div>
 
@@ -111,11 +111,11 @@ const DiskPartitionRow: React.FC<DiskPartitionRowProps> = ({
                         <div className="text-zinc-300 font-mono">{partition.device}</div>
                     </div>
                     <div>
-                        <div className="text-zinc-500">Usado</div>
+                        <div className="text-zinc-500">Used</div>
                         <div className="text-zinc-300">{formatBytes(partition.used_bytes)}</div>
                     </div>
                     <div>
-                        <div className="text-zinc-500">Libre</div>
+                        <div className="text-zinc-500">Free</div>
                         <div className="text-zinc-300">{formatBytes(partition.free_bytes)}</div>
                     </div>
                 </div>

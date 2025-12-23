@@ -46,7 +46,7 @@ export const useSystemDiskView = () => {
                 }
 
                 console.error('Error fetching disk info', err);
-                setError('No se pudo cargar el estado del almacenamiento. Mostrando datos mock de respaldo.');
+                setError('Storage status could not be loaded. Showing fallback mock data.');
                 setDiskInfo(MOCK_SYSTEM_DISK);
             } finally {
                 setLoading(false);
@@ -76,7 +76,7 @@ export const useSystemDiskView = () => {
                 }
 
                 console.error('Error fetching disk total', err);
-                setTotalError('No se pudo cargar el total del disco.');
+                setTotalError('Disk total could not be loaded.');
                 setTotalInfo(null);
             } finally {
                 setTotalLoading(false);
@@ -122,7 +122,7 @@ export const useSystemDiskView = () => {
             }
 
             console.error('Error fetching disk processes', err);
-            setProcessesError(prev => ({ ...prev, [mountpoint]: 'No se pudieron cargar los procesos de esta particion.' }));
+            setProcessesError(prev => ({ ...prev, [mountpoint]: 'Processes for this partition could not be loaded.' }));
             setProcessesByMountpoint(prev => ({ ...prev, [mountpoint]: null }));
         } finally {
             setProcessesLoading(prev => ({ ...prev, [mountpoint]: false }));

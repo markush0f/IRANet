@@ -27,7 +27,7 @@ export const useSystemAlerts = () => {
         };
 
         const handleError = () => {
-            showAlert('No se pudo conectar con el canal de alertas del sistema.');
+            showAlert('Could not connect to the system alerts channel.');
         };
 
         websocket.addEventListener('message', handleMessage);

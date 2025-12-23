@@ -31,7 +31,7 @@ export const useUsersData = () => {
             } catch (e) {
                 if (isAbortError(e)) return;
                 console.error('Error fetching users summary', e);
-                setError('No se pudo cargar el resumen de usuarios. Mostrando datos de respaldo.');
+                setError('User summary could not be loaded. Showing fallback data.');
                 setSummary(fallbackSummary);
             }
         };
@@ -53,7 +53,7 @@ export const useUsersData = () => {
             } catch (e) {
                 if (isAbortError(e)) return;
                 console.error('Error fetching users list', e);
-                setError('No se pudo cargar usuarios. Usando datos de respaldo.');
+                setError('Users could not be loaded. Using fallback data.');
                 setUsers(getUsersFallbackByType(typeFilter));
             } finally {
                 setLoading(false);

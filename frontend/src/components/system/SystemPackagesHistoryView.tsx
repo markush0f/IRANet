@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SystemPackage, SystemPackageHistoryEvent } from '../../types';
-import { getAptPackages, getPackageHistory, getPackageInstalledAt } from '../../services/api';
-import PackageSearchInput from './apt/PackageSearchInput';
-import PackageSortHeader from './apt/PackageSortHeader';
-import PackagesTable from './apt/PackagesTable';
-import PackageDetailPanel from './apt/PackageDetailPanel';
-import HistoryTimeline from './apt/HistoryTimeline';
-import HistoryFilters from './apt/HistoryFilters';
+import { getInstalledPackages, getPackageHistory, getPackageInstalledAt } from '../../services/api';
+import PackageSearchInput from './packages/PackageSearchInput';
+import PackageSortHeader from './packages/PackageSortHeader';
+import PackagesTable from './packages/PackagesTable';
+import PackageDetailPanel from './packages/PackageDetailPanel';
+import HistoryTimeline from './packages/HistoryTimeline';
+import HistoryFilters from './packages/HistoryFilters';
 
 type SortBy = 'name' | 'version' | 'arch';
 type SortDir = 'asc' | 'desc';
@@ -14,7 +14,7 @@ type HistoryActionFilter = 'all' | 'install' | 'upgrade' | 'remove';
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
-const SystemAptPackagesView: React.FC = () => {
+const SystemPackagesHistoryView: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'installed' | 'history'>('installed');
 
     const [packages, setPackages] = useState<SystemPackage[]>([]);
@@ -51,7 +51,7 @@ const SystemAptPackagesView: React.FC = () => {
             try {
                 setPackagesLoading(true);
                 setPackagesError(null);
-                const response = await getAptPackages({
+                const response = await getInstalledPackages({
                     page,
                     pageSize,
                     query,
@@ -68,8 +68,8 @@ const SystemAptPackagesView: React.FC = () => {
                 ) {
                     return;
                 }
-                console.error('Error fetching apt packages', e);
-                setPackagesError('No se pudieron cargar los paquetes instalados.');
+                console.error('Error fetching packages', e);
+                setPackagesError('Installed packages could not be loaded.');
             } finally {
                 setPackagesLoading(false);
             }
@@ -104,7 +104,7 @@ const SystemAptPackagesView: React.FC = () => {
                     return;
                 }
                 console.error('Error fetching package detail', e);
-                setDetailError('No se pudo cargar el detalle del paquete.');
+                setDetailError('Package details could not be loaded.');
             } finally {
                 setDetailLoading(false);
             }
@@ -141,7 +141,7 @@ const SystemAptPackagesView: React.FC = () => {
                     return;
                 }
                 console.error('Error fetching global history', e);
-                setHistoryError('No se pudo cargar el historial global.');
+                setHistoryError('Global history could not be loaded.');
             } finally {
                 setHistoryLoading(false);
             }
@@ -177,10 +177,10 @@ const SystemAptPackagesView: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">APT</p>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Paquetes APT</h2>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">System</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Package history</h2>
                     <p className="text-sm text-zinc-400 mt-2 max-w-2xl">
-                        Panel para revisar paquetes instalados y el historial de APT con enfoque en trazabilidad.
+                        Review installed packages and package history with a focus on traceability.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -231,7 +231,7 @@ const SystemAptPackagesView: React.FC = () => {
                                     >
                                         {PAGE_SIZES.map((size) => (
                                             <option key={size} value={size}>
-                                                {size} / pág
+                                                {size} / page
                                             </option>
                                         ))}
                                     </select>
@@ -241,12 +241,12 @@ const SystemAptPackagesView: React.FC = () => {
                                         </svg>
                                     </span>
                                 </div>
-                                <span className="text-[11px] text-zinc-500">Paginación activa</span>
+                                <span className="text-[11px] text-zinc-500">Pagination enabled</span>
                             </div>
                         )}
                         {isSearching && (
                             <div className="text-[11px] text-zinc-500">
-                                Búsqueda activa: paginación deshabilitada.
+                                Search active: pagination disabled.
                             </div>
                         )}
 
@@ -260,7 +260,7 @@ const SystemAptPackagesView: React.FC = () => {
 
                         {!isSearching && (
                             <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-zinc-500">
-                                <span>Página {page} de {totalPages}</span>
+                                <span>Page {page} of {totalPages}</span>
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         type="button"
@@ -268,7 +268,7 @@ const SystemAptPackagesView: React.FC = () => {
                                         disabled={page === 1}
                                         className="rounded-full border border-zinc-800 px-3 py-1.5 font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                                     >
-                                        Inicio
+                                        First
                                     </button>
                                     <button
                                         type="button"
@@ -276,7 +276,7 @@ const SystemAptPackagesView: React.FC = () => {
                                         disabled={page === 1}
                                         className="rounded-full border border-zinc-800 px-3 py-1.5 font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                                     >
-                                        Anterior
+                                        Previous
                                     </button>
                                     <button
                                         type="button"
@@ -284,7 +284,7 @@ const SystemAptPackagesView: React.FC = () => {
                                         disabled={page >= totalPages}
                                         className="rounded-full border border-zinc-800 px-3 py-1.5 font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                                     >
-                                        Siguiente
+                                        Next
                                     </button>
                                     <button
                                         type="button"
@@ -292,7 +292,7 @@ const SystemAptPackagesView: React.FC = () => {
                                         disabled={page >= totalPages}
                                         className="rounded-full border border-zinc-800 px-3 py-1.5 font-semibold uppercase tracking-wide text-zinc-300 disabled:text-zinc-600 disabled:border-zinc-900"
                                     >
-                                        Fin
+                                        Last
                                     </button>
                                 </div>
                             </div>
@@ -326,16 +326,16 @@ const SystemAptPackagesView: React.FC = () => {
                         {historyLoading ? (
                             <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-10">
                                 <div className="w-6 h-6 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
-                                <span>Cargando historial...</span>
+                                <span>Loading history...</span>
                             </div>
                         ) : historyError ? (
                             <div className="text-sm text-amber-400">{historyError}</div>
                         ) : historyItems.length === 0 ? (
                             <div className="text-sm text-zinc-400">
-                                No hay eventos para los filtros seleccionados.
+                                No events for the selected filters.
                             </div>
                         ) : (
-                            <HistoryTimeline events={historyItems} emptyMessage="No hay eventos para los filtros seleccionados." />
+                            <HistoryTimeline events={historyItems} emptyMessage="No events for the selected filters." />
                         )}
                     </div>
                 </div>
@@ -344,4 +344,4 @@ const SystemAptPackagesView: React.FC = () => {
     );
 };
 
-export default SystemAptPackagesView;
+export default SystemPackagesHistoryView;

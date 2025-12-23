@@ -9,7 +9,7 @@ const SystemApplicationsView: React.FC = () => {
                 <p className="text-xs uppercase tracking-wide text-zinc-500">Applications</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">System applications</h2>
                 <p className="text-sm text-zinc-400 mt-2 max-w-2xl">
-                    Colección de directorios sobre los que el sistema ejecuta comandos críticos. Cada entrada muestra los binarios disponibles y permite añadir nuevas aplicaciones del sistema para monitorear.
+                    Directory collection where the system runs critical commands. Each entry shows available binaries and lets you add new system applications to monitor.
                 </p>
             </div>
 

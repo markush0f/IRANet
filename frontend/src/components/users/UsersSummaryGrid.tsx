@@ -4,10 +4,10 @@ import type { UsersSummary } from '../../types';
 type SummaryCardKey = 'total' | 'human' | 'system' | 'active';
 
 const summaryCards = [
-    { key: 'total', label: 'Total usuarios', color: 'text-indigo-300' },
-    { key: 'human', label: 'Humanos', color: 'text-emerald-300' },
-    { key: 'system', label: 'Sistema', color: 'text-amber-300' },
-    { key: 'active', label: 'Activos', color: 'text-rose-300' },
+    { key: 'total', label: 'Total users', color: 'text-indigo-300' },
+    { key: 'human', label: 'Human', color: 'text-emerald-300' },
+    { key: 'system', label: 'System', color: 'text-amber-300' },
+    { key: 'active', label: 'Active', color: 'text-rose-300' },
 ] as const;
 
 interface UsersSummaryGridProps {

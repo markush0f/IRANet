@@ -20,13 +20,13 @@ const PackagesTable: React.FC<PackagesTableProps> = ({
         {loading ? (
             <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-10">
                 <div className="w-6 h-6 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
-                <span>Cargando paquetes...</span>
+                <span>Loading packages...</span>
             </div>
         ) : error ? (
             <div className="text-sm text-amber-400">{error}</div>
         ) : packages.length === 0 ? (
             <div className="text-sm text-zinc-400">
-                No hay paquetes que coincidan con el filtro.
+                No packages match the filter.
             </div>
         ) : (
             <div className="overflow-x-auto">

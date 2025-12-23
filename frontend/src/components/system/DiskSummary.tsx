@@ -27,7 +27,7 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
                 <div>
                     <div className="text-[10px] uppercase tracking-wider text-zinc-500">
-                        Uso total
+                        Total usage
                     </div>
 
                     <div className="mt-2 h-32">

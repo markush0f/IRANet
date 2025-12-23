@@ -37,35 +37,35 @@ const METRIC_PANELS: MetricPreviewConfig[] = [
     },
     {
         id: 'memory.used_percent',
-        title: 'Memoria usada',
+        title: 'Memory used',
         unit: '%',
         strokeColor: '#34d399',
         fillColor: '#10b981',
     },
     {
         id: 'memory.available_percent',
-        title: 'Memoria disponible',
+        title: 'Memory available',
         unit: '%',
         strokeColor: '#22c55e',
         fillColor: '#16a34a',
     },
     {
         id: 'net.latency.avg_ms',
-        title: 'Latencia promedio',
+        title: 'Average latency',
         unit: ' ms',
         strokeColor: '#38bdf8',
         fillColor: '#0ea5e9',
     },
     {
         id: 'net.latency.max_ms',
-        title: 'Latencia máxima',
+        title: 'Max latency',
         unit: ' ms',
         strokeColor: '#f97316',
         fillColor: '#ea580c',
     },
     {
         id: 'net.latency.min_ms',
-        title: 'Latencia mínima',
+        title: 'Min latency',
         unit: ' ms',
         strokeColor: '#6366f1',
         fillColor: '#4f46e5',
@@ -150,7 +150,7 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 shadow-xl space-y-3 h-full">
             <div className="flex items-center justify-between gap-3">
                 <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Métrica</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Metric</p>
                     <h3 className="text-base font-semibold text-zinc-100">{title}</h3>
                 </div>
                 <div className="text-right">
@@ -171,10 +171,10 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
-                <span>Máx {formatValue(manualSummary.max)}</span>
-                <span>Mín {formatValue(manualSummary.min)}</span>
-                <span>Prom {formatValue(manualSummary.avg)}</span>
-                <span>Actualizado {lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : '—'}</span>
+                <span>Max {formatValue(manualSummary.max)}</span>
+                <span>Min {formatValue(manualSummary.min)}</span>
+                <span>Avg {formatValue(manualSummary.avg)}</span>
+                <span>Updated {lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : '—'}</span>
             </div>
         </div>
     );
@@ -206,7 +206,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                 }
 
                 console.error('Error loading system info for dashboard', err);
-                setHostError('No se pudo cargar el hostname del sistema.');
+                setHostError('System hostname could not be loaded.');
             } finally {
                 setLoadingHost(false);
             }
@@ -224,8 +224,8 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
             <section className="space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
-                        <h2 className="text-2xl font-semibold text-zinc-100">Panel de gráficas</h2>
-                        <p className="text-sm text-zinc-400">Arrastra y redimensiona las cards; el grid se reacomoda automáticamente.</p>
+                        <h2 className="text-2xl font-semibold text-zinc-100">Charts panel</h2>
+                        <p className="text-sm text-zinc-400">Drag and resize cards; the grid auto-adjusts.</p>
                     </div>
                     <div className="flex flex-wrap items-end gap-4">
                         <div className="flex flex-col gap-1">
@@ -243,9 +243,9 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                 </div>
 
                 <p className="text-sm text-zinc-400">
-                    {loadingHost && 'Cargando información del host…'}
-                    {!loadingHost && hostname && `Host detectado: ${hostname}`}
-                    {!loadingHost && !hostname && 'No se detectó ningún hostname por defecto.'}
+                    {loadingHost && 'Loading host information…'}
+                    {!loadingHost && hostname && `Detected host: ${hostname}`}
+                    {!loadingHost && !hostname && 'No default hostname detected.'}
                 </p>
 
                 {hostError && (

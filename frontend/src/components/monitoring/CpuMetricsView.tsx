@@ -29,7 +29,7 @@ const CpuMetricsView: React.FC = () => {
                 }
 
                 console.error('Error loading system info for CPU view', err);
-                setError('No se pudo cargar el hostname del sistema.');
+                setError('System hostname could not be loaded.');
             } finally {
                 setLoading(false);
             }
@@ -47,23 +47,23 @@ const CpuMetricsView: React.FC = () => {
             <Card className="space-y-6 p-4 sm:p-6">
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
-                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Serie de métricas</Text>
-                        <Title className="text-2xl sm:text-3xl text-zinc-100">Uso de CPU en tiempo real</Title>
+                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Metrics series</Text>
+                        <Title className="text-2xl sm:text-3xl text-zinc-100">Real-time CPU usage</Title>
                         <Text className="text-sm text-zinc-400 max-w-3xl">
-                            La gráfica se actualiza cada 5 segundos y puede analizarse desde un rango manual o en modo streaming.
-                            Si el hostname no se detecta automáticamente, puedes forzar uno para consultar la API correcta.
+                            The chart updates every 5 seconds and can be analyzed over a manual range or in streaming mode.
+                            If the hostname is not detected automatically, you can provide one to query the correct API.
                         </Text>
                     </div>
                     <Badge color="indigo" size="xs">
-                        Actualización cada 5 segundos
+                        Updates every 5 seconds
                     </Badge>
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
                     <Text className="text-sm text-zinc-400">
-                        {loading && 'Cargando información del host…'}
-                        {!loading && hostname && `Host detectado: ${hostname}`}
-                        {!loading && !hostname && 'No se detectó ningún hostname por defecto.'}
+                        {loading && 'Loading host information…'}
+                        {!loading && hostname && `Detected host: ${hostname}`}
+                        {!loading && !hostname && 'No default hostname detected.'}
                     </Text>
                     <div className="flex flex-col gap-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Host override</Text>
@@ -87,7 +87,7 @@ const CpuMetricsView: React.FC = () => {
                     <RechartsMetricPanel
                         hostname={hostToUse || undefined}
                         metric="cpu.total"
-                        seriesLabel="Serie de métricas CPU total"
+                        seriesLabel="CPU total metrics series"
                         valueFormatter={value => `${value.toFixed(2)}%`}
                     />
                 </div>

@@ -10,7 +10,7 @@ const AppFooter: React.FC = () => {
                     <a href="#" className="text-zinc-500 hover:text-zinc-300 text-xs font-medium transition-colors">API Status</a>
                 </div>
                 <div className="text-zinc-600 text-xs font-mono">
-                    System v2.1.0-dark
+                    v1.0.0
                 </div>
             </div>
         </footer>

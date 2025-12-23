@@ -13,6 +13,7 @@ import type {
     SystemPackagesResponse,
     SystemPackageHistoryResponse,
     SystemPackageInstalledAtResponse,
+    DatabaseClassification,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -213,7 +214,7 @@ export const getSystemPackages = async ({
     return response.json() as Promise<SystemPackagesResponse>;
 };
 
-export interface GetAptPackagesParams {
+export interface GetInstalledPackagesParams {
     page?: number;
     pageSize?: number;
     query?: string;
@@ -222,14 +223,14 @@ export interface GetAptPackagesParams {
     signal?: AbortSignal;
 }
 
-export const getAptPackages = async ({
+export const getInstalledPackages = async ({
     page = 1,
     pageSize = 50,
     query = '',
     sortBy = 'name',
     sortDir = 'asc',
     signal,
-}: GetAptPackagesParams = {}): Promise<SystemPackagesResponse> => {
+}: GetInstalledPackagesParams = {}): Promise<SystemPackagesResponse> => {
     const params = new URLSearchParams();
     if (query.trim()) {
         params.set('q', query.trim());
@@ -244,7 +245,7 @@ export const getAptPackages = async ({
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
-        throw new Error(`HTTP ${response.status} al obtener paquetes APT`);
+        throw new Error(`HTTP ${response.status} al obtener paquetes`);
     }
 
     const data = await response.json();
@@ -310,6 +311,21 @@ export const getPackageInstalledAt = async (
     return data as SystemPackageInstalledAtResponse;
 };
 
+export const getDatabaseClassification = async (signal?: AbortSignal): Promise<DatabaseClassification[]> => {
+    const url = `${getBaseUrl()}/services/clasification/databases`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener bases de datos`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as DatabaseClassification[];
+    }
+    return [];
+};
+
 export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
     const url = `${getBaseUrl()}/users/human`;
     const response = await fetch(url, { signal });
@@ -353,7 +369,7 @@ export const getMetricSeries = async ({
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
-        throw new Error(`HTTP ${response.status} al obtener métricas`);
+        throw new Error(`HTTP ${response.status} while fetching metrics`);
     }
 
     const data = await response.json();
@@ -387,7 +403,7 @@ export const createApplication = async (
     });
 
     if (!response.ok) {
-        throw new Error(`HTTP ${response.status} al crear aplicación`);
+        throw new Error(`HTTP ${response.status} while creating application`);
     }
 
     return response.json();
@@ -410,7 +426,7 @@ export interface RemoteApplicationRecord {
 }
 
 export const getApplicationsList = async (signal?: AbortSignal): Promise<RemoteApplicationRecord[]> => {
-    const url = `${getBaseUrl()}/applications/list`;
+    const url = `${getBaseUrl()}/applications/all/list`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -432,7 +448,7 @@ export const getApplicationsLogsList = async (signal?: AbortSignal): Promise<Rem
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
-        throw new Error(`HTTP ${response.status} al obtener aplicaciones con logs`);
+        throw new Error(`HTTP ${response.status} while fetching applications with logs`);
     }
 
     const data = await response.json();
@@ -442,6 +458,99 @@ export const getApplicationsLogsList = async (signal?: AbortSignal): Promise<Rem
     if (data && typeof data === 'object' && Array.isArray((data as any).applications)) {
         return (data as any).applications as RemoteApplicationRecord[];
     }
+    return [];
+};
+
+export interface ApplicationLogFilesResponse {
+    page: number;
+    page_size: number;
+    total: number;
+    items: string[];
+}
+
+const normalizeLogFilePath = (entry: unknown): string | null => {
+    if (typeof entry === 'string') return entry;
+    if (!entry || typeof entry !== 'object') return null;
+    const candidate = (entry as any).file_path ?? (entry as any).path ?? (entry as any).name;
+    return typeof candidate === 'string' ? candidate : null;
+};
+
+export const getApplicationLogFiles = async (
+    applicationId: string,
+    page = 1,
+    pageSize = 20,
+    signal?: AbortSignal
+): Promise<ApplicationLogFilesResponse> => {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('page_size', String(pageSize));
+
+    const url = `${getBaseUrl()}/logs/applications/${applicationId}/files?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while fetching application log files`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        const items = data.map(normalizeLogFilePath).filter((value): value is string => Boolean(value));
+        return { page, page_size: items.length, total: items.length, items };
+    }
+    if (data && typeof data === 'object' && Array.isArray((data as any).items)) {
+        const items = (data as any).items
+            .map(normalizeLogFilePath)
+            .filter((value: string | null): value is string => Boolean(value));
+        return {
+            page: Number((data as any).page ?? page),
+            page_size: Number((data as any).page_size ?? items.length),
+            total: Number((data as any).total ?? items.length),
+            items,
+        };
+    }
+
+    return { page, page_size: 0, total: 0, items: [] };
+};
+
+const normalizeHistoryEntry = (entry: unknown): string | null => {
+    if (typeof entry === 'string') return entry;
+    if (!entry || typeof entry !== 'object') return null;
+    const candidate = (entry as any).line ?? (entry as any).message ?? (entry as any).text;
+    return typeof candidate === 'string' ? candidate : null;
+};
+
+export const getApplicationLogFileHistory = async (
+    applicationId: string,
+    filePath: string,
+    limit = 200,
+    signal?: AbortSignal
+): Promise<string[]> => {
+    const params = new URLSearchParams();
+    params.set('file_path', filePath);
+    params.set('limit', String(limit));
+
+    const url = `${getBaseUrl()}/logs/applications/${applicationId}/files/history?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while fetching application log history`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data
+            .map(normalizeHistoryEntry)
+            .filter((value): value is string => Boolean(value));
+    }
+    if (data && typeof data === 'object') {
+        const raw = (data as any).items ?? (data as any).lines ?? (data as any).entries;
+        if (Array.isArray(raw)) {
+            return raw
+                .map(normalizeHistoryEntry)
+                .filter((value: string | null): value is string => Boolean(value));
+        }
+    }
+
     return [];
 };
 

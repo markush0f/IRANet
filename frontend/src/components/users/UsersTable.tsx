@@ -25,13 +25,13 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
                     {loading ? (
                         <tr>
                             <td colSpan={6} className="px-4 py-6 text-center text-sm text-zinc-400">
-                                Cargando usuarios...
+                                Loading users...
                             </td>
                         </tr>
                     ) : users.length === 0 ? (
                         <tr>
                             <td colSpan={6} className="px-4 py-6 text-center text-sm text-zinc-400">
-                                No se encontraron usuarios con ese filtro.
+                                No users found for that filter.
                             </td>
                         </tr>
                     ) : (
@@ -59,7 +59,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
         {!loading && (
             <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>
-                    Mostrando <span className="text-zinc-200 font-semibold">{users.length}</span> usuarios
+                    Showing <span className="text-zinc-200 font-semibold">{users.length}</span> users
                 </span>
                 <span className="font-mono text-[10px]">
                     login_allowed={summary.login_allowed} · active={summary.active}

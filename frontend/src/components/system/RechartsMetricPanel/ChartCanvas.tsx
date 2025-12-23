@@ -74,7 +74,7 @@ const ChartCanvas: React.FC<ChartCanvasProps> = ({
     if (!chartData.length) {
         return (
             <div className="flex h-[300px] items-center justify-center text-xs text-zinc-500">
-                No hay datos para mostrar. Puedes iniciar el seguimiento en vivo o elegir un rango.
+                No data to display. You can start live tracking or choose a range.
             </div>
         );
     }

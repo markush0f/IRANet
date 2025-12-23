@@ -31,9 +31,9 @@ const DockerView: React.FC = () => {
                     return;
                 }
                 console.error('Error fetching docker containers', e);
-                setError('No se pudieron cargar los contenedores Docker.');
+                setError('Docker containers could not be loaded.');
             } finally {
-                // pequeño retraso para que el spinner sea visible aunque la respuesta sea muy rápida
+                // Small delay so the spinner is visible even with fast responses.
                 setTimeout(() => setLoading(false), 250);
             }
         };
@@ -150,7 +150,7 @@ const DockerView: React.FC = () => {
                         <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Buscar por nombre, imagen, id..."
+                            placeholder="Search by name, image, or id..."
                             className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
@@ -160,11 +160,11 @@ const DockerView: React.FC = () => {
             {loading ? (
                 <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-10">
                     <div className="w-6 h-6 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
-                    <span>Cargando contenedores Docker...</span>
+                    <span>Loading Docker containers...</span>
                 </div>
             ) : filteredContainers.length === 0 ? (
                 <div className="text-sm text-zinc-400">
-                    No hay contenedores que coincidan con el filtro actual.
+                    No containers match the current filter.
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

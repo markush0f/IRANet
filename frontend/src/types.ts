@@ -112,6 +112,20 @@ export interface SystemPackageInstalledAtResponse {
     installed_at?: string | null;
 }
 
+export interface ClassifiedServiceRecord {
+    name: string;
+    source: string;
+    status: string;
+    process?: string | null;
+    image?: string | null;
+    port?: number | null;
+}
+
+export interface DatabaseClassification {
+    engine: string;
+    service: ClassifiedServiceRecord;
+}
+
 export interface SystemApplication {
     cwd: string;
     commands: string[];

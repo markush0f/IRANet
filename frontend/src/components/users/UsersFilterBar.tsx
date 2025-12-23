@@ -2,9 +2,9 @@ import React from 'react';
 import type { UserFilterOption } from '../../services/usersService';
 
 const FILTER_OPTIONS: { value: UserFilterOption; label: string }[] = [
-    { value: 'all', label: 'Todos' },
-    { value: 'human', label: 'Humanos' },
-    { value: 'system', label: 'Sistema' },
+    { value: 'all', label: 'All' },
+    { value: 'human', label: 'Human' },
+    { value: 'system', label: 'System' },
 ];
 
 interface UsersFilterBarProps {
@@ -29,7 +29,7 @@ const UsersFilterBar: React.FC<UsersFilterBarProps> = ({ currentFilter, onFilter
             </button>
         ))}
         <span className="text-[11px] text-zinc-400 font-mono">
-            Filtrando <strong>{currentFilter}</strong>
+            Filtering <strong>{currentFilter}</strong>
         </span>
     </div>
 );

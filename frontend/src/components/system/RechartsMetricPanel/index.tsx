@@ -60,10 +60,10 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
     }));
 
     const chartTypes = [
-        { value: 'area' as ChartType, label: 'Área', Icon: AreaChartIcon },
-        { value: 'line' as ChartType, label: 'Línea', Icon: LineChartIcon },
-        { value: 'bar' as ChartType, label: 'Barras', Icon: BarChart3 },
-        { value: 'composed' as ChartType, label: 'Combinada', Icon: TrendingUp },
+        { value: 'area' as ChartType, label: 'Area', Icon: AreaChartIcon },
+        { value: 'line' as ChartType, label: 'Line', Icon: LineChartIcon },
+        { value: 'bar' as ChartType, label: 'Bars', Icon: BarChart3 },
+        { value: 'composed' as ChartType, label: 'Composed', Icon: TrendingUp },
     ];
 
     return (

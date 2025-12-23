@@ -43,7 +43,7 @@ const HistoryFilters: React.FC<HistoryFiltersProps> = ({
                 ))}
             </div>
             <div className="flex flex-wrap items-center gap-2">
-                <label className="text-[11px] text-zinc-500 uppercase tracking-wide">Orden</label>
+                <label className="text-[11px] text-zinc-500 uppercase tracking-wide">Sort</label>
                 <div className="inline-flex rounded-full bg-zinc-900 border border-zinc-800 p-1">
                     <button
                         type="button"
@@ -73,7 +73,7 @@ const HistoryFilters: React.FC<HistoryFiltersProps> = ({
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col gap-2">
-                <label className="text-[11px] uppercase tracking-wide text-zinc-500">Desde</label>
+                <label className="text-[11px] uppercase tracking-wide text-zinc-500">From</label>
                 <input
                     type="datetime-local"
                     value={dateFrom}
@@ -82,7 +82,7 @@ const HistoryFilters: React.FC<HistoryFiltersProps> = ({
                 />
             </div>
             <div className="flex flex-col gap-2">
-                <label className="text-[11px] uppercase tracking-wide text-zinc-500">Hasta</label>
+                <label className="text-[11px] uppercase tracking-wide text-zinc-500">To</label>
                 <input
                     type="datetime-local"
                     value={dateTo}

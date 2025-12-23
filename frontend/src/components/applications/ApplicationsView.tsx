@@ -23,15 +23,15 @@ type ApplicationLog = {
 const initialApplications: Application[] = [
     {
         id: 'app-1',
-        name: 'Panel de control',
-        description: 'Interfaz principal del operador del sistema',
+        name: 'Control panel',
+        description: 'Main system operator interface',
         createdAt: new Date('2024-07-01T08:30:00Z').toISOString(),
         iconKey: 'activity',
     },
     {
         id: 'app-2',
-        name: 'Procesador de métricas',
-        description: 'Servicio que normaliza las series de métricas',
+        name: 'Metrics processor',
+        description: 'Service that normalizes metric series',
         createdAt: new Date('2024-07-12T16:40:00Z').toISOString(),
         iconKey: 'server',
     },
@@ -99,7 +99,7 @@ const ApplicationsView: React.FC = () => {
                     const recordId = record.id ?? record.identifier ?? crypto.randomUUID?.() ?? `app-${Date.now()}`;
                     return {
                         id: recordId,
-                        name: record.name || record.identifier || record.workdir || 'Aplicación',
+                        name: record.name || record.identifier || record.workdir || 'Application',
                         description: record.workdir,
                         createdAt: record.created_at ?? record.last_seen_at ?? new Date().toISOString(),
                         iconKey: 'server',
@@ -112,7 +112,7 @@ const ApplicationsView: React.FC = () => {
                     return;
                 }
                 console.error('Error loading applications list', err);
-                setListError('No se pudo cargar la lista de aplicaciones.');
+                setListError('The applications list could not be loaded.');
             })
             .finally(() => {
                 setLoadingList(false);
@@ -136,7 +136,7 @@ const ApplicationsView: React.FC = () => {
     const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!form.name.trim() || !form.cwd.trim()) {
-            setError('Nombre y CWD son obligatorios.');
+            setError('Name and CWD are required.');
             return;
         }
 
@@ -146,7 +146,7 @@ const ApplicationsView: React.FC = () => {
             .filter(Boolean);
 
         if (!logPaths.length) {
-            setError('Debes incluir al menos una ruta de logs.');
+            setError('You must include at least one log path.');
             return;
         }
 
@@ -183,7 +183,7 @@ const ApplicationsView: React.FC = () => {
             toast.custom(
                 () => (
                     <div className="rounded-2xl border border-emerald-500/30 bg-zinc-950 px-5 py-4 text-base text-emerald-200 shadow-xl">
-                        Aplicación creada correctamente
+                        Application created successfully
                     </div>
                 ),
                 { duration: 4000 }
@@ -199,7 +199,7 @@ const ApplicationsView: React.FC = () => {
             setMode('list');
         } catch (err) {
             console.error('Error creating application', err);
-            setError('No se pudo crear la aplicación. Verifica el backend.');
+            setError('The application could not be created. Please check the backend.');
         } finally {
             setSaving(false);
         }
@@ -215,7 +215,7 @@ const ApplicationsView: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Applications</h2>
-                    <p className="text-sm text-zinc-400 mt-1">Modelo sencillo de aplicaciones + bitácoras basado en las tablas del backend.</p>
+                    <p className="text-sm text-zinc-400 mt-1">Simple applications + logs model based on backend tables.</p>
                 </div>
                 {mode === 'list' && (
                     <button
@@ -223,7 +223,7 @@ const ApplicationsView: React.FC = () => {
                         onClick={() => setMode('create')}
                         className="inline-flex items-center gap-2 rounded-full border border-indigo-500 px-4 py-2 text-sm font-semibold text-indigo-300 hover:bg-indigo-500/10 transition"
                     >
-                        Crear aplicación
+                        Create application
                     </button>
                 )}
                 {mode === 'create' && (
@@ -232,7 +232,7 @@ const ApplicationsView: React.FC = () => {
                         onClick={() => setMode('list')}
                         className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 hover:bg-zinc-900 transition"
                     >
-                        Volver al listado
+                        Back to list
                     </button>
                 )}
             </div>
@@ -249,9 +249,9 @@ const ApplicationsView: React.FC = () => {
                             <table className="min-w-full text-xs divide-y divide-zinc-800">
                                 <thead className="bg-zinc-950/70">
                                     <tr>
-                                        <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Nombre</th>
-                                        <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Descripción</th>
-                                        <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Creado</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Name</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Description</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Created</th>
                                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Logs</th>
                                     </tr>
                                 </thead>
@@ -259,13 +259,13 @@ const ApplicationsView: React.FC = () => {
                                     {loadingList ? (
                                         <tr>
                                             <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
-                                                Cargando aplicaciones...
+                                                Loading applications...
                                             </td>
                                         </tr>
                                     ) : applications.length === 0 ? (
                                         <tr>
                                             <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
-                                                No hay aplicaciones registradas.
+                                                No applications registered.
                                             </td>
                                         </tr>
                                     ) : applications.map(app => {
@@ -292,12 +292,12 @@ const ApplicationsView: React.FC = () => {
                                                         <div key={log.id} className="text-[11px] leading-relaxed">
                                                             <span className="font-mono text-zinc-200">{log.logPath}</span>
                                                             <span className="ml-2 rounded-full bg-zinc-800/60 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
-                                                                {log.enabled ? 'Activo' : 'Desactivado'}
+                                                                {log.enabled ? 'Active' : 'Disabled'}
                                                             </span>
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <span className="text-[11px] text-zinc-500">Sin logs</span>
+                                                    <span className="text-[11px] text-zinc-500">No logs</span>
                                                 ))}
                                             </td>
                                         </tr>
@@ -309,7 +309,7 @@ const ApplicationsView: React.FC = () => {
                 </div>
             ) : (
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-6 shadow-lg space-y-5">
-                    <h3 className="text-xl font-semibold text-zinc-100">Nueva aplicación</h3>
+                    <h3 className="text-xl font-semibold text-zinc-100">New application</h3>
                     {error && (
                         <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">
                             {error}
@@ -317,7 +317,7 @@ const ApplicationsView: React.FC = () => {
                     )}
                     <form className="space-y-4" onSubmit={handleCreate}>
                         <div className="grid gap-2">
-                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Nombre</label>
+                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Name</label>
                             <input
                                 type="text"
                                 required
@@ -338,7 +338,7 @@ const ApplicationsView: React.FC = () => {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Descripción</label>
+                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Description</label>
                             <textarea
                                 value={form.description}
                                 onChange={event => handleChange('description', event.target.value)}
@@ -347,7 +347,7 @@ const ApplicationsView: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Icono</label>
+                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Icon</label>
                             <div className="mt-2 flex flex-wrap gap-2">
                                 {ICON_OPTIONS.map(option => (
                                     <button
@@ -367,7 +367,7 @@ const ApplicationsView: React.FC = () => {
                             </div>
                         </div>
                         <div className="grid gap-2">
-                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Rutas de logs (una por línea)</label>
+                            <label className="text-[11px] uppercase tracking-wide text-zinc-500">Log paths (one per line)</label>
                             <textarea
                                 value={form.logPaths}
                                 onChange={event => handleChange('logPaths', event.target.value)}
@@ -385,7 +385,7 @@ const ApplicationsView: React.FC = () => {
                                 className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500"
                             />
                             <label htmlFor="log-enabled" className="text-xs text-zinc-400">
-                                Habilitar log al crear
+                                Enable log on create
                             </label>
                         </div>
                         <div className="flex justify-stretch sm:justify-end">
@@ -394,7 +394,7 @@ const ApplicationsView: React.FC = () => {
                                 disabled={saving}
                                 className="w-full sm:w-auto rounded-full border border-transparent bg-indigo-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-800"
                             >
-                                {saving ? 'Guardando...' : 'Guardar aplicación'}
+                                {saving ? 'Saving...' : 'Save application'}
                             </button>
                         </div>
                     </form>

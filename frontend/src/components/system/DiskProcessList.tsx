@@ -15,7 +15,7 @@ const DiskProcessList: React.FC<DiskProcessListProps> = ({
     formatBytes,
 }) => {
     if (isLoading) {
-        return <div className="text-sm text-zinc-400">Cargando procesos…</div>;
+        return <div className="text-sm text-zinc-400">Loading processes…</div>;
     }
 
     if (error) {
@@ -27,13 +27,13 @@ const DiskProcessList: React.FC<DiskProcessListProps> = ({
     }
 
     if (!processes) {
-        return <div className="text-sm text-zinc-500">No hay datos disponibles para esta particion.</div>;
+        return <div className="text-sm text-zinc-500">No data available for this partition.</div>;
     }
 
     if (processes.processes.length === 0) {
         return (
             <div className="text-sm text-zinc-500">
-                No hay procesos con actividad registrada para este mountpoint.
+                No processes with recorded activity for this mountpoint.
             </div>
         );
     }
@@ -51,8 +51,8 @@ const DiskProcessList: React.FC<DiskProcessListProps> = ({
                             <span className="text-xs text-zinc-500">User: {process.user}</span>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-zinc-400">
-                            <span>Lectura: <span className="text-zinc-200">{formatBytes(process.read_bytes)}</span></span>
-                            <span>Escritura: <span className="text-zinc-200">{formatBytes(process.write_bytes)}</span></span>
+                            <span>Read: <span className="text-zinc-200">{formatBytes(process.read_bytes)}</span></span>
+                            <span>Write: <span className="text-zinc-200">{formatBytes(process.write_bytes)}</span></span>
                         </div>
                     </div>
                     {process.paths.length > 0 && (

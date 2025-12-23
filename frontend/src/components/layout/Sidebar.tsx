@@ -118,18 +118,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                 </svg>
             )
         },
+        // {
+        //     id: 'system-packages',
+        //     label: 'System packages',
+        //     icon: (
+        //         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14l-8-4m8 4v10m0 0l-8 4m8-4l8 4" />
+        //         </svg>
+        //     )
+        // },
         {
-            id: 'system-packages',
-            label: 'Paquetes del sistema',
-            icon: (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14l-8-4m8 4v10m0 0l-8 4m8-4l8 4" />
-                </svg>
-            )
-        },
-        {
-            id: 'apt-packages',
-            label: 'Paquetes APT',
+            id: 'packages-history',
+            label: 'Package history',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6m4-8h4l2 2v2h-8V6l2-2z" />
@@ -138,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
         },
         {
             id: 'alerts',
-            label: 'Alertas',
+            label: 'Alerts',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 22a2 2 0 002-2h-4a2 2 0 002 2zm6-6V11a6 6 0 10-12 0v5H4v2h16v-2h-2z" />
@@ -147,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
         },
         {
             id: 'metrics',
-            label: 'Métricas',
+            label: 'Metrics',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 4h12v16H6z" />
@@ -224,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
         // },
         {
             id: 'logs',
-            label: 'Applications logs',
+            label: 'Application logs',
             icon: (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -246,30 +246,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
 
     return (
         <div
-            className={`h-screen bg-zinc-950 border-r border-zinc-900 flex flex-col transition-all duration-300 ${
-                isCollapsed ? 'w-20' : 'w-64'
-            } fixed inset-y-0 left-0 z-40 transform ${
-                isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-            } lg:translate-x-0 lg:static lg:top-0 lg:sticky`}
+            className={`h-screen bg-zinc-950 border-r border-zinc-900 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+                } fixed inset-y-0 left-0 z-40 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+                } lg:translate-x-0 lg:static lg:top-0 lg:sticky`}
         >
             {/* Header / Logo Area */}
-            <div className="h-20 flex items-center px-6 border-b border-zinc-900 justify-between">
-                {!isCollapsed && (
-                    <div className="flex items-center gap-3">
-                        <div className="w-30 h-30   flex items-center justify-center ">
-                            <img src="/ira-logo.png" alt="" />
-                        </div>
-                        {/* <span className="text-lg font-bold text-zinc-100 tracking-tight">IRANet</span> */}
+            <div className="relative border-b border-zinc-900 px-6 py-5 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-1">
+                    <div className={`${isCollapsed ? 'w-14 h-14' : 'w-24 h-24'} flex items-center justify-center`}>
+                        <img src="/ira-logo.png" alt="IRANet" className="w-full h-full object-contain" />
                     </div>
-                )}
-                {isCollapsed && (
-                    <div className="w-full flex justify-center">
-                        <div className="w-30 h-30 flex items-center justify-center">
-                            <img src="/ira-logo.png" alt="" />
-                        </div>
-                    </div>
-                )}
-                <div className="flex items-center gap-2">
+                    {!isCollapsed && (
+                        <span className="text-base font-semibold text-zinc-100 tracking-[0.12em] uppercase leading-tight">
+                            IRANet
+                        </span>
+                    )}
+                </div>
+                <div className="absolute right-3 top-3 flex items-center gap-2">
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         className="text-zinc-500 hover:text-zinc-300 transition-colors hidden lg:block"
@@ -282,7 +275,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                         onClick={onMobileClose}
                         className="text-zinc-500 hover:text-zinc-300 transition-colors lg:hidden"
                         type="button"
-                        aria-label="Cerrar menú"
+                        aria-label="Close menu"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -298,7 +291,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                     const isInternetGroup = item.id === 'internet';
                     const isApplicationsGroup = item.id === 'applications';
                     const isServicesGroup = item.id === 'services';
-                    const servicesChildActive = activeView === 'docker' || activeView === 'system-services';
+                    const servicesChildActive = activeView === 'docker' || activeView === 'system-services' || activeView === 'system-databases';
                     const hasChildren = Boolean(item.children && item.children.length > 0);
                     const groupActive = hasChildren
                         ? (item.children ?? []).some(child => child.id === activeView)
@@ -423,7 +416,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6h12M6 10h12M6 14h12M6 18h12" />
                                         </svg>
-                                        <span>Servicios del sistema</span>
+                                        <span>System services</span>
+                                    </button>
+                                    <button
+                                        onClick={() => onNavigate('system-databases')}
+                                        className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                                            ${activeView === 'system-databases'
+                                                ? 'bg-indigo-600/10 text-indigo-400'
+                                                : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                            }
+                                        `}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11h8M8 15h6" />
+                                        </svg>
+                                        <span>Databases</span>
                                     </button>
                                 </div>
                             )}

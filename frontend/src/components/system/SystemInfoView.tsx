@@ -38,7 +38,7 @@ const SystemInfoView: React.FC = () => {
                 }
 
                 console.error('Error fetching system info', e);
-                setError('No se pudo cargar la información del sistema. Mostrando datos mock de respaldo.');
+                setError('System information could not be loaded. Showing fallback mock data.');
                 setInfo(MOCK_SYSTEM_INFO);
             } finally {
                 setLoading(false);
@@ -63,38 +63,38 @@ const SystemInfoView: React.FC = () => {
             <SystemInfoHeader error={error} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <InfoCard title="Identidad">
+                <InfoCard title="Identity">
                     <InfoRow label="Hostname" value={info.hostname} />
                     <InfoRow label="FQDN" value={info.fqdn} />
                     <InfoRow label="MAC" value={info.network?.mac_address ?? 'N/A'} />
                 </InfoCard>
 
-                <InfoCard title="Sistema operativo">
+                <InfoCard title="Operating system">
                     <InfoRow label="OS" value={info.os} />
-                    <InfoRow label="Versión" value={info.os_version} />
+                    <InfoRow label="Version" value={info.os_version} />
                     <InfoRow label="Kernel" value={info.kernel} />
                     <InfoRow
-                        label="Distribución"
+                        label="Distribution"
                         value={`${info.distribution.name} ${info.distribution.version} (${info.distribution.codename})`}
                     />
                 </InfoCard>
 
-                <InfoCard title="CPU y memoria">
-                    <InfoRow label="Arquitectura" value={info.architecture} />
-                    <InfoRow label="Procesador" value={info.processor} />
-                    <InfoRow label="Cores físicos" value={info.cpu?.cores_physical ?? 'N/A'} />
-                    <InfoRow label="Cores lógicos" value={info.cpu?.cores_logical ?? 'N/A'} />
+                <InfoCard title="CPU and memory">
+                    <InfoRow label="Architecture" value={info.architecture} />
+                    <InfoRow label="Processor" value={info.processor} />
+                    <InfoRow label="Physical cores" value={info.cpu?.cores_physical ?? 'N/A'} />
+                    <InfoRow label="Logical cores" value={info.cpu?.cores_logical ?? 'N/A'} />
                     <InfoRow
-                        label="Memoria total"
+                        label="Total memory"
                         value={info.memory ? formatBytesToGiB(info.memory.total_bytes) : 'N/A'}
                     />
                 </InfoCard>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <InfoCard title="Tiempo de arranque">
+                <InfoCard title="Boot time">
                     <p className="text-sm text-zinc-400 mb-4">
-                        Marca de tiempo Unix del arranque del sistema y fecha legible.
+                        Unix timestamp for system boot with a readable date.
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
                         <div>
@@ -102,7 +102,7 @@ const SystemInfoView: React.FC = () => {
                             <div className="text-lg font-mono text-zinc-100">{info.boot_time}</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs uppercase tracking-wide text-zinc-500 font-semibold mb-1">Fecha y hora</div>
+                            <div className="text-xs uppercase tracking-wide text-zinc-500 font-semibold mb-1">Date and time</div>
                             <div className="text-sm font-mono text-zinc-100">{formatBootTime(info.boot_time)}</div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@ const SystemInfoView: React.FC = () => {
                     title="Runtime"
                     description={
                         <>
-                            Datos obtenidos desde <code className="font-mono text-[11px]">/system/info</code>. Si el backend no responde se mostrarán datos mock de respaldo.
+                            Data from <code className="font-mono text-[11px]">/system/info</code>. If the backend is unavailable, fallback mock data is shown.
                         </>
                     }
                 >

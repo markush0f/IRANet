@@ -10,8 +10,8 @@ const MemoryMetricsView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [overrideHost, setOverrideHost] = useState('');
     const memoryMetrics = [
-        { id: 'memory.available_percent', label: 'Memoria disponible' },
-        { id: 'memory.used_percent', label: 'Memoria usada' },
+        { id: 'memory.available_percent', label: 'Available memory' },
+        { id: 'memory.used_percent', label: 'Used memory' },
     ];
     const [activeMemoryMetric, setActiveMemoryMetric] = useState(memoryMetrics[0]);
 
@@ -34,7 +34,7 @@ const MemoryMetricsView: React.FC = () => {
                 }
 
                 console.error('Error loading system info for Memory view', err);
-                setError('No se pudo cargar el hostname del sistema.');
+                setError('System hostname could not be loaded.');
             } finally {
                 setLoading(false);
             }
@@ -52,23 +52,23 @@ const MemoryMetricsView: React.FC = () => {
             <Card className="space-y-6 p-4 sm:p-6">
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
-                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Serie de métricas</Text>
-                        <Title className="text-2xl sm:text-3xl text-zinc-100">Memoria disponible en tiempo real</Title>
+                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Metrics series</Text>
+                        <Title className="text-2xl sm:text-3xl text-zinc-100">Real-time available memory</Title>
                         <Text className="text-sm text-zinc-400 max-w-3xl">
-                            Consulta el porcentaje de memoria disponible del host cada 5 segundos o desde un intervalo personalizado.
-                            Si el hostname no se detecta automáticamente, puedes forzar uno para apuntar a la instancia correcta.
+                            Check the host's available memory percentage every 5 seconds or over a custom range.
+                            If the hostname is not detected automatically, you can provide one to target the correct instance.
                         </Text>
                     </div>
                     <Badge color="emerald" size="xs">
-                        Actualización cada 5 segundos
+                        Updates every 5 seconds
                     </Badge>
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
                     <Text className="text-sm text-zinc-400">
-                        {loading && 'Cargando información del host…'}
-                        {!loading && hostname && `Host detectado: ${hostname}`}
-                        {!loading && !hostname && 'No se detectó ningún hostname por defecto.'}
+                        {loading && 'Loading host information…'}
+                        {!loading && hostname && `Detected host: ${hostname}`}
+                        {!loading && !hostname && 'No default hostname detected.'}
                     </Text>
                     <div className="flex flex-col gap-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Host override</Text>
@@ -108,7 +108,7 @@ const MemoryMetricsView: React.FC = () => {
                     <RechartsMetricPanel
                         hostname={hostToUse || undefined}
                         metric={activeMemoryMetric.id}
-                        seriesLabel={`Serie de métricas de ${activeMemoryMetric.label.toLowerCase()}`}
+                        seriesLabel={`Metrics series for ${activeMemoryMetric.label.toLowerCase()}`}
                         valueFormatter={value => `${value.toFixed(2)}%`}
                     />
                 </div>

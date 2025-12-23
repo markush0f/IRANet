@@ -36,7 +36,7 @@ export const useAlerts = (initialPage = 1, initialPageSize = DEFAULT_PAGE_SIZE) 
                     return;
                 }
                 console.error('Error fetching alerts', err);
-                setError('No se pudieron cargar las alertas. Intenta nuevamente.');
+                setError('Alerts could not be loaded. Please try again.');
             })
             .finally(() => {
                 if (append) {

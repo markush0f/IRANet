@@ -13,7 +13,7 @@ const UsersPageHeader: React.FC<UsersPageHeaderProps> = ({ searchTerm, onSearchT
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">User Directory</h2>
                 <div className="h-1 w-20 bg-indigo-600 rounded-full mt-4" />
                 <p className="text-zinc-400 mt-2 text-sm">
-                    Controla los usuarios conocidos por el sistema y revisa el resumen actualizado desde el backend.
+                    Manage known system users and review the updated summary from the backend.
                 </p>
                 {error && (
                     <p className="mt-2 text-xs text-amber-400">{error}</p>
@@ -28,7 +28,7 @@ const UsersPageHeader: React.FC<UsersPageHeaderProps> = ({ searchTerm, onSearchT
                     </div>
                     <input
                         type="text"
-                        placeholder="Buscar usuario..."
+                        placeholder="Search user..."
                         value={searchTerm}
                         onChange={(event) => onSearchTermChange(event.target.value)}
                         className="block w-full pl-10 pr-3 py-2.5 border border-zinc-800 rounded-lg leading-5 bg-zinc-900 text-zinc-300 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
