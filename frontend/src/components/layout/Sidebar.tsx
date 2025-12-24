@@ -246,30 +246,42 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
 
     return (
         <div
-            className={`h-screen bg-zinc-950 border-r border-zinc-900 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+            className={`h-screen bg-gradient-to-b from-zinc-950 via-zinc-950 to-zinc-900/80 border-r border-zinc-800/80 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
                 } fixed inset-y-0 left-0 z-40 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
                 } lg:translate-x-0 lg:static lg:top-0 lg:sticky`}
         >
             {/* Header / Logo Area */}
-            <div className="relative border-b border-zinc-900 px-6 py-5 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-1">
-                    <div className={`${isCollapsed ? 'w-14 h-14' : 'w-24 h-24'} flex items-center justify-center`}>
-                        <img src="/ira-logo.png" alt="IRANet" className="w-full h-full object-contain" />
-                    </div>
-                    {!isCollapsed && (
-                        <span className="text-base font-semibold text-zinc-100 tracking-[0.12em] uppercase leading-tight">
+            <div
+                className={`border-b border-zinc-800/80 px-4 py-4 flex items-center ${
+                    isCollapsed ? 'justify-center' : 'justify-between'
+                }`}
+            >
+                {!isCollapsed && (
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900/60 border border-zinc-800 shadow-inner">
+                            <img src="/ira-logo.png" alt="IRANet" className="w-4/5 h-4/5 object-contain" />
+                        </div>
+                        <span className="text-sm font-semibold text-zinc-100 tracking-[0.18em] uppercase leading-tight">
                             IRANet
                         </span>
-                    )}
-                </div>
-                <div className="absolute right-3 top-3 flex items-center gap-2">
+                    </div>
+                )}
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="text-zinc-500 hover:text-zinc-300 transition-colors hidden lg:block"
+                        className="hidden lg:inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100 hover:border-zinc-600 transition-colors"
+                        type="button"
+                        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                     >
-                        <svg className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                        </svg>
+                        {isCollapsed ? (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        )}
                     </button>
                     <button
                         onClick={onMobileClose}
@@ -285,7 +297,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+            <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
                 {navItems.map(item => {
                     const isMetricsGroup = item.id === 'metrics';
                     const isInternetGroup = item.id === 'internet';
@@ -321,15 +333,20 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                     }
                                     onNavigate(item.id);
                                 }}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent transition-all duration-200 group relative
                                     ${groupActive
-                                        ? 'bg-indigo-600/10 text-indigo-400'
-                                        : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                        ? 'bg-indigo-600/10 text-indigo-400 border-indigo-500/30 shadow-[0_0_0_1px_rgba(99,102,241,0.2)]'
+                                        : 'text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-100'
                                     }
                                     ${isCollapsed ? 'justify-center' : ''}
                                 `}
                             >
-                                <div className={`${groupActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                <span
+                                    className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r ${
+                                        groupActive && !isCollapsed ? 'bg-indigo-400' : 'bg-transparent'
+                                    }`}
+                                />
+                                <div className={`${groupActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-200'}`}>
                                     {item.icon}
                                 </div>
 
@@ -389,13 +406,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                             </button>
 
                             {!isCollapsed && item.id === 'services' && servicesOpen && (
-                                <div className="ml-8 mt-1 space-y-1">
+                                <div className="ml-8 mt-2 space-y-1">
                                     <button
                                         onClick={() => onNavigate('docker')}
                                         className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                             ${activeView === 'docker'
                                                 ? 'bg-indigo-600/10 text-indigo-400'
-                                                : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
                                             }
                                         `}
                                     >
@@ -409,7 +426,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                         className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                             ${activeView === 'system-services'
                                                 ? 'bg-indigo-600/10 text-indigo-400'
-                                                : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
                                             }
                                         `}
                                     >
@@ -423,7 +440,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                         className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                             ${activeView === 'system-databases'
                                                 ? 'bg-indigo-600/10 text-indigo-400'
-                                                : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
                                             }
                                         `}
                                     >
@@ -437,7 +454,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                             )}
 
                             {!isCollapsed && isMetricsGroup && metricsOpen && (
-                                <div className="ml-8 mt-1 space-y-1">
+                                <div className="ml-8 mt-2 space-y-1">
                                     {(item.children ?? []).map(child => (
                                         <button
                                             key={child.id}
@@ -445,11 +462,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                             className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                                 ${activeView === child.id
                                                     ? 'bg-indigo-600/10 text-indigo-400'
-                                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
                                                 }
                                             `}
                                         >
-                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-200'}`}>
                                                 {child.icon}
                                             </div>
                                             <span className="flex-1">{child.label}</span>
@@ -461,7 +478,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                 </div>
                             )}
                             {!isCollapsed && isInternetGroup && internetOpen && (
-                                <div className="ml-8 mt-1 space-y-1">
+                                <div className="ml-8 mt-2 space-y-1">
                                     {(item.children ?? []).map(child => (
                                         <button
                                             key={child.id}
@@ -469,11 +486,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                             className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                                 ${activeView === child.id
                                                     ? 'bg-indigo-600/10 text-indigo-400'
-                                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
                                                 }
                                             `}
                                         >
-                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-200'}`}>
                                                 {child.icon}
                                             </div>
                                             <span className="flex-1">{child.label}</span>
@@ -485,7 +502,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                 </div>
                             )}
                             {!isCollapsed && isApplicationsGroup && applicationsOpen && (
-                                <div className="ml-8 mt-1 space-y-1">
+                                <div className="ml-8 mt-2 space-y-1">
                                     {(item.children ?? []).map(child => (
                                         <button
                                             key={child.id}
@@ -493,11 +510,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                             className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                                 ${activeView === child.id
                                                     ? 'bg-indigo-600/10 text-indigo-400'
-                                                    : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
+                                                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
                                                 }
                                             `}
                                         >
-                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`}>
+                                            <div className={`${activeView === child.id ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-200'}`}>
                                                 {child.icon}
                                             </div>
                                             <span className="flex-1">{child.label}</span>
@@ -514,9 +531,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
             </nav>
 
             {/* User Profile */}
-            <div className={`p-4 border-t border-zinc-900 ${isCollapsed ? 'flex justify-center' : ''}`}>
+            <div className={`p-4 border-t border-zinc-800/80 ${isCollapsed ? 'flex justify-center' : ''}`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-400">
+                    <div className="w-9 h-9 rounded-xl bg-zinc-900/70 border border-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-400">
                         AD
                     </div>
                     {!isCollapsed && (
