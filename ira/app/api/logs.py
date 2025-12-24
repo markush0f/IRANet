@@ -63,19 +63,19 @@ async def application_log_file_history(
         limit=limit,
     )
 
-@router.post("/applications/{application_id}/logs/rescan")
-async def rescan_application_logs(
-    application_id: UUID,
-    session: AsyncSession = Depends(get_session),
-):
-    service = ApplicationLogsService(session)
+# @router.post("/applications/{application_id}/logs/rescan")
+# async def rescan_application_logs(
+#     application_id: UUID,
+#     session: AsyncSession = Depends(get_session),
+# ):
+#     service = ApplicationLogsService(session)
 
-    added = await service.rescan_application_logs(
-        application_id=application_id,
-    )
+#     added = await service.rescan_application_logs(
+#         application_id=application_id,
+#     )
 
-    return {
-        "added": added,
-    }
+#     return {
+#         "added": added,
+#     }
 
 # TODO get logs from file with specific date range

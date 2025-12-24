@@ -1,12 +1,11 @@
+from typing import Dict, List, Optional, Sequence, Set
 from uuid import UUID
-from typing import Dict, List, Optional, Sequence, Tuple, Set
 from pathlib import Path
-from datetime import datetime
-import json
-import re
 
 from fastapi import WebSocket
+from sqlalchemy.exc import IntegrityError
 
+from app.core.logger import get_logger
 from app.modules.logs.inspector import list_log_files
 from app.modules.logs.reader import read_last_lines
 from app.modules.logs.resolver import resolve_log_files
@@ -15,84 +14,34 @@ from app.modules.scanner.logs import detect_log_paths
 from app.repositories.logs import ApplicationLogRepository
 from app.utils.logs_parser import parse_log_line, passes_filters
 
-
-LEVEL_BY_NUMBER = {
-    10: "trace",
-    20: "debug",
-    30: "info",
-    40: "warn",
-    50: "error",
-    60: "fatal",
-}
-
-TEXT_LEVEL_REGEX: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\bTRACE\b", re.I), "trace"),
-    (re.compile(r"\bDEBUG\b", re.I), "debug"),
-    (re.compile(r"\bINFO\b", re.I), "info"),
-    (re.compile(r"\bWARN(ING)?\b", re.I), "warn"),
-    (re.compile(r"\bERROR\b", re.I), "error"),
-    (re.compile(r"\bFATAL\b", re.I), "fatal"),
-]
-
-ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*m")
+logger = get_logger()
 
 
 class ApplicationLogsService:
     def __init__(self, session) -> None:
         self._repo = ApplicationLogRepository(session)
 
-    async def attach_logs(
+    async def attach_log_paths(
         self,
         *,
         application_id: UUID,
         workdir: str,
-        manual_paths: Optional[List[str]] = None,
     ) -> None:
-        if manual_paths:
-            paths = manual_paths
-            discovered = False
-        else:
-            paths = detect_log_paths(workdir)
-            discovered = True
-
-        for path in paths:
-            await self._repo.insert(
-                application_id=application_id,
-                path=path,
-                discovered=discovered,
-                enabled=True,
-            )
-
-    async def rescan_application_logs(
-        self,
-        *,
-        application_id: UUID,
-    ) -> int:
-        """
-        Rescan filesystem paths associated with the application
-        and register newly discovered log files.
-
-        Returns the number of new log files added.
-        """
-        base_paths = await self._repo.list_active_paths(
-            application_id=application_id,
-        )
-
-        added = 0
+        session = self._repo._session
+        base_paths = detect_log_paths(workdir)
 
         for base_path in base_paths:
-            for log_file in resolve_log_files(base_path):
-                created = await self._repo.insert_if_not_exists(
+            try:
+                await self._repo.insert(
                     application_id=application_id,
-                    path=log_file,
-                    discovered=True,
+                    base_path=base_path,
                     enabled=True,
                 )
+                await session.flush()
+            except IntegrityError:
+                await session.rollback()
 
-                if created:
-                    added += 1
-
-        return added
+        await session.commit()
 
     async def stream_application_log_file(
         self,
@@ -107,7 +56,7 @@ class ApplicationLogsService:
     ) -> None:
         await websocket.accept()
 
-        allowed_base_paths = await self._repo.list_active_paths(
+        allowed_base_paths = await self._repo.list_active_base_paths(
             application_id=application_id,
         )
 
@@ -127,7 +76,9 @@ class ApplicationLogsService:
         allowed_levels: Optional[Set[str]] = None
         if levels:
             allowed_levels = {
-                level.strip().lower() for level in levels.split(",") if level.strip()
+                level.strip().lower()
+                for level in levels.split(",")
+                if level.strip()
             }
 
         search_term = search.lower() if search else None
@@ -180,29 +131,6 @@ class ApplicationLogsService:
 
             await websocket.send_json(event)
 
-    async def get_application_log_file_history(
-        self,
-        *,
-        application_id: UUID,
-        file_path: str,
-        limit: int = 200,
-    ) -> List[str]:
-        allowed_base_paths = await self._repo.list_active_paths(
-            application_id=application_id,
-        )
-
-        requested = Path(file_path).resolve()
-
-        for base_path in allowed_base_paths:
-            for log_file in resolve_log_files(base_path):
-                if Path(log_file).resolve() == requested:
-                    return read_last_lines(
-                        path=log_file,
-                        limit=limit,
-                    )
-
-        return []
-
     async def get_application_log_files(
         self,
         *,
@@ -210,14 +138,16 @@ class ApplicationLogsService:
         page: int = 1,
         page_size: int = 20,
     ) -> Dict:
-        paths = await self._repo.list_active_paths(
+        base_paths = await self._repo.list_active_base_paths(
             application_id=application_id,
         )
 
         all_files: List[Dict] = []
 
-        for path in paths:
-            all_files.extend(list_log_files(directory=path))
+        for base_path in base_paths:
+            all_files.extend(
+                list_log_files(directory=base_path)
+            )
 
         all_files.sort(
             key=lambda f: f["created_at"],
@@ -235,11 +165,35 @@ class ApplicationLogsService:
             "items": all_files[start:end],
         }
 
-    async def get_applications_path_logs(
+    async def get_application_log_file_history(
         self,
+        *,
+        application_id: UUID,
+        file_path: str,
+        limit: int = 200,
+    ) -> List[str]:
+        allowed_base_paths = await self._repo.list_active_base_paths(
+            application_id=application_id,
+        )
+
+        requested = Path(file_path).resolve()
+
+        for base_path in allowed_base_paths:
+            for log_file in resolve_log_files(base_path):
+                if Path(log_file).resolve() == requested:
+                    return read_last_lines(
+                        path=log_file,
+                        limit=limit,
+                    )
+
+        return []
+
+    async def get_application_log_base_paths(
+        self,
+        *,
         application_id: UUID,
     ) -> Sequence[str]:
-        return await self._repo.list_active_paths(
+        return await self._repo.list_active_base_paths(
             application_id=application_id,
         )
 
@@ -263,9 +217,6 @@ class ApplicationLogsService:
             "context": context,
             "type": event_type,
         }
-
-    def _normalize_line(self, line: str) -> str:
-        return ANSI_REGEX.sub("", line).strip()
 
     def _is_allowed_file(
         self,

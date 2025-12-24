@@ -2,13 +2,12 @@ from typing import Sequence
 from uuid import UUID
 from datetime import datetime, timezone
 
-from psycopg2 import IntegrityError
-from sqlalchemy import column, asc
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import asc
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.entities.application_log import ApplicationLog
+from app.models.entities.application_log import ApplicationLogPath
 
 
 class ApplicationLogRepository:
@@ -19,27 +18,27 @@ class ApplicationLogRepository:
         self,
         *,
         application_id: UUID,
-    ) -> Sequence[ApplicationLog]:
+    ) -> Sequence[ApplicationLogPath]:
         result = await self._session.exec(
-            select(ApplicationLog)
-            .where(ApplicationLog.application_id == application_id)
-            .order_by(asc(column("created_at")))
+            select(ApplicationLogPath)
+            .where(ApplicationLogPath.application_id == application_id)
+            .order_by(asc(ApplicationLogPath.created_at))  # type: ignore
         )
         return result.all()
 
-    async def list_active_paths(
+    async def list_active_base_paths(
         self,
         *,
         application_id: UUID,
     ) -> Sequence[str]:
         result = await self._session.exec(
-            select(ApplicationLog.path)
+            select(ApplicationLogPath.base_path)
             .where(
-                ApplicationLog.application_id == application_id,
-                column("enabled").is_(True),
-                column("discovered").is_(True),
+                ApplicationLogPath.application_id == application_id,
+                ApplicationLogPath.enabled.is_(True),# type: ignore
+                ApplicationLogPath.discovered.is_(True),# type: ignore
             )
-            .order_by(asc(column("created_at")))
+            .order_by(asc(ApplicationLogPath.created_at))# type: ignore
         )
         return result.all()
 
@@ -47,45 +46,16 @@ class ApplicationLogRepository:
         self,
         *,
         application_id: UUID,
-        path: str,
+        base_path: str,
         discovered: bool = True,
         enabled: bool = True,
     ) -> None:
-        stmt = (
-            insert(ApplicationLog)
-            .values(
-                application_id=application_id,
-                path=path,
-                discovered=discovered,
-                enabled=enabled,
-                created_at=datetime.now(timezone.utc),
-            )
-            .on_conflict_do_nothing(index_elements=["application_id", "path"])
-        )
-
-        await self._session.exec(stmt)
-        await self._session.commit()
-
-    async def insert_if_not_exists(
-        self,
-        *,
-        application_id: UUID,
-        path: str,
-        discovered: bool,
-        enabled: bool,
-    ) -> bool:
-        log = ApplicationLog(
+        entity = ApplicationLogPath(
             application_id=application_id,
-            path=path,
+            base_path=base_path,
             discovered=discovered,
             enabled=enabled,
+            created_at=datetime.now(timezone.utc),
         )
 
-        self._session.add(log)
-
-        try:
-            await self._session.commit()
-            return True
-        except IntegrityError:
-            await self._session.rollback()
-            return False
+        self._session.add(entity)

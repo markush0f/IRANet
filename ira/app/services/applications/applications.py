@@ -1,9 +1,9 @@
-from typing import Dict, List, Sequence
+from typing import List, Sequence
 from uuid import UUID
+
 from app.models.dto.application_logs_dto import ApplicationsLogsDTO
 from app.models.entities.application import Application
 from app.models.requests.create_application_request import CreateApplicationRequest
-from app.modules.scanner.models import ScannedProcess
 from app.repositories.applications import ApplicationRepository
 from app.services.logs_service import ApplicationLogsService
 
@@ -27,7 +27,6 @@ class ApplicationsService:
         identifier = self.build_application_identifier(data.cwd)
 
         existing = await self.applications_repository.get_by_identifier(identifier)
-
         if existing:
             return existing.id
 
@@ -39,7 +38,8 @@ class ApplicationsService:
             enabled=True,
         )
 
-        await self._logs_service.attach_logs(
+        # 🔧 CORRECTO: solo base paths
+        await self._logs_service.attach_log_paths(
             application_id=application.id,
             workdir=data.cwd,
         )
@@ -47,18 +47,16 @@ class ApplicationsService:
         return application.id
 
     async def list_applications(self) -> Sequence[Application]:
-        applications = await self.applications_repository.list_all()
-        return applications
+        return await self.applications_repository.list_all()
 
     async def applications_lists(
         self,
     ) -> Sequence[ApplicationsLogsDTO]:
         applications = await self.applications_repository.list_all()
-
         result: List[ApplicationsLogsDTO] = []
 
         for application in applications:
-            log_paths = await self._logs_service.get_applications_path_logs(
+            base_paths = await self._logs_service.get_application_log_base_paths(
                 application_id=application.id
             )
 
@@ -72,7 +70,8 @@ class ApplicationsService:
                     "file_path": application.file_path,
                     "port": application.port,
                     "pid": application.pid,
-                    "log_paths": log_paths,
+                    # ⚠️ Sigue llamándose log_paths para no romper frontend
+                    "log_paths": base_paths,
                 }
             )
 
@@ -82,11 +81,10 @@ class ApplicationsService:
         self,
     ) -> Sequence[ApplicationsLogsDTO]:
         applications = await self.applications_repository.applications_with_path_logs()
-
         result: List[ApplicationsLogsDTO] = []
 
         for application in applications:
-            log_paths = await self._logs_service.get_applications_path_logs(
+            base_paths = await self._logs_service.get_application_log_base_paths(
                 application_id=application.id
             )
 
@@ -100,7 +98,7 @@ class ApplicationsService:
                     "file_path": application.file_path,
                     "port": application.port,
                     "pid": application.pid,
-                    "log_paths": log_paths,
+                    "log_paths": base_paths,
                 }
             )
 

@@ -8,7 +8,7 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.entities.application import Application
-from app.models.entities.application_log import ApplicationLog
+from app.models.entities.application_log import ApplicationLogPath
 
 
 class ApplicationRepository:
@@ -85,14 +85,13 @@ class ApplicationRepository:
         await self._session.commit()
 
     async def applications_with_path_logs(
-    self,
+        self,
     ) -> Sequence[Application]:
         stmt = (
             select(Application)
             .where(
-                select(ApplicationLog.application_id)
-                .where(ApplicationLog.application_id == Application.id)
-                .exists()
+                exists()
+                .where(ApplicationLogPath.application_id == Application.id) 
             )
         )
 
