@@ -47,7 +47,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const [discoveryDetails, setDiscoveryDetails] = useState<ApplicationDiscoveryDetails | null>(null);
     const [discoveryError, setDiscoveryError] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
-    const [logPaths, setLogPaths] = useState<string[]>([]);
+    const [logBasePaths, setLogBasePaths] = useState<string[]>([]);
     const [loadingDetails, setLoadingDetails] = useState(false);
     const [savingApplication, setSavingApplication] = useState(false);
     const [technicalDetailsOpen, setTechnicalDetailsOpen] = useState(false);
@@ -57,7 +57,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         setLoadingDetails(true);
         setDiscoveryError(null);
         setDiscoveryDetails(null);
-        setLogPaths([]);
+        setLogBasePaths([]);
         setFetchKey(key => key + 1);
     };
 
@@ -76,7 +76,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         setApplicationName('');
         setSelectedApplication(null);
         setDiscoveryDetails(null);
-        setLogPaths([]);
+        setLogBasePaths([]);
         setDiscoveryError(null);
         setSaveError(null);
         setLoadingDetails(false);
@@ -87,7 +87,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const handleSaveApplication = async () => {
         const cwd = discoveryCwd.trim();
         const name = applicationName.trim();
-        const cleanedPaths = logPaths.map(path => path.trim()).filter(Boolean);
+        const cleanedBasePaths = logBasePaths.map(path => path.trim()).filter(Boolean);
 
         if (!cwd || !name) {
             setSaveError('Name and CWD are required.');
@@ -101,7 +101,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             await createApplication({
                 cwd,
                 name,
-                log_paths: cleanedPaths,
+                log_base_paths: cleanedBasePaths,
             });
             toast.custom(
                 () => (
@@ -128,20 +128,20 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         prepareDiscoveryRequest();
     };
 
-    const handleLogPathChange = (index: number, value: string) => {
-        setLogPaths(prev => {
+    const handleLogBasePathChange = (index: number, value: string) => {
+        setLogBasePaths(prev => {
             const next = [...prev];
             next[index] = value;
             return next;
         });
     };
 
-    const handleAddLogPath = () => {
-        setLogPaths(prev => [...prev, '']);
+    const handleAddLogBasePath = () => {
+        setLogBasePaths(prev => [...prev, '']);
     };
 
-    const handleRemoveLogPath = (index: number) => {
-        setLogPaths(prev => prev.filter((_, idx) => idx !== index));
+    const handleRemoveLogBasePath = (index: number) => {
+        setLogBasePaths(prev => prev.filter((_, idx) => idx !== index));
     };
 
     useEffect(() => {
@@ -154,11 +154,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         getApplicationDiscoveryDetails(discoveryCwd, 15, controller.signal)
             .then(data => {
                 setDiscoveryDetails(data);
-                setLogPaths(
-                    data.detected_log_paths ??
-                    data.paths?.log_paths ??
-                    []
-                );
+                setLogBasePaths(data.paths?.log_base_paths ?? []);
             })
             .catch(error => {
                 if (error.name !== 'AbortError') {
@@ -208,6 +204,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
     const accessPorts = discoveryDetails?.access?.ports ?? [];
     const accessUrls = discoveryDetails?.access?.urls ?? [];
     const accessAvailable = discoveryDetails?.access?.available;
+    const detectedBasePaths = discoveryDetails?.paths?.log_base_paths ?? [];
 
     const modalDisplayName =
         discoveryDetails?.name ?? selectedApplication?.cwd ?? 'Detected application';
@@ -218,7 +215,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
             <section className="mt-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-xl">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Applications</p>
+                        <p className="text-xs uppercase tracking-wide text-zinc-500">Applications</p>
                         <h3 className="text-lg font-semibold text-zinc-100">System applications</h3>
                     </div>
                 </div>
@@ -360,31 +357,36 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                         </div>
 
                         <div className="mt-6 space-y-3">
+                            {detectedBasePaths.length > 0 && (
+                                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 px-4 py-3 text-xs text-zinc-400">
+                                    Suggested base paths detected. You can edit or add more below.
+                                </div>
+                            )}
                             <div className="flex items-center justify-between gap-3">
-                                <p className="text-[10px] uppercase tracking-wide text-zinc-500">Detected log paths</p>
+                                <p className="text-[10px] uppercase tracking-wide text-zinc-500">Log base paths</p>
                                 <button
                                     type="button"
-                                    onClick={handleAddLogPath}
+                                    onClick={handleAddLogBasePath}
                                     className="rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400 transition hover:border-zinc-600 hover:text-white"
                                 >
                                     + Add path
                                 </button>
                             </div>
 
-                            {logPaths.length > 0 ? (
+                            {logBasePaths.length > 0 ? (
                                 <div className="space-y-2">
-                                    {logPaths.map((path, index) => (
+                                    {logBasePaths.map((path, index) => (
                                         <div key={`${path}-${index}`} className="flex items-center gap-3">
                                             <span className="text-sm text-zinc-500">•</span>
                                             <input
                                                 type="text"
                                                 value={path}
-                                                onChange={event => handleLogPathChange(index, event.target.value)}
+                                                onChange={event => handleLogBasePathChange(index, event.target.value)}
                                                 className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm font-mono text-zinc-100 focus:border-emerald-500 focus:outline-none"
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => handleRemoveLogPath(index)}
+                                                onClick={() => handleRemoveLogBasePath(index)}
                                                 className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 transition hover:border-zinc-600 hover:text-white"
                                             >
                                                 ✕
@@ -393,7 +395,7 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-zinc-500">No paths detected; you can add them manually.</p>
+                                <p className="text-sm text-zinc-500">No base paths yet; add at least one.</p>
                             )}
                         </div>
 
@@ -402,9 +404,8 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                                 <p className="text-[10px] uppercase tracking-wide text-zinc-500">Detected access</p>
                                 {accessAvailable != null && (
                                     <span
-                                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-                                            accessAvailable ? 'text-emerald-300 border border-emerald-500/60' : 'text-rose-300 border border-rose-500/60'
-                                        }`}
+                                        className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${accessAvailable ? 'text-emerald-300 border border-emerald-500/60' : 'text-rose-300 border border-rose-500/60'
+                                            }`}
                                     >
                                         {accessAvailable ? 'available' : 'unavailable'}
                                     </span>

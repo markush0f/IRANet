@@ -178,31 +178,29 @@ const SystemPackagesHistoryView: React.FC = () => {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p className="text-xs uppercase tracking-wide text-zinc-500">System</p>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Package history</h2>
-                    <p className="text-sm text-zinc-400 mt-2 max-w-2xl">
-                        Review installed packages and package history with a focus on traceability.
+                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Packages</h2>
+                    <p className="text-sm text-zinc-400 mt-2 max-w-2xl"> 
+                        Review installed packages and package with a focus on traceability.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
                         onClick={() => setActiveTab('installed')}
-                        className={`rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${
-                            activeTab === 'installed'
-                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                        }`}
+                        className={`rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${activeTab === 'installed'
+                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                            : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                            }`}
                     >
                         Installed Packages
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('history')}
-                        className={`rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${
-                            activeTab === 'history'
-                                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                        }`}
+                        className={`rounded-full border px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${activeTab === 'history'
+                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
+                            : 'border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                            }`}
                     >
                         Global History
                     </button>

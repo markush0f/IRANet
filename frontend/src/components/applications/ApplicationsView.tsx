@@ -175,7 +175,7 @@ const ApplicationsView: React.FC = () => {
             await createApplication({
                 cwd: form.cwd.trim(),
                 name: form.name.trim(),
-                log_paths: logPaths,
+                log_base_paths: logPaths,
             });
 
             setApplications(prev => [newApplication, ...prev]);

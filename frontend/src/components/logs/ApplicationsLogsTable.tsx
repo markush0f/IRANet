@@ -11,9 +11,17 @@ interface ApplicationsLogsTableProps {
     applications: RemoteApplicationRecord[];
     loading: boolean;
     onShowLogs: (app: RemoteApplicationRecord) => void;
+    onRescanLogs: (app: RemoteApplicationRecord) => void;
+    rescanLoading: Record<string, boolean>;
 }
 
-const ApplicationsLogsTable: React.FC<ApplicationsLogsTableProps> = ({ applications, loading, onShowLogs }) => {
+const ApplicationsLogsTable: React.FC<ApplicationsLogsTableProps> = ({
+    applications,
+    loading,
+    onShowLogs,
+    onRescanLogs,
+    rescanLoading,
+}) => {
     return (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-5 shadow-lg">
             <div className="overflow-x-auto">
@@ -23,20 +31,19 @@ const ApplicationsLogsTable: React.FC<ApplicationsLogsTableProps> = ({ applicati
                             <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Name</th>
                             <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Workdir</th>
                             <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Created</th>
-                            <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Log paths</th>
                             <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800">
                         {loading ? (
                             <tr>
-                                <td className="px-4 py-6 text-center text-zinc-500" colSpan={5}>
+                                <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
                                     Loading applications...
                                 </td>
                             </tr>
                         ) : applications.length === 0 ? (
                             <tr>
-                                <td className="px-4 py-6 text-center text-zinc-500" colSpan={5}>
+                                <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
                                     No applications with configured logs.
                                 </td>
                             </tr>
@@ -52,21 +59,24 @@ const ApplicationsLogsTable: React.FC<ApplicationsLogsTableProps> = ({ applicati
                                     <td className="px-4 py-3 text-zinc-400 font-mono">
                                         {formatDate(app.created_at)}
                                     </td>
-                                    <td className="px-4 py-3 text-zinc-300">
-                                        {(app.log_paths ?? []).map((path, index) => (
-                                            <div key={`${app.identifier}-log-${index}`} className="text-[11px] leading-relaxed">
-                                                <span className="font-mono text-zinc-200">{path}</span>
-                                            </div>
-                                        ))}
-                                    </td>
                                     <td className="px-4 py-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => onShowLogs(app)}
-                                            className="inline-flex items-center rounded-full border border-emerald-500/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:text-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            Show logs
-                                        </button>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => onShowLogs(app)}
+                                                className="inline-flex items-center rounded-full border border-emerald-500/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:text-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                Show logs
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => onRescanLogs(app)}
+                                                disabled={!app.id || rescanLoading[app.id]}
+                                                className="inline-flex items-center rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-zinc-500 hover:text-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                {rescanLoading[app.id ?? ''] ? 'Rescanning...' : 'Rescan logs'}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))

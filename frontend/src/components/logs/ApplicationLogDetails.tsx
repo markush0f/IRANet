@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { RemoteApplicationRecord } from '../../services/api';
 import type { LiveStatus } from '../../hooks/useApplicationsLogs';
-import LogHistoryPanel from './LogHistoryPanel';
+import type { LogEvent } from '../../types';
 import LiveLogPanel from './LiveLogPanel';
 
 interface ApplicationLogDetailsProps {
@@ -12,21 +12,18 @@ interface ApplicationLogDetailsProps {
     selectedFile: string | null;
     onSelectFile: (path: string) => void;
     onClose: () => void;
-    history: {
-        lines: string[];
-        loading: boolean;
-        error: string | null;
-        limit: number;
-        onLimitChange: (next: number) => void;
-        onReload: () => void;
-    };
     live: {
         enabled: boolean;
         status: LiveStatus;
         error: string | null;
-        lines: string[];
+        lines: LogEvent[];
         onToggle: () => void;
         onClear: () => void;
+        levelFilter: 'all' | NonNullable<LogEvent['level']>;
+        onLevelFilterChange: (next: 'all' | NonNullable<LogEvent['level']>) => void;
+        searchQuery: string;
+        onSearchQueryChange: (next: string) => void;
+        onClearSearch: () => void;
         containerRef: React.RefObject<HTMLDivElement>;
     };
 }
@@ -39,9 +36,10 @@ const ApplicationLogDetails: React.FC<ApplicationLogDetailsProps> = ({
     selectedFile,
     onSelectFile,
     onClose,
-    history,
     live,
 }) => {
+    const [expandedPanel, setExpandedPanel] = useState<'live' | null>('live');
+
     return (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 sm:p-6 space-y-5 shadow-lg">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -73,8 +71,11 @@ const ApplicationLogDetails: React.FC<ApplicationLogDetailsProps> = ({
                     <p className="text-sm text-zinc-500">No log files available for this application.</p>
                 ) : (
                     <div className="flex flex-wrap gap-2">
-                        {logFiles.map(path => {
+                        {logFiles.map((path, index) => {
                             const isActive = path === selectedFile;
+                            const baseName = path.split('/').filter(Boolean).pop() ?? `log-file-${index + 1}`;
+                            const duplicates = logFiles.filter(item => item.split('/').filter(Boolean).pop() === baseName).length;
+                            const label = duplicates > 1 ? `${baseName} (${index + 1})` : baseName;
                             return (
                                 <button
                                     key={path}
@@ -86,7 +87,7 @@ const ApplicationLogDetails: React.FC<ApplicationLogDetailsProps> = ({
                                             : 'border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-zinc-100'
                                     }`}
                                 >
-                                    {path}
+                                    {label}
                                 </button>
                             );
                         })}
@@ -95,23 +96,26 @@ const ApplicationLogDetails: React.FC<ApplicationLogDetailsProps> = ({
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-                <LogHistoryPanel
-                    lines={history.lines}
-                    loading={history.loading}
-                    error={history.error}
-                    limit={history.limit}
-                    onLimitChange={history.onLimitChange}
-                    onReload={history.onReload}
-                />
-                <LiveLogPanel
-                    enabled={live.enabled}
-                    status={live.status}
-                    error={live.error}
-                    lines={live.lines}
-                    onToggle={live.onToggle}
-                    onClear={live.onClear}
-                    containerRef={live.containerRef}
-                />
+                <div className={expandedPanel === 'live' ? 'lg:col-span-2' : ''}>
+                    <LiveLogPanel
+                        enabled={live.enabled}
+                        status={live.status}
+                        error={live.error}
+                        lines={live.lines}
+                        onToggle={live.onToggle}
+                        onClear={live.onClear}
+                        levelFilter={live.levelFilter}
+                        onLevelFilterChange={live.onLevelFilterChange}
+                        searchQuery={live.searchQuery}
+                        onSearchQueryChange={live.onSearchQueryChange}
+                        onClearSearch={live.onClearSearch}
+                        containerRef={live.containerRef}
+                        isExpanded={expandedPanel === 'live'}
+                        onToggleExpand={() =>
+                            setExpandedPanel(prev => (prev === 'live' ? null : 'live'))
+                        }
+                    />
+                </div>
             </div>
         </div>
     );

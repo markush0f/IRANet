@@ -14,6 +14,7 @@ import type {
     SystemPackageHistoryResponse,
     SystemPackageInstalledAtResponse,
     DatabaseClassification,
+    LogEvent,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -384,7 +385,7 @@ export const getMetricSeries = async ({
 export interface CreateApplicationPayload {
     cwd: string;
     name: string;
-    log_paths: string[];
+    log_base_paths?: string[];
 }
 
 export const createApplication = async (
@@ -512,11 +513,34 @@ export const getApplicationLogFiles = async (
     return { page, page_size: 0, total: 0, items: [] };
 };
 
-const normalizeHistoryEntry = (entry: unknown): string | null => {
-    if (typeof entry === 'string') return entry;
+const normalizeHistoryEntry = (entry: unknown, fallbackType: LogEvent['type']): LogEvent | null => {
+    if (typeof entry === 'string') {
+        return {
+            path: '',
+            message: entry,
+            type: fallbackType,
+        };
+    }
     if (!entry || typeof entry !== 'object') return null;
-    const candidate = (entry as any).line ?? (entry as any).message ?? (entry as any).text;
-    return typeof candidate === 'string' ? candidate : null;
+    if ((entry as any).message && typeof (entry as any).message === 'string') {
+        return {
+            path: typeof (entry as any).path === 'string' ? (entry as any).path : '',
+            message: (entry as any).message,
+            level: (entry as any).level,
+            timestamp: (entry as any).timestamp ?? (entry as any).time ?? (entry as any).ts,
+            context: (entry as any).context,
+            type: (entry as any).type ?? fallbackType,
+        } as LogEvent;
+    }
+    const candidate = (entry as any).line ?? (entry as any).text;
+    if (typeof candidate === 'string') {
+        return {
+            path: typeof (entry as any).path === 'string' ? (entry as any).path : '',
+            message: candidate,
+            type: fallbackType,
+        };
+    }
+    return null;
 };
 
 export const getApplicationLogFileHistory = async (
@@ -524,7 +548,7 @@ export const getApplicationLogFileHistory = async (
     filePath: string,
     limit = 200,
     signal?: AbortSignal
-): Promise<string[]> => {
+): Promise<LogEvent[]> => {
     const params = new URLSearchParams();
     params.set('file_path', filePath);
     params.set('limit', String(limit));
@@ -539,19 +563,37 @@ export const getApplicationLogFileHistory = async (
     const data = await response.json();
     if (Array.isArray(data)) {
         return data
-            .map(normalizeHistoryEntry)
-            .filter((value): value is string => Boolean(value));
+            .map(entry => normalizeHistoryEntry(entry, 'history'))
+            .filter((value): value is LogEvent => Boolean(value));
     }
     if (data && typeof data === 'object') {
         const raw = (data as any).items ?? (data as any).lines ?? (data as any).entries;
         if (Array.isArray(raw)) {
             return raw
-                .map(normalizeHistoryEntry)
-                .filter((value: string | null): value is string => Boolean(value));
+                .map(entry => normalizeHistoryEntry(entry, 'history'))
+                .filter((value: LogEvent | null): value is LogEvent => Boolean(value));
         }
     }
 
     return [];
+};
+
+export const rescanApplicationLogs = async (
+    applicationId: string,
+    signal?: AbortSignal
+): Promise<{ added: number }> => {
+    const url = `${getBaseUrl()}/logs/applications/${applicationId}/logs/rescan`;
+    const response = await fetch(url, {
+        method: 'POST',
+        signal,
+        headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while rescanning application logs`);
+    }
+
+    return response.json() as Promise<{ added: number }>;
 };
 
 export interface PacketLossEvent {

@@ -55,7 +55,7 @@ const PackageDetailPanel: React.FC<PackageDetailPanelProps> = ({
                 )}
 
                 <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Package history</p>
+                    <p className="text-xs uppercase tracking-wide text-zinc-500">Packages</p>
                     <div className="mt-3 max-h-[320px] overflow-y-auto pr-1">
                         {loading ? (
                             <div className="text-sm text-zinc-500">Loading history…</div>

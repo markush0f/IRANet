@@ -16,18 +16,19 @@ const ApplicationsLogsView: React.FC = () => {
         filesError,
         selectedFile,
         selectFile,
-        historyLimit,
-        updateHistoryLimit,
-        historyLines,
-        historyLoading,
-        historyError,
-        reloadHistory,
         liveEnabled,
         liveStatus,
         liveError,
         liveLines,
         toggleLive,
         clearLive,
+        liveLevelFilter,
+        updateLiveLevelFilter,
+        liveSearchQuery,
+        updateLiveSearchQuery,
+        clearLiveSearch,
+        rescanLoading,
+        rescanLogs,
         liveContainerRef,
     } = useApplicationsLogs();
 
@@ -51,6 +52,8 @@ const ApplicationsLogsView: React.FC = () => {
                 applications={applications}
                 loading={loading}
                 onShowLogs={selectApp}
+                onRescanLogs={rescanLogs}
+                rescanLoading={rescanLoading}
             />
 
             {selectedApp && (
@@ -62,14 +65,6 @@ const ApplicationsLogsView: React.FC = () => {
                     selectedFile={selectedFile}
                     onSelectFile={selectFile}
                     onClose={closeDetails}
-                    history={{
-                        lines: historyLines,
-                        loading: historyLoading,
-                        error: historyError,
-                        limit: historyLimit,
-                        onLimitChange: updateHistoryLimit,
-                        onReload: reloadHistory,
-                    }}
                     live={{
                         enabled: liveEnabled,
                         status: liveStatus,
@@ -77,6 +72,11 @@ const ApplicationsLogsView: React.FC = () => {
                         lines: liveLines,
                         onToggle: toggleLive,
                         onClear: clearLive,
+                        levelFilter: liveLevelFilter,
+                        onLevelFilterChange: updateLiveLevelFilter,
+                        searchQuery: liveSearchQuery,
+                        onSearchQueryChange: updateLiveSearchQuery,
+                        onClearSearch: clearLiveSearch,
                         containerRef: liveContainerRef,
                     }}
                 />

@@ -1,12 +1,16 @@
 import React from 'react';
+import type { LogEvent } from '../../types';
+import LogLine from './LogLine';
 
 interface LogHistoryPanelProps {
-    lines: string[];
+    lines: LogEvent[];
     loading: boolean;
     error: string | null;
     limit: number;
     onLimitChange: (next: number) => void;
     onReload: () => void;
+    isExpanded?: boolean;
+    onToggleExpand?: () => void;
 }
 
 const LogHistoryPanel: React.FC<LogHistoryPanelProps> = ({
@@ -16,6 +20,8 @@ const LogHistoryPanel: React.FC<LogHistoryPanelProps> = ({
     limit,
     onLimitChange,
     onReload,
+    isExpanded = false,
+    onToggleExpand,
 }) => {
     return (
         <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-4 space-y-3">
@@ -47,6 +53,15 @@ const LogHistoryPanel: React.FC<LogHistoryPanelProps> = ({
                     >
                         Reload
                     </button>
+                    {onToggleExpand && (
+                        <button
+                            type="button"
+                            onClick={onToggleExpand}
+                            className="rounded-full border border-zinc-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-zinc-500 hover:text-zinc-100"
+                        >
+                            {isExpanded ? 'Collapse' : 'Expand'}
+                        </button>
+                    )}
                 </div>
             </div>
             {error && <p className="text-sm text-rose-300">{error}</p>}
@@ -59,11 +74,9 @@ const LogHistoryPanel: React.FC<LogHistoryPanelProps> = ({
                     No history entries found.
                 </div>
             ) : (
-                <div className="max-h-80 overflow-auto rounded-lg border border-zinc-900 bg-zinc-950 px-3 py-2 space-y-1">
+                <div className="max-h-80 overflow-auto rounded-lg border border-zinc-900 bg-zinc-950 px-3 py-2 space-y-2">
                     {lines.map((line, index) => (
-                        <div key={`${line}-${index}`} className="font-mono text-xs text-zinc-200">
-                            {line}
-                        </div>
+                        <LogLine key={`${line}-${index}`} line={line} />
                     ))}
                 </div>
             )}

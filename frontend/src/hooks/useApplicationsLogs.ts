@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    getApplicationLogFileHistory,
     getApplicationLogFiles,
     getApplicationsLogsList,
     getBaseUrl,
     type RemoteApplicationRecord,
+    rescanApplicationLogs,
 } from '../services/api';
+import type { LogEvent } from '../types';
 
 export type LiveStatus = 'idle' | 'connecting' | 'connected' | 'closed' | 'error';
 
@@ -18,14 +19,13 @@ export const useApplicationsLogs = () => {
     const [filesLoading, setFilesLoading] = useState(false);
     const [filesError, setFilesError] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
-    const [historyLimit, setHistoryLimit] = useState(200);
-    const [historyLines, setHistoryLines] = useState<string[]>([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
-    const [historyError, setHistoryError] = useState<string | null>(null);
     const [liveEnabled, setLiveEnabled] = useState(true);
-    const [liveLines, setLiveLines] = useState<string[]>([]);
+    const [liveLines, setLiveLines] = useState<LogEvent[]>([]);
     const [liveStatus, setLiveStatus] = useState<LiveStatus>('idle');
     const [liveError, setLiveError] = useState<string | null>(null);
+    const [liveLevelFilter, setLiveLevelFilter] = useState<'all' | NonNullable<LogEvent['level']>>('all');
+    const [liveSearchQuery, setLiveSearchQuery] = useState('');
+    const [rescanLoading, setRescanLoading] = useState<Record<string, boolean>>({});
     const liveContainerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -66,15 +66,32 @@ export const useApplicationsLogs = () => {
         return Array.from(known);
     }, [logFiles, selectedApp?.log_paths]);
 
-    const appendLiveLine = useCallback((line: string) => {
-        if (!line) return;
+    const appendLiveLine = useCallback((entry: LogEvent) => {
+        if (!entry.message) return;
         setLiveLines(prev => {
-            const next = [...prev, line];
+            const next = [...prev, entry];
             if (next.length > 500) {
                 return next.slice(-500);
             }
             return next;
         });
+    }, []);
+
+    const normalizeLiveEvent = useCallback((payload: unknown): LogEvent | null => {
+        if (payload && typeof payload === 'object' && typeof (payload as any).message === 'string') {
+            return {
+                path: typeof (payload as any).path === 'string' ? (payload as any).path : '',
+                message: (payload as any).message,
+                level: (payload as any).level,
+                timestamp: (payload as any).timestamp ?? (payload as any).time ?? (payload as any).ts,
+                context: (payload as any).context,
+                type: (payload as any).type ?? 'live',
+            } as LogEvent;
+        }
+        if (typeof payload === 'string') {
+            return { path: '', message: payload, type: 'live' };
+        }
+        return null;
     }, []);
 
     const selectApp = useCallback((app: RemoteApplicationRecord) => {
@@ -85,7 +102,6 @@ export const useApplicationsLogs = () => {
         setError(null);
         setSelectedApp(app);
         setLiveLines([]);
-        setHistoryLines([]);
         setLiveEnabled(true);
     }, []);
 
@@ -93,38 +109,14 @@ export const useApplicationsLogs = () => {
         setSelectedApp(null);
         setSelectedFile(null);
         setLogFiles([]);
-        setHistoryLines([]);
         setLiveLines([]);
         setLiveEnabled(false);
     }, []);
 
     const selectFile = useCallback((path: string) => {
         setSelectedFile(path);
-        setHistoryLines([]);
         setLiveLines([]);
     }, []);
-
-    const updateHistoryLimit = useCallback((next: number) => {
-        setHistoryLimit(Number.isNaN(next) ? 200 : next);
-    }, []);
-
-    const reloadHistory = useCallback(() => {
-        if (!selectedApp?.id || !selectedFile) return;
-        setHistoryLines([]);
-        setHistoryError(null);
-        setHistoryLoading(true);
-        getApplicationLogFileHistory(selectedApp.id, selectedFile, historyLimit)
-            .then(lines => {
-                setHistoryLines(lines);
-            })
-            .catch(err => {
-                console.error('Error reloading application log history', err);
-                setHistoryError('The log history could not be loaded.');
-            })
-            .finally(() => {
-                setHistoryLoading(false);
-            });
-    }, [historyLimit, selectedApp?.id, selectedFile]);
 
     const toggleLive = useCallback(() => {
         setLiveEnabled(prev => !prev);
@@ -133,6 +125,39 @@ export const useApplicationsLogs = () => {
     const clearLive = useCallback(() => {
         setLiveLines([]);
     }, []);
+
+    const updateLiveLevelFilter = useCallback((next: 'all' | NonNullable<LogEvent['level']>) => {
+        setLiveLevelFilter(next);
+    }, []);
+
+    const updateLiveSearchQuery = useCallback((next: string) => {
+        setLiveSearchQuery(next);
+    }, []);
+
+    const clearLiveSearch = useCallback(() => {
+        setLiveSearchQuery('');
+    }, []);
+
+    const rescanLogs = useCallback(async (app: RemoteApplicationRecord) => {
+        if (!app.id) {
+            setError('This application is missing an id required to rescan logs.');
+            return;
+        }
+        setError(null);
+        setRescanLoading(prev => ({ ...prev, [app.id]: true }));
+        try {
+            await rescanApplicationLogs(app.id);
+        } catch (err) {
+            console.error('Error rescanning application logs', err);
+            setError('The application logs could not be rescanned.');
+        } finally {
+            setRescanLoading(prev => ({ ...prev, [app.id]: false }));
+        }
+    }, []);
+
+    useEffect(() => {
+        setLiveLines([]);
+    }, [liveLevelFilter, liveSearchQuery]);
 
     useEffect(() => {
         if (!selectedApp?.id) {
@@ -167,35 +192,6 @@ export const useApplicationsLogs = () => {
     }, [selectedApp?.id, selectedApp?.log_paths]);
 
     useEffect(() => {
-        if (!selectedApp?.id || !selectedFile) {
-            setHistoryLines([]);
-            setHistoryError(null);
-            return;
-        }
-
-        const controller = new AbortController();
-        setHistoryLoading(true);
-        setHistoryError(null);
-
-        getApplicationLogFileHistory(selectedApp.id, selectedFile, historyLimit, controller.signal)
-            .then(lines => {
-                setHistoryLines(lines);
-            })
-            .catch(err => {
-                if (err instanceof DOMException && err.name === 'AbortError') {
-                    return;
-                }
-                console.error('Error loading application log history', err);
-                setHistoryError('The log history could not be loaded.');
-            })
-            .finally(() => {
-                setHistoryLoading(false);
-            });
-
-        return () => controller.abort();
-    }, [selectedApp?.id, selectedFile, historyLimit]);
-
-    useEffect(() => {
         if (!selectedApp?.id || !selectedFile || !liveEnabled) {
             setLiveStatus('idle');
             return;
@@ -205,9 +201,15 @@ export const useApplicationsLogs = () => {
         const wsBase = baseUrl.startsWith('https')
             ? baseUrl.replace(/^https/, 'wss')
             : baseUrl.replace(/^http/, 'ws');
-        const url = `${wsBase}/logs/ws/applications/${selectedApp.id}/file?file_path=${encodeURIComponent(
-            selectedFile
-        )}`;
+        const params = new URLSearchParams();
+        params.set('file_path', selectedFile);
+        if (liveLevelFilter !== 'all') {
+            params.set('levels', liveLevelFilter);
+        }
+        if (liveSearchQuery.trim()) {
+            params.set('search', liveSearchQuery.trim());
+        }
+        const url = `${wsBase}/logs/ws/applications/${selectedApp.id}/file?${params.toString()}`;
         const socket = new WebSocket(url);
 
         setLiveStatus('connecting');
@@ -218,14 +220,29 @@ export const useApplicationsLogs = () => {
         };
 
         socket.onmessage = event => {
+            const handlePayload = (payload: unknown) => {
+                let parsed: unknown = payload;
+                if (typeof payload === 'string') {
+                    try {
+                        parsed = JSON.parse(payload);
+                    } catch {
+                        parsed = payload;
+                    }
+                }
+                const normalized = normalizeLiveEvent(parsed);
+                if (normalized) {
+                    appendLiveLine(normalized);
+                }
+            };
+
             if (typeof event.data === 'string') {
-                appendLiveLine(event.data);
+                handlePayload(event.data);
                 return;
             }
             if (event.data instanceof Blob) {
                 event.data
                     .text()
-                    .then(text => appendLiveLine(text))
+                    .then(text => handlePayload(text))
                     .catch(() => undefined);
             }
         };
@@ -242,7 +259,7 @@ export const useApplicationsLogs = () => {
         return () => {
             socket.close();
         };
-    }, [appendLiveLine, liveEnabled, selectedApp?.id, selectedFile]);
+    }, [appendLiveLine, liveEnabled, liveLevelFilter, liveSearchQuery, selectedApp?.id, selectedFile]);
 
     useEffect(() => {
         if (!liveContainerRef.current) return;
@@ -262,18 +279,19 @@ export const useApplicationsLogs = () => {
         filesError,
         selectedFile,
         selectFile,
-        historyLimit,
-        updateHistoryLimit,
-        historyLines,
-        historyLoading,
-        historyError,
-        reloadHistory,
         liveEnabled,
         liveStatus,
         liveError,
         liveLines,
         toggleLive,
         clearLive,
+        liveLevelFilter,
+        updateLiveLevelFilter,
+        liveSearchQuery,
+        updateLiveSearchQuery,
+        clearLiveSearch,
+        rescanLoading,
+        rescanLogs,
         liveContainerRef,
     };
 };

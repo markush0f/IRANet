@@ -21,6 +21,15 @@ export interface LogEntry {
     serviceId: string;
 }
 
+export interface LogEvent {
+    path: string;
+    message: string;
+    level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+    timestamp?: string;
+    context?: string;
+    type: 'history' | 'live';
+}
+
 export interface User {
     id: string;
     name: string;
@@ -145,6 +154,7 @@ export interface ApplicationDiscoveryDetails {
     detected_processes?: ApplicationDiscoveryProcess[];
     paths?: {
         log_paths?: string[];
+        log_base_paths?: string[];
     };
     access?: {
         ports?: number[];
