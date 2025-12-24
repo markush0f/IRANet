@@ -3,7 +3,7 @@ from typing import List, Dict, Set
 from uuid import UUID
 
 from app.models.requests.create_application_request import CreateApplicationRequest
-from app.modules.scanner.logs import detect_log_paths
+from app.modules.scanner.logs import detect_log_base_paths, detect_log_paths
 from app.modules.scanner.models import ScannedProcess
 from app.modules.scanner.ports import scan_listening_ports
 from app.modules.scanner.process import scan_processes
@@ -84,7 +84,7 @@ class ApplicationsSystemService:
                 for p in matched
             ],
             "paths": {
-                "log_paths": detect_log_paths(cwd),
+                "log_base_paths": detect_log_base_paths(cwd),
             },
             "access": {
                 "ports": app_ports,

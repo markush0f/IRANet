@@ -33,3 +33,32 @@ def detect_log_paths(project_path: str) -> List[str]:
                     detected.append(str(log_file))
 
     return detected
+
+
+from pathlib import Path
+from typing import List, Set
+
+
+def detect_log_base_paths(project_path: str) -> List[str]:
+    base = Path(project_path)
+
+    candidates = [
+        base / "logs",
+        base / "log",
+        base,
+    ]
+
+    detected: Set[str] = set()
+
+    for path in candidates:
+        if not path.exists():
+            continue
+
+        if path.is_dir():
+            for log_file in path.rglob("*.log"):
+                detected.add(str(log_file.parent))
+
+        if path.is_file() and path.suffix == ".log":
+            detected.add(str(path.parent))
+
+    return sorted(detected)

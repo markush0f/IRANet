@@ -20,8 +20,8 @@ class ApplicationsService:
         return f"process:{workdir}"
 
     async def create_application(
-        self,
-        *,
+    self,
+    *,
         data: CreateApplicationRequest,
     ) -> UUID:
         identifier = self.build_application_identifier(data.cwd)
@@ -38,13 +38,20 @@ class ApplicationsService:
             enabled=True,
         )
 
-        # 🔧 CORRECTO: solo base paths
-        await self._logs_service.attach_log_paths(
-            application_id=application.id,
-            workdir=data.cwd,
-        )
+        if data.log_base_paths:
+            await self._logs_service.attach_log_base_paths(
+                application_id=application.id,
+                base_paths=data.log_base_paths,
+            )
+        else:
+            await self._logs_service.attach_log_paths(
+                application_id=application.id,
+                workdir=data.cwd,
+            )
 
         return application.id
+    
+
 
     async def list_applications(self) -> Sequence[Application]:
         return await self.applications_repository.list_all()

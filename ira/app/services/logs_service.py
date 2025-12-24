@@ -10,7 +10,7 @@ from app.modules.logs.inspector import list_log_files
 from app.modules.logs.reader import read_last_lines
 from app.modules.logs.resolver import resolve_log_files
 from app.modules.logs.tail import tail_file
-from app.modules.scanner.logs import detect_log_paths
+from app.modules.scanner.logs import detect_log_base_paths, detect_log_paths
 from app.repositories.logs import ApplicationLogRepository
 from app.utils.logs_parser import parse_log_line, passes_filters
 
@@ -21,14 +21,27 @@ class ApplicationLogsService:
     def __init__(self, session) -> None:
         self._repo = ApplicationLogRepository(session)
 
+
     async def attach_log_paths(
         self,
         *,
         application_id: UUID,
         workdir: str,
     ) -> None:
+        base_paths = detect_log_base_paths(workdir)
+
+        await self.attach_log_base_paths(
+            application_id=application_id,
+            base_paths=base_paths,
+        )
+
+    async def attach_log_base_paths(
+        self,
+        *,
+        application_id: UUID,
+        base_paths: list[str],
+    ) -> None:
         session = self._repo._session
-        base_paths = detect_log_paths(workdir)
 
         for base_path in base_paths:
             try:
@@ -36,6 +49,7 @@ class ApplicationLogsService:
                     application_id=application_id,
                     base_path=base_path,
                     enabled=True,
+                    discovered=False,
                 )
                 await session.flush()
             except IntegrityError:
@@ -76,9 +90,7 @@ class ApplicationLogsService:
         allowed_levels: Optional[Set[str]] = None
         if levels:
             allowed_levels = {
-                level.strip().lower()
-                for level in levels.split(",")
-                if level.strip()
+                level.strip().lower() for level in levels.split(",") if level.strip()
             }
 
         search_term = search.lower() if search else None
@@ -145,9 +157,7 @@ class ApplicationLogsService:
         all_files: List[Dict] = []
 
         for base_path in base_paths:
-            all_files.extend(
-                list_log_files(directory=base_path)
-            )
+            all_files.extend(list_log_files(directory=base_path))
 
         all_files.sort(
             key=lambda f: f["created_at"],

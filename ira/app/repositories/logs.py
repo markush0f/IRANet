@@ -27,20 +27,20 @@ class ApplicationLogRepository:
         return result.all()
 
     async def list_active_base_paths(
-        self,
-        *,
-        application_id: UUID,
+    self,
+    *,
+    application_id: UUID,
     ) -> Sequence[str]:
         result = await self._session.exec(
             select(ApplicationLogPath.base_path)
             .where(
                 ApplicationLogPath.application_id == application_id,
-                ApplicationLogPath.enabled.is_(True),# type: ignore
-                ApplicationLogPath.discovered.is_(True),# type: ignore
+                ApplicationLogPath.enabled.is_(True),
             )
-            .order_by(asc(ApplicationLogPath.created_at))# type: ignore
+            .order_by(asc(ApplicationLogPath.created_at))
         )
         return result.all()
+
 
     async def insert(
         self,
