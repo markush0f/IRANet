@@ -2,6 +2,7 @@ from typing import Sequence
 from uuid import UUID
 from datetime import datetime, timezone
 
+from psycopg2 import IntegrityError
 from sqlalchemy import column, asc
 from sqlalchemy.dialects.postgresql import insert
 from sqlmodel import select
@@ -64,3 +65,27 @@ class ApplicationLogRepository:
 
         await self._session.exec(stmt)
         await self._session.commit()
+
+    async def insert_if_not_exists(
+        self,
+        *,
+        application_id: UUID,
+        path: str,
+        discovered: bool,
+        enabled: bool,
+    ) -> bool:
+        log = ApplicationLog(
+            application_id=application_id,
+            path=path,
+            discovered=discovered,
+            enabled=enabled,
+        )
+
+        self._session.add(log)
+
+        try:
+            await self._session.commit()
+            return True
+        except IntegrityError:
+            await self._session.rollback()
+            return False

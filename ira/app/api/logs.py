@@ -14,14 +14,19 @@ async def application_log_file_ws(
     websocket: WebSocket,
     application_id: UUID,
     file_path: str,
+    levels: str | None = None,
+    search: str | None = None,
     session: AsyncSession = Depends(get_session),
 ) -> None:
     service = ApplicationLogsService(session)
+
     try:
         await service.stream_application_log_file(
             application_id=application_id,
             file_path=file_path,
             websocket=websocket,
+            levels=levels,
+            search=search,
         )
     except WebSocketDisconnect:
         pass
@@ -51,12 +56,26 @@ async def application_log_file_history(
     session: AsyncSession = Depends(get_session),
 ):
     service = ApplicationLogsService(session)
-    
+
     return await service.get_application_log_file_history(
         application_id=application_id,
         file_path=file_path,
         limit=limit,
     )
 
+@router.post("/applications/{application_id}/logs/rescan")
+async def rescan_application_logs(
+    application_id: UUID,
+    session: AsyncSession = Depends(get_session),
+):
+    service = ApplicationLogsService(session)
+
+    added = await service.rescan_application_logs(
+        application_id=application_id,
+    )
+
+    return {
+        "added": added,
+    }
 
 # TODO get logs from file with specific date range
