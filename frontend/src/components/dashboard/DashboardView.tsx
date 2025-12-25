@@ -220,7 +220,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
     const hostToUse = overrideHost.trim() || hostname;
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <main className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <section className="space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>

@@ -72,7 +72,7 @@ const SystemServicesView: React.FC = () => {
     });
 
     return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">

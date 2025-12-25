@@ -130,7 +130,7 @@ const PacketLossEventsView: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <Card className="space-y-6 p-4 sm:p-6">
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">

@@ -33,7 +33,7 @@ const ApplicationsLogsView: React.FC = () => {
     } = useApplicationsLogs();
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-6">
             <div>
                 <p className="text-xs uppercase tracking-wide text-zinc-500">Logs</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Applications with logs</h2>

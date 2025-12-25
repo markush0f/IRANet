@@ -4,7 +4,7 @@ import SystemApplicationsSection from './SystemApplicationsSection';
 
 const SystemApplicationsView: React.FC = () => {
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-8">
             <div>
                 <p className="text-xs uppercase tracking-wide text-zinc-500">Applications</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">System applications</h2>

@@ -78,7 +78,7 @@ const SystemPackagesView: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-4">
             {/* Header */}
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>

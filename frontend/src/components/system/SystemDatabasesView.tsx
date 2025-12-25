@@ -78,7 +78,7 @@ const SystemDatabasesView: React.FC = () => {
     const runningCount = items.filter(item => item.service.status === 'running').length;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p className="text-xs uppercase tracking-wide text-zinc-500">Services</p>

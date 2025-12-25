@@ -252,13 +252,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
         >
             {/* Header / Logo Area */}
             <div
-                className={`border-b border-zinc-800/80 px-4 py-4 flex items-center ${
-                    isCollapsed ? 'justify-center' : 'justify-between'
-                }`}
+                className={`border-b border-zinc-800/80 px-4 py-4 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'
+                    }`}
             >
                 {!isCollapsed && (
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900/60 border border-zinc-800 shadow-inner">
+                        <div className="w-10 h-10 flex items-center justify-center ">
                             <img src="/ira-logo.png" alt="IRANet" className="w-4/5 h-4/5 object-contain" />
                         </div>
                         <span className="text-sm font-semibold text-zinc-100 tracking-[0.18em] uppercase leading-tight">
@@ -342,9 +341,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                                 `}
                             >
                                 <span
-                                    className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r ${
-                                        groupActive && !isCollapsed ? 'bg-indigo-400' : 'bg-transparent'
-                                    }`}
+                                    className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r ${groupActive && !isCollapsed ? 'bg-indigo-400' : 'bg-transparent'
+                                        }`}
                                 />
                                 <div className={`${groupActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-200'}`}>
                                     {item.icon}

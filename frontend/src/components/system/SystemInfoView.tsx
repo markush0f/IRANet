@@ -52,14 +52,14 @@ const SystemInfoView: React.FC = () => {
 
     if (loading || !info) {
         return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
                 <SystemInfoHeader loading />
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
             <SystemInfoHeader error={error} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

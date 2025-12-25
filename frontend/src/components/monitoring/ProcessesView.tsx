@@ -81,7 +81,7 @@ const ProcessesView: React.FC = () => {
     }, [processes, userFilter, stateFilter, search]);
 
     return (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
             <header className="mb-6 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>

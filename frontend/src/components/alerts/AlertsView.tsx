@@ -58,7 +58,7 @@ const AlertsView: React.FC = () => {
     const formatMoment = (alert: AlertRecord) => formatTimestamp(alert.first_seen_at ?? alert.timestamp ?? alert.last_seen_at ?? '');
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
             {/* Header */}
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
