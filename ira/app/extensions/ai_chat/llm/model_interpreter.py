@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import Optional, List
 from llama_cpp import Llama
 
 
-class ModelInterpreter():
+class ModelInterpreter:
     def __init__(self, *, model_path: str):
         self._interpreter = Llama(
             model_path=model_path,
@@ -13,7 +13,23 @@ class ModelInterpreter():
             verbose=False,
         )
 
+        self._primed = False
+
+    def _prime(self) -> None:
+        if self._primed:
+            return
+
+        # Priming ONLY for format, result is ignored
+        self._interpreter(
+            prompt='Output:\n{"name": null, "arguments": {}}',
+            max_tokens=32,
+        )
+
+        self._primed = True
+
     def interpret(self, *, prompt: str, stop: Optional[List[str]] = None) -> str:
+        self._prime()
+
         kwargs = {
             "prompt": prompt,
             "max_tokens": 256,
