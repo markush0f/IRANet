@@ -1,9 +1,10 @@
 import json
 
-from app.extensions.ai_chat.dispatcher import ToolDispatcher
-from app.extensions.ai_chat.initializer import ModelInterpreter
-from app.extensions.ai_chat.models import ToolCall
-from app.extensions.ai_chat.prompt_builder import build_prompt
+from extensions.ai_chat.dispatcher import ToolDispatcher
+from extensions.ai_chat.initializer import ModelInterpreter
+from extensions.ai_chat.models import ToolCall
+from extensions.ai_chat.prompt_builder import build_prompt
+
 
 class ServerChatService:
     def __init__(

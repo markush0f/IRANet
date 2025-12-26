@@ -2,12 +2,9 @@ import importlib
 from pathlib import Path
 from typing import Any, Dict, cast
 
-from app.extensions.ai_chat.argumen_validator import (
-    ToolArgumentValidationError,
-    validate_arguments,
-)
-from app.extensions.ai_chat.loader import load_tools_registry
-from app.extensions.ai_chat.models import ToolCall
+from extensions.ai_chat.argumen_validator import ToolArgumentValidationError, validate_arguments
+from extensions.ai_chat.loader import load_tools_registry
+from extensions.ai_chat.models import ToolCall
 
 
 class ToolDispatcher:

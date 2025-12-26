@@ -1,6 +1,7 @@
 import json
 
-from app.extensions.ai_chat.prompts import DEFAULT_SYSTEM_PROMPT
+from extensions.ai_chat.prompts import DEFAULT_SYSTEM_PROMPT
+
 
 
 def build_prompt(*, user_message: str, tools: dict) -> str:
