@@ -2,14 +2,19 @@ import importlib
 from pathlib import Path
 from typing import Any, Dict, cast
 
-from extensions.ai_chat.argumen_validator import ToolArgumentValidationError, validate_arguments
-from extensions.ai_chat.loader import load_tools_registry
-from extensions.ai_chat.models import ToolCall
+from app.extensions.ai_chat.core.argumen_validator import (
+    ToolArgumentValidationError,
+    validate_arguments,
+)
+from app.extensions.ai_chat.tools.loader import load_tools_registry
+from app.extensions.ai_chat.core.models import ToolCall
 
 
 class ToolDispatcher:
-    def __init__(self, *, tools_path: Path):
-        self._registry: Dict[str, Any] = load_tools_registry(tools_path)
+    def __init__(self) -> None:
+        TOOLS_REGISTRY_PATH = Path("app/extensions/ai_chat/tools/tools_calls.json")
+
+        self._registry: Dict[str, Any] = load_tools_registry(TOOLS_REGISTRY_PATH)
 
     def execute(self, tool_call: ToolCall) -> dict:
         if tool_call.name is None:
@@ -20,7 +25,7 @@ class ToolDispatcher:
 
         tool_def = self._registry.get(tool_call.name)
 
-        if not tool_def:
+        if tool_def is None:
             return {
                 "executed": False,
                 "error": f"Tool '{tool_call.name}' is not allowed",
@@ -30,13 +35,6 @@ class ToolDispatcher:
             module_path, func_name = tool_def["handler"].rsplit(".", 1)
             module = importlib.import_module(module_path)
             handler = getattr(module, func_name)
-            tool_def = self._registry.get(tool_call.name)
-
-            if tool_def is None:
-                return {
-                    "executed": False,
-                    "error": f"Tool '{tool_call.name}' is not allowed",
-                }
 
             tool_def = cast(Dict[str, Any], tool_def)
             arguments_schema = tool_def.get("arguments", {})
@@ -54,7 +52,6 @@ class ToolDispatcher:
                 }
 
             result = handler(**validated_arguments)
-            result = handler(**tool_call.arguments)
 
             return {
                 "executed": True,

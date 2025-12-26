@@ -82,3 +82,8 @@ CREATE TABLE
         enabled BOOLEAN NOT NULL DEFAULT false,
         created_at TIMESTAMP NOT NULL DEFAULT now ()
     );
+
+INSERT INTO
+    extensions (id, enabled)
+VALUES
+    ('ai_chat', False)

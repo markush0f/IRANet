@@ -1,6 +1,6 @@
 import json
 
-from extensions.ai_chat.prompts import DEFAULT_SYSTEM_PROMPT
+from app.extensions.ai_chat.prompts.prompts import DEFAULT_SYSTEM_PROMPT
 
 
 

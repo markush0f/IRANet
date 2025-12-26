@@ -1,7 +1,5 @@
 import asyncio
 from contextlib import asynccontextmanager
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -21,7 +19,8 @@ from app.api.services_clasification import router as services_clasification_rout
 from app.core.config import load_config
 from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
-from app.core.database import engine
+from app.core.database import engine, get_session
+from app.services.extensions import ExtensionsService
 
 
 logger = get_logger(__name__)
@@ -29,11 +28,22 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
+    # Start background metrics scheduler
     task = asyncio.create_task(metrics_scheduler())
+
+    # Laod enabled extensions from database at startup
+    async for session in get_session():
+        extensions_service = ExtensionsService(session)
+
+        # Load ai_chat extension if is enabled
+        if await extensions_service.extension_is_enabled(extension_id="ai_chat"):
+            from extensions.ai_chat.api.router import router as chat_router
+
+            app.include_router(chat_router)
     try:
         yield
     finally:
+        # Stop background task and close database engine
         task.cancel()
         await engine.dispose()
 
@@ -55,7 +65,6 @@ app.add_middleware(
 
 logger.info("Initialising Ira API application")
 
-config = load_config()
 
 app.include_router(health_router)
 app.include_router(system_router)
@@ -69,6 +78,8 @@ app.include_router(logs_router)
 app.include_router(internet_router)
 app.include_router(system_packages_router)
 app.include_router(services_clasification_router)
+
+config = load_config()
 
 
 @app.get("/config")
