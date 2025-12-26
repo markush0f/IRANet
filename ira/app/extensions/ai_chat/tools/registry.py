@@ -10,9 +10,11 @@ from uuid import UUID
 
 import inspect
 
+from app.core.logger import get_logger
 
 # Names reserved for dependency injection; they are never exposed as tool args.
 _DEPENDENCY_NAMES = {"session", "repository", "ping_host"}
+_logger = get_logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -90,10 +92,12 @@ def collect_tools_from_package(package_name: str) -> Dict[str, Any]:
     tools: Dict[str, Any] = {}
     package = importlib.import_module(package_name)
 
+    _logger.info("Collecting tools from package: %s", package_name)
     for module_info in pkgutil.walk_packages(package.__path__, package.__name__ + "."):
         module = importlib.import_module(module_info.name)
         tools.update(collect_tools_from_module(module))
 
+    _logger.info("Collected %s tools from %s", len(tools), package_name)
     return tools
 
 
@@ -101,6 +105,7 @@ def collect_tools_from_module(module) -> Dict[str, Any]:
     """Collect tool definitions from a single imported module."""
     tools: Dict[str, Any] = {}
 
+    _logger.debug("Scanning module for tools: %s", module.__name__)
     for _, func in inspect.getmembers(module, inspect.isfunction):
         # Only consider functions declared in the target module.
         if func.__module__ != module.__name__:
@@ -128,6 +133,8 @@ def _collect_tools_from_class(cls, *, module_name: str) -> Dict[str, Any]:
     tools: Dict[str, Any] = {}
     class_spec = getattr(cls, "__ai_tool_class__", None)
 
+    if class_spec:
+        _logger.debug("Collecting tools from class: %s", cls.__name__)
     members = inspect.getmembers(cls, inspect.isfunction)
     for name, func in members:
         # Export methods when class-level or method-level decorators are present.

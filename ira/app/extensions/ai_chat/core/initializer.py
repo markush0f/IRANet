@@ -13,10 +13,10 @@ def get_chat_service() -> ServerChatService:
 
     if _chat_service is None:
         tools_schema = load_tools_registry(
-            Path("app/extensions/ai_chat/tools/registry.json")
+            Path("app/extensions/ai_chat/tools_calls.json")
         )
         interpreter = ModelInterpreter(
-            model_path="models/phi-3-mini/Phi-3-mini-4k-instruct-q4.gguf"
+            model_path="app/extensions/ai_chat/models/Phi-3-mini-4k-instruct-q4.gguf"
         )
 
         dispatcher = ToolDispatcher()

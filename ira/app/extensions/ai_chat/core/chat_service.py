@@ -30,9 +30,8 @@ class ServerChatService:
             stop=["\n\n"],
         )
 
-        try:
-            payload = json.loads(raw_output)
-        except json.JSONDecodeError as exc:
+        payload = self._parse_tool_payload(raw_output)
+        if payload is None:
             return {
                 "executed": False,
                 "error": "invalid_model_output",
@@ -50,3 +49,20 @@ class ServerChatService:
             }
 
         return await self._dispatcher.execute(tool_call)
+
+    def _parse_tool_payload(self, raw_output: str) -> dict | None:
+        try:
+            return json.loads(raw_output)
+        except json.JSONDecodeError:
+            pass
+
+        # Some models prefix with headers (e.g. "###"), so extract the JSON object.
+        start = raw_output.find("{")
+        end = raw_output.rfind("}")
+        if start == -1 or end == -1 or end < start:
+            return None
+
+        try:
+            return json.loads(raw_output[start : end + 1])
+        except json.JSONDecodeError:
+            return None

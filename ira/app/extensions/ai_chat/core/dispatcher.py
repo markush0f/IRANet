@@ -10,6 +10,7 @@ from app.extensions.ai_chat.core.argumen_validator import (
 from app.extensions.ai_chat.tools.loader import load_tools_registry
 from app.extensions.ai_chat.core.models import ToolCall
 from app.core.database import AsyncSessionLocal
+from app.core.logger import get_logger
 from app.repositories.metric_point import MetricPointRepository
 
 
@@ -17,6 +18,7 @@ class ToolDispatcher:
     """Resolve and execute tool handlers with argument validation and DI."""
 
     _SESSION_DEPENDENCIES = {"session", "repository"}
+    _logger = get_logger(__name__)
 
     def __init__(self) -> None:
         # Tools registry maps tool names to handler paths and argument schemas.
@@ -26,6 +28,7 @@ class ToolDispatcher:
 
     async def execute(self, tool_call: ToolCall) -> dict:
         """Validate tool arguments, resolve handler, inject deps, and execute."""
+        self._logger.debug("Dispatching tool call: %s", tool_call.name)
         if tool_call.name is None:
             return {
                 "executed": False,
@@ -35,6 +38,7 @@ class ToolDispatcher:
         tool_def = self._registry.get(tool_call.name)
 
         if tool_def is None:
+            self._logger.warning("Tool not allowed: %s", tool_call.name)
             return {
                 "executed": False,
                 "error": f"Tool '{tool_call.name}' is not allowed",
@@ -51,6 +55,11 @@ class ToolDispatcher:
                     schema=arguments_schema,
                 )
             except ToolArgumentValidationError as exc:
+                self._logger.warning(
+                    "Tool arguments invalid for %s: %s",
+                    tool_call.name,
+                    exc,
+                )
                 return {
                     "executed": False,
                     "tool": tool_call.name,
@@ -58,10 +67,12 @@ class ToolDispatcher:
                 }
 
             handler_path = tool_def["handler"]
+            self._logger.debug("Resolved handler path: %s", handler_path)
             needs_session = self._handler_needs_session(handler_path)
 
             if needs_session:
                 # Create a scoped DB session only when the handler (or its class) needs it.
+                self._logger.debug("Handler requires session: %s", handler_path)
                 async with AsyncSessionLocal() as session:
                     return await self._execute_handler(
                         tool_call=tool_call,
@@ -78,6 +89,7 @@ class ToolDispatcher:
             )
 
         except Exception as exc:
+            self._logger.exception("Tool execution failed: %s", tool_call.name)
             return {
                 "executed": False,
                 "tool": tool_call.name,
@@ -93,6 +105,11 @@ class ToolDispatcher:
         session,
     ) -> dict:
         """Invoke a resolved handler, awaiting if it returns a coroutine."""
+        self._logger.info(
+            "Executing tool '%s' with handler '%s'",
+            tool_call.name,
+            handler_path,
+        )
         handler = self._resolve_handler(handler_path, session=session)
         call_kwargs = self._build_call_kwargs(
             handler=handler,
@@ -105,6 +122,7 @@ class ToolDispatcher:
         if inspect.isawaitable(result):
             result = await result
 
+        self._logger.debug("Tool executed: %s", tool_call.name)
         return {
             "executed": True,
             "tool": tool_call.name,
@@ -202,6 +220,7 @@ class ToolDispatcher:
             if name not in dependency_builders:
                 continue
             if name in self._SESSION_DEPENDENCIES and session is None:
+                self._logger.error("Missing session for dependency: %s", name)
                 raise RuntimeError("Session dependency is required but missing")
             kwargs[name] = dependency_builders[name](session)
 
