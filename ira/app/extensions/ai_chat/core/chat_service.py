@@ -27,7 +27,7 @@ class ServerChatService:
 
         raw_output = self._interpreter.interpret(
             prompt=prompt,
-            stop=["\n\n"],
+            stop=["<END_JSON>"],
         )
 
         payload = self._parse_tool_payload(raw_output)
@@ -51,18 +51,22 @@ class ServerChatService:
         return await self._dispatcher.execute(tool_call)
 
     def _parse_tool_payload(self, raw_output: str) -> dict | None:
-        try:
-            return json.loads(raw_output)
-        except json.JSONDecodeError:
-            pass
-
-        # Some models prefix with headers (e.g. "###"), so extract the JSON object.
+        # Find first JSON object only
         start = raw_output.find("{")
-        end = raw_output.rfind("}")
-        if start == -1 or end == -1 or end < start:
+        if start == -1:
             return None
 
-        try:
-            return json.loads(raw_output[start : end + 1])
-        except json.JSONDecodeError:
-            return None
+        depth = 0
+        for i in range(start, len(raw_output)):
+            if raw_output[i] == "{":
+                depth += 1
+            elif raw_output[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    json_str = raw_output[start : i + 1]
+                    try:
+                        return json.loads(json_str)
+                    except json.JSONDecodeError:
+                        return None
+
+        return None

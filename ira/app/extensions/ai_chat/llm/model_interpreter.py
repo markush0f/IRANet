@@ -1,3 +1,4 @@
+from typing import List, Optional
 from llama_cpp import Llama
 
 
@@ -12,10 +13,14 @@ class ModelInterpreter():
             verbose=False,
         )
 
-    def interpret(self, *, prompt: str, stop: list[str]) -> str:
-        response = self._interpreter(
-            prompt,
-            stop=stop,
-        )
+    def interpret(self, *, prompt: str, stop: Optional[List[str]] = None) -> str:
+        kwargs = {
+            "prompt": prompt,
+            "max_tokens": 256,
+        }
 
-        return response["choices"][0]["text"].strip() # type: ignore
+        if stop:
+            kwargs["stop"] = stop
+
+        response = self._interpreter(**kwargs)
+        return response["choices"][0]["text"].strip()  # type: ignore

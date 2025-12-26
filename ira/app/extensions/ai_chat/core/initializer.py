@@ -16,7 +16,7 @@ def get_chat_service() -> ServerChatService:
             Path("app/extensions/ai_chat/tools_calls.json")
         )
         interpreter = ModelInterpreter(
-            model_path="app/extensions/ai_chat/models/Phi-3-mini-4k-instruct-q4.gguf"
+            model_path="app/extensions/ai_chat/models/qwen2.5-1.5b-instruct-q4_k_m.gguf"
         )
 
         dispatcher = ToolDispatcher()
