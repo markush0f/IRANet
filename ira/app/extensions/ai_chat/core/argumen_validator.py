@@ -32,6 +32,10 @@ def validate_arguments(
         value = provided[name]
         expected_type = rules.get("type")
 
+        if expected_type in (None, "any"):
+            validated[name] = value
+            continue
+
         if expected_type == "string":
             if not isinstance(value, str):
                 raise ToolArgumentValidationError(
@@ -61,6 +65,37 @@ def validate_arguments(
             if not isinstance(value, bool):
                 raise ToolArgumentValidationError(
                     f"Argument '{name}' must be a boolean"
+                )
+
+        elif expected_type == "number":
+            if not isinstance(value, (int, float)):
+                raise ToolArgumentValidationError(
+                    f"Argument '{name}' must be a number"
+                )
+
+            min_value = rules.get("min")
+            max_value = rules.get("max")
+
+            if min_value is not None and value < min_value:
+                raise ToolArgumentValidationError(
+                    f"Argument '{name}' must be >= {min_value}"
+                )
+
+            if max_value is not None and value > max_value:
+                raise ToolArgumentValidationError(
+                    f"Argument '{name}' must be <= {max_value}"
+                )
+
+        elif expected_type == "array":
+            if not isinstance(value, list):
+                raise ToolArgumentValidationError(
+                    f"Argument '{name}' must be an array"
+                )
+
+        elif expected_type == "object":
+            if not isinstance(value, dict):
+                raise ToolArgumentValidationError(
+                    f"Argument '{name}' must be an object"
                 )
 
         else:

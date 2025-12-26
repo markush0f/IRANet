@@ -19,7 +19,7 @@ class ServerChatService:
         self._dispatcher = dispatcher
         self._tools_schema = tools_schema
 
-    def ask(self, *, question: str) -> dict:
+    async def ask(self, *, question: str) -> dict:
         prompt = build_prompt(
             user_message=question,
             tools=self._tools_schema,
@@ -49,4 +49,4 @@ class ServerChatService:
                 "payload": payload,
             }
 
-        return self._dispatcher.execute(tool_call)
+        return await self._dispatcher.execute(tool_call)

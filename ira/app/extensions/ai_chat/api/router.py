@@ -19,12 +19,12 @@ def health_check():
 
 
 @router.post("/ask")
-def ask_chat(
+async def ask_chat(
     payload: ChatRequest,
 ):
     try:
         chat_service = get_chat_service()
-        return chat_service.ask(question=payload.question)
+        return await chat_service.ask(question=payload.question)
     except Exception as exc:
         raise HTTPException(
             status_code=500,

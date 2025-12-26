@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
 
         # Load ai_chat extension if is enabled
         if await extensions_service.extension_is_enabled(extension_id="ai_chat"):
-            from extensions.ai_chat.api.router import router as chat_router
+            from app.extensions.ai_chat.api.router import router as chat_router
 
             app.include_router(chat_router)
     try:

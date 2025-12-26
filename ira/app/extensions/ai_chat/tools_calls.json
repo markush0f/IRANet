@@ -1,0 +1,343 @@
+{
+  "logs.attach_log_paths": {
+    "description": "Asocia rutas de logs detectadas a una aplicacion.",
+    "handler": "app.services.logs_service.ApplicationLogsService.attach_log_paths",
+    "arguments": {
+      "application_id": {"type": "string", "required": true},
+      "workdir": {"type": "string", "required": true}
+    }
+  },
+  "logs.attach_log_base_paths": {
+    "description": "Asocia rutas base de logs a una aplicacion.",
+    "handler": "app.services.logs_service.ApplicationLogsService.attach_log_base_paths",
+    "arguments": {
+      "application_id": {"type": "string", "required": true},
+      "base_paths": {"type": "array", "required": true}
+    }
+  },
+  "logs.stream_application_log_file": {
+    "description": "Stream de logs para un archivo (requiere websocket).",
+    "handler": "app.services.logs_service.ApplicationLogsService.stream_application_log_file",
+    "arguments": {
+      "application_id": {"type": "string", "required": true},
+      "file_path": {"type": "string", "required": true},
+      "websocket": {"type": "object", "required": true},
+      "poll_interval": {"type": "number", "required": false, "min": 0},
+      "history_limit": {"type": "integer", "required": false, "min": 1},
+      "levels": {"type": "string", "required": false},
+      "search": {"type": "string", "required": false}
+    }
+  },
+  "logs.get_application_log_files": {
+    "description": "Lista archivos de log de una aplicacion.",
+    "handler": "app.services.logs_service.ApplicationLogsService.get_application_log_files",
+    "arguments": {
+      "application_id": {"type": "string", "required": true},
+      "page": {"type": "integer", "required": false, "min": 1},
+      "page_size": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "logs.get_application_log_file_history": {
+    "description": "Devuelve historial de lineas para un archivo de log.",
+    "handler": "app.services.logs_service.ApplicationLogsService.get_application_log_file_history",
+    "arguments": {
+      "application_id": {"type": "string", "required": true},
+      "file_path": {"type": "string", "required": true},
+      "limit": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "logs.get_application_log_base_paths": {
+    "description": "Lista rutas base de logs de una aplicacion.",
+    "handler": "app.services.logs_service.ApplicationLogsService.get_application_log_base_paths",
+    "arguments": {
+      "application_id": {"type": "string", "required": true}
+    }
+  },
+  "processes.build_processes_header": {
+    "description": "Construye el header de procesos tipo top.",
+    "handler": "app.services.processes_service.ProcessesService.build_processes_header",
+    "arguments": {}
+  },
+  "processes.build_processes_snapshot": {
+    "description": "Snapshot completo de procesos y header.",
+    "handler": "app.services.processes_service.ProcessesService.build_processes_snapshot",
+    "arguments": {
+      "limit": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "processes.build_process_snapshot": {
+    "description": "Snapshot completo de un proceso.",
+    "handler": "app.services.processes_service.ProcessesService.build_process_snapshot",
+    "arguments": {
+      "pid": {"type": "integer", "required": true, "min": 1}
+    }
+  },
+  "processes.get_processes_table": {
+    "description": "Tabla de procesos para top/htop.",
+    "handler": "app.services.processes_service.ProcessesService.get_processes_table",
+    "arguments": {
+      "limit": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "service_discovery.discover_all": {
+    "description": "Descubre servicios desde procesos, apps, docker y systemd.",
+    "handler": "app.services.clasification.discovery_orchestrator_service.ServiceDiscoveryOrchestrator.discover_all",
+    "arguments": {}
+  },
+  "classification.classify_database_services": {
+    "description": "Clasifica servicios de base de datos.",
+    "handler": "app.services.clasification.clasification_service.ClasificationService.classify_database_services",
+    "arguments": {}
+  },
+  "internet_events.get_packet_loss_events": {
+    "description": "Lista eventos de packet loss por host y rango de tiempo.",
+    "handler": "app.services.internet.internet_events_service.InternetEventsService.get_packet_loss_events",
+    "arguments": {
+      "host": {"type": "string", "required": true},
+      "ts_from": {"type": "string", "required": true},
+      "ts_to": {"type": "string", "required": true}
+    }
+  },
+  "internet_metrics.build_internet_metrics": {
+    "description": "Construye metricas de internet para host y timestamp.",
+    "handler": "app.services.internet.internet_metrics_service.InternetMetricsService.build_internet_metrics",
+    "arguments": {
+      "ts": {"type": "string", "required": true},
+      "host": {"type": "string", "required": true}
+    }
+  },
+  "internet_metrics.get_summary": {
+    "description": "Resumen actual de estado de red.",
+    "handler": "app.services.internet.internet_metrics_service.InternetMetricsService.get_summary",
+    "arguments": {
+      "host": {"type": "string", "required": true},
+      "interface": {"type": "string", "required": true}
+    }
+  },
+  "metrics.collect_metrics": {
+    "description": "Recolecta metricas del sistema e internet.",
+    "handler": "app.services.metrics.metrics_service.SystemMetricsService.collect_metrics",
+    "arguments": {
+      "host": {"type": "string", "required": true}
+    }
+  },
+  "metrics.get_metric_series": {
+    "description": "Serie temporal para una metrica y host.",
+    "handler": "app.services.metrics.metrics_service.SystemMetricsService.get_metric_series",
+    "arguments": {
+      "metric": {"type": "string", "required": true},
+      "host": {"type": "string", "required": true},
+      "ts_from": {"type": "string", "required": true},
+      "ts_to": {"type": "string", "required": true}
+    }
+  },
+  "system.build_host_info": {
+    "description": "Informacion basica del host.",
+    "handler": "app.services.system.system_service.SystemService.build_host_info",
+    "arguments": {}
+  },
+  "system.build_system_snapshot": {
+    "description": "Snapshot general del sistema.",
+    "handler": "app.services.system.system_service.SystemService.build_system_snapshot",
+    "arguments": {}
+  },
+  "system.build_system_resources_snapshot": {
+    "description": "Snapshot liviano de recursos del sistema.",
+    "handler": "app.services.system.system_service.SystemService.build_system_resources_snapshot",
+    "arguments": {}
+  },
+  "system.build_system_alerts_snapshot": {
+    "description": "Snapshot de alertas del sistema.",
+    "handler": "app.services.system.system_service.SystemService.build_system_alerts_snapshot",
+    "arguments": {}
+  },
+  "system.get_system_disk": {
+    "description": "Lista particiones de disco y su estado.",
+    "handler": "app.services.system.system_service.SystemService.get_system_disk",
+    "arguments": {}
+  },
+  "system.get_disk_processes": {
+    "description": "Procesos que usan un mountpoint.",
+    "handler": "app.services.system.system_service.SystemService.get_disk_processes",
+    "arguments": {
+      "mountpoint": {"type": "string", "required": true},
+      "limit": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "system.get_system_disk_total": {
+    "description": "Uso agregado de discos.",
+    "handler": "app.services.system.system_service.SystemService.get_system_disk_total",
+    "arguments": {}
+  },
+  "system.get_root_disk_usage": {
+    "description": "Uso de disco en /.",
+    "handler": "app.services.system.system_service.SystemService.get_root_disk_usage",
+    "arguments": {}
+  },
+  "system_simple.get_simple_services": {
+    "description": "Servicios simples de systemd.",
+    "handler": "app.services.system.simple_services_service.SimpleServicesService.get_simple_services",
+    "arguments": {
+      "limit": {"type": "integer", "required": true, "min": 1}
+    }
+  },
+  "system_packages.get_packages_paginated": {
+    "description": "Paquetes instalados paginados.",
+    "handler": "app.services.system.packages_service.SystemPackagesService.get_packages_paginated",
+    "arguments": {
+      "page": {"type": "integer", "required": true, "min": 1},
+      "page_size": {"type": "integer", "required": true, "min": 1},
+      "q": {"type": "string", "required": false},
+      "sort_by": {"type": "string", "required": false},
+      "sort_dir": {"type": "string", "required": false}
+    }
+  },
+  "system_packages.get_history": {
+    "description": "Historial de paquetes apt.",
+    "handler": "app.services.system.packages_service.SystemPackagesService.get_history",
+    "arguments": {
+      "page": {"type": "integer", "required": true, "min": 1},
+      "page_size": {"type": "integer", "required": true, "min": 1},
+      "action": {"type": "string", "required": false},
+      "package": {"type": "string", "required": false},
+      "sort_dir": {"type": "string", "required": false},
+      "date_from": {"type": "string", "required": false},
+      "date_to": {"type": "string", "required": false}
+    }
+  },
+  "system_packages.get_installed_at": {
+    "description": "Fecha de instalacion de un paquete.",
+    "handler": "app.services.system.packages_service.SystemPackagesService.get_installed_at",
+    "arguments": {
+      "package": {"type": "string", "required": true}
+    }
+  },
+  "system_packages.get_active_packages_history": {
+    "description": "Historial de paquetes activos instalados.",
+    "handler": "app.services.system.packages_service.SystemPackagesService.get_active_packages_history",
+    "arguments": {}
+  },
+  "system_alerts.notify_critical_alert": {
+    "description": "Notifica y persiste una alerta critica.",
+    "handler": "app.services.system.system_alerts_service.SystemAlertsService.notify_critical_alert",
+    "arguments": {
+      "alert": {"type": "string", "required": true},
+      "host": {"type": "string", "required": true},
+      "alert_type": {"type": "string", "required": true},
+      "value": {"type": "number", "required": true},
+      "threshold": {"type": "number", "required": true}
+    }
+  },
+  "system_alerts.evaluate_alerts": {
+    "description": "Evalua metricas y emite alertas.",
+    "handler": "app.services.system.system_alerts_service.SystemAlertsService.evaluate_alerts",
+    "arguments": {
+      "cpu_total": {"type": "number", "required": true},
+      "memory_available_percent": {"type": "number", "required": true},
+      "load_1m": {"type": "number", "required": true},
+      "cpu_cores": {"type": "integer", "required": true, "min": 1},
+      "host": {"type": "string", "required": true}
+    }
+  },
+  "system_alerts.get_system_alerts_paginated": {
+    "description": "Listado paginado de alertas del sistema.",
+    "handler": "app.services.system.system_alerts_service.SystemAlertsService.get_system_alerts_paginated",
+    "arguments": {
+      "page": {"type": "integer", "required": true, "min": 1},
+      "page_size": {"type": "integer", "required": true, "min": 1}
+    }
+  },
+  "applications_system.discover_applications": {
+    "description": "Descubre aplicaciones a partir de procesos.",
+    "handler": "app.services.applications.applications_system_service.ApplicationsSystemService.discover_applications",
+    "arguments": {
+      "min_etimes_seconds": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "applications_system.discover_applications_grouped": {
+    "description": "Descubre aplicaciones agrupadas por cwd.",
+    "handler": "app.services.applications.applications_system_service.ApplicationsSystemService.discover_applications_grouped",
+    "arguments": {
+      "min_etimes_seconds": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "applications_system.discover_application_details": {
+    "description": "Detalles de una aplicacion por cwd.",
+    "handler": "app.services.applications.applications_system_service.ApplicationsSystemService.discover_application_details",
+    "arguments": {
+      "cwd": {"type": "string", "required": true},
+      "min_etimes_seconds": {"type": "integer", "required": false, "min": 1}
+    }
+  },
+  "applications.build_application_identifier": {
+    "description": "Construye el identificador de aplicacion.",
+    "handler": "app.services.applications.applications.ApplicationsService.build_application_identifier",
+    "arguments": {
+      "workdir": {"type": "string", "required": true}
+    }
+  },
+  "applications.create_application": {
+    "description": "Crea una aplicacion desde un request.",
+    "handler": "app.services.applications.applications.ApplicationsService.create_application",
+    "arguments": {
+      "data": {"type": "object", "required": true}
+    }
+  },
+  "applications.list_applications": {
+    "description": "Lista aplicaciones.",
+    "handler": "app.services.applications.applications.ApplicationsService.list_applications",
+    "arguments": {}
+  },
+  "applications.applications_lists": {
+    "description": "Lista aplicaciones con logs.",
+    "handler": "app.services.applications.applications.ApplicationsService.applications_lists",
+    "arguments": {}
+  },
+  "applications.applications_list_with_path_logs": {
+    "description": "Lista aplicaciones con rutas de logs.",
+    "handler": "app.services.applications.applications.ApplicationsService.applications_list_with_path_logs",
+    "arguments": {}
+  },
+  "users.get_all_users": {
+    "description": "Lista todos los usuarios del sistema.",
+    "handler": "app.services.user_system_service.UsersSystemService.get_all_users",
+    "arguments": {}
+  },
+  "users.get_login_allowed_users": {
+    "description": "Usuarios con login permitido.",
+    "handler": "app.services.user_system_service.UsersSystemService.get_login_allowed_users",
+    "arguments": {}
+  },
+  "users.get_active_users": {
+    "description": "Usuarios activos en el sistema.",
+    "handler": "app.services.user_system_service.UsersSystemService.get_active_users",
+    "arguments": {}
+  },
+  "users.get_users_summary": {
+    "description": "Resumen de usuarios del sistema.",
+    "handler": "app.services.user_system_service.UsersSystemService.get_users_summary",
+    "arguments": {}
+  },
+  "users.get_human_users": {
+    "description": "Usuarios humanos del sistema.",
+    "handler": "app.services.user_system_service.UsersSystemService.get_human_users",
+    "arguments": {}
+  },
+  "users.get_system_users": {
+    "description": "Usuarios de sistema.",
+    "handler": "app.services.user_system_service.UsersSystemService.get_system_users",
+    "arguments": {}
+  },
+  "extensions.extension_is_enabled": {
+    "description": "Verifica si una extension esta habilitada.",
+    "handler": "app.services.extensions.ExtensionsService.extension_is_enabled",
+    "arguments": {
+      "extension_id": {"type": "string", "required": true}
+    }
+  },
+  "extensions.get_all_extensions": {
+    "description": "Lista todas las extensiones.",
+    "handler": "app.services.extensions.ExtensionsService.get_all_extensions",
+    "arguments": {}
+  }
+}
