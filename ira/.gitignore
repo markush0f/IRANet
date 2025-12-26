@@ -11,6 +11,10 @@ logs/
 logs/*
 *.log
 
+# models
+models/*
+
+
 # Distribution / packaging
 .Python
 build/
