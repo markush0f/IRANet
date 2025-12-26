@@ -32,15 +32,14 @@ async def lifespan(app: FastAPI):
     # Start background metrics scheduler
     task = asyncio.create_task(metrics_scheduler())
 
-    # Regenerate AI tools registry at startup to reflect latest code.
-    generate_tools_calls()
-
     # Laod enabled extensions from database at startup
     async for session in get_session():
         extensions_service = ExtensionsService(session)
 
         # Load ai_chat extension if is enabled
         if await extensions_service.extension_is_enabled(extension_id="ai_chat"):
+            # Regenerate AI tools registry only when the extension is enabled.
+            generate_tools_calls()
             from app.extensions.ai_chat.api.router import router as chat_router
 
             app.include_router(chat_router)
