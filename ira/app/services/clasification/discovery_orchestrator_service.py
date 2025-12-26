@@ -3,6 +3,7 @@ from typing import List, Optional
 
 
 from app.models.entities.service import Service
+from app.extensions.ai_chat.tools.registry import tool_class
 from app.modules.scanner.process import scan_processes
 from app.modules.services.docker.docker import system_docker_containers
 from app.modules.system.proc import (
@@ -14,6 +15,7 @@ from app.modules.system.proc import (
 from app.modules.systemd.simple.discovery import discover_simple_services
 
 
+@tool_class(name_prefix="service_discovery")
 class ServiceDiscoveryOrchestrator:
     def discover_all(self) -> List[Service]:
         services: List[Service] = []

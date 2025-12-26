@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from app.models.entities.service import Service
+from app.extensions.ai_chat.tools.registry import tool_class
 from app.services.clasification.discovery_orchestrator_service import ServiceDiscoveryOrchestrator
 
 
@@ -17,6 +18,7 @@ DATABASE_SIGNATURES: Dict[str, List[str]] = {
 }
 
 
+@tool_class(name_prefix="classification")
 class ClasificationService:
 
     def classify_database_services(self) -> List[Dict]:

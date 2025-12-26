@@ -5,11 +5,13 @@ from typing import Any, Dict
 from app.core.logger import get_logger
 from app.core.websocket_manager import ws_manager
 from app.repositories.system_alerts import SystemAlertRepository
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
 logger = get_logger(__name__)
 
 
+@tool_class(name_prefix="system_alerts")
 class SystemAlertsService:
     CPU_CRITICAL = 80
     MEMORY_AVAILABLE_CRITICAL = 30

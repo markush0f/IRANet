@@ -10,8 +10,10 @@ from app.modules.scanner.process import scan_processes
 
 from app.repositories.applications import ApplicationRepository
 from app.services.logs_service import ApplicationLogsService
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="applications_system")
 class ApplicationsSystemService:
     def __init__(self, session) -> None:
         self._applications_repo = ApplicationRepository(session)

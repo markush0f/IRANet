@@ -8,8 +8,10 @@ from app.models.dto.system_packages_history import SystemPackageHistoryEntry
 from app.modules.system.packages.apt_history import read_apt_history
 from app.modules.system.packages.apt_packages import installed_packages
 from app.modules.system.packages.types import AptAction, AptHistoryEntry
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="system_packages")
 class SystemPackagesService:
 
     def get_packages_paginated(

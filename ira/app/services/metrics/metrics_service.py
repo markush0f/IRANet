@@ -10,8 +10,10 @@ from app.modules.system.cpu import get_cpu_global_top_percent
 from app.modules.system.meminfo import read_memory_and_swap_status
 from app.repositories.metric_point import MetricPointRepository
 from app.services.internet.internet_metrics_service import InternetMetricsService
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="metrics")
 class SystemMetricsService:
     def __init__(self, session: AsyncSession) -> None:
         self._repo = MetricPointRepository(session)

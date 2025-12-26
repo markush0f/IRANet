@@ -21,6 +21,7 @@ from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
 from app.core.database import engine, get_session
 from app.services.extensions import ExtensionsService
+from app.extensions.ai_chat.tools.generate_tools_calls import main as generate_tools_calls
 
 
 logger = get_logger(__name__)
@@ -30,6 +31,9 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     # Start background metrics scheduler
     task = asyncio.create_task(metrics_scheduler())
+
+    # Regenerate AI tools registry at startup to reflect latest code.
+    generate_tools_calls()
 
     # Laod enabled extensions from database at startup
     async for session in get_session():

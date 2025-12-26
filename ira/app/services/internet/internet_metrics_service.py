@@ -6,8 +6,10 @@ from app.models.entities.metric_point import MetricName, MetricPoint
 from app.modules.internet.ping import measure_latency
 from app.modules.internet.interfaces import measure_interfaces_traffic
 from app.repositories.metric_point import MetricPointRepository
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="internet_metrics")
 class InternetMetricsService:
     def __init__(self, *, ping_host: str, session) -> None:
         self._ping_host = ping_host

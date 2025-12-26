@@ -11,8 +11,10 @@ from app.modules.system.host import host_info
 from app.modules.system.meminfo import read_memory_and_swap_status
 from app.modules.system.proc import read_uptime_seconds
 from app.modules.system.types import DiskPartition, DiskProcessUsage
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="system")
 class SystemService:
     def build_host_info(self) -> dict:
         return {

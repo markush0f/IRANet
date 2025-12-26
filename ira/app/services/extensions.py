@@ -1,6 +1,8 @@
 from app.repositories.extensions import ExtensionsRepository
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="extensions")
 class ExtensionsService:
     def __init__(self, session):
         self._repository = ExtensionsRepository(session)

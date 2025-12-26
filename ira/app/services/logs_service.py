@@ -6,6 +6,7 @@ from fastapi import WebSocket
 from sqlalchemy.exc import IntegrityError
 
 from app.core.logger import get_logger
+from app.extensions.ai_chat.tools.registry import tool_class
 from app.modules.logs.inspector import list_log_files
 from app.modules.logs.reader import read_last_lines
 from app.modules.logs.resolver import resolve_log_files
@@ -17,6 +18,7 @@ from app.utils.logs_parser import parse_log_line, passes_filters
 logger = get_logger()
 
 
+@tool_class(name_prefix="logs")
 class ApplicationLogsService:
     def __init__(self, session) -> None:
         self._repo = ApplicationLogRepository(session)

@@ -1,6 +1,7 @@
 import time
 from typing import Any, Dict
 from app.core.logger import get_logger
+from app.extensions.ai_chat.tools.registry import tool_class
 from app.modules.common.base import read_process_name
 from app.modules.processes.top.memory import (
     get_process_memory_res_kb,
@@ -30,6 +31,7 @@ from app.shared.pids import iter_pids
 logger = get_logger(__name__)
 
 
+@tool_class(name_prefix="processes")
 class ProcessesService:
 
     def _format_uptime(self, seconds: int) -> str:

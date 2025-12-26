@@ -6,8 +6,10 @@ from app.models.entities.application import Application
 from app.models.requests.create_application_request import CreateApplicationRequest
 from app.repositories.applications import ApplicationRepository
 from app.services.logs_service import ApplicationLogsService
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="applications")
 class ApplicationsService:
     def __init__(self, session) -> None:
         self.applications_repository = ApplicationRepository(session)

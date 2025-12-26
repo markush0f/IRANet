@@ -2,8 +2,10 @@ from datetime import datetime
 from typing import List, Dict
 
 from app.repositories.metric_point import MetricPointRepository
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="internet_events")
 class InternetEventsService:
     def __init__(self, repository: MetricPointRepository) -> None:
         self._repository = repository

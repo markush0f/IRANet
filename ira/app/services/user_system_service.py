@@ -1,6 +1,8 @@
 from app.modules.system.users import active_users, system_users
+from app.extensions.ai_chat.tools.registry import tool_class
 
 
+@tool_class(name_prefix="users")
 class UsersSystemService:
     def get_all_users(self):
         return system_users()
