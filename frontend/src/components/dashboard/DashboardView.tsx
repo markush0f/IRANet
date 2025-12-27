@@ -145,6 +145,8 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
     const latestLabel = latestValue !== null ? formatValue(latestValue) : '—';
 
     const chartType: ChartType = 'area';
+    const yDomain: [number, number] | undefined =
+        id.endsWith('_percent') || id === 'cpu.total' ? [0, 100] : undefined;
 
     return (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 shadow-xl space-y-3 h-full">
@@ -167,6 +169,7 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
                     strokeColor={strokeColor}
                     fillColor={fillColor}
                     valueFormatter={(value) => formatValue(value)}
+                    yDomain={yDomain}
                 />
             </div>
 

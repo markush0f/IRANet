@@ -12,6 +12,8 @@ interface RechartsMetricPanelProps {
     metric: string;
     seriesLabel: string;
     valueFormatter?: (value: number) => string;
+    valueTransform?: (value: number) => number;
+    yDomain?: [number, number];
     strokeColor?: string;
     fillColor?: string;
 }
@@ -21,6 +23,8 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
     metric,
     seriesLabel,
     valueFormatter,
+    valueTransform,
+    yDomain,
     strokeColor = '#a855f7',
     fillColor = '#a855f7',
 }) => {
@@ -46,10 +50,16 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
         handleManualFetch,
     } = useMetricSeriesPanel({ hostname, metric });
 
+    const applyTransform = (value: number) => (valueTransform ? valueTransform(value) : value);
     const valueToDisplay = (value: number) => (valueFormatter ? valueFormatter(value) : value.toFixed(2));
-    const latestValueLabel = latestValue !== null ? valueToDisplay(latestValue) : null;
 
-    const chartData = samples.map(sample => ({
+    const displaySamples = valueTransform
+        ? samples.map(sample => ({ ...sample, value: applyTransform(sample.value) }))
+        : samples;
+
+    const latestValueLabel = displaySamples.length ? valueToDisplay(displaySamples.at(-1)?.value ?? 0) : null;
+
+    const chartData = displaySamples.map(sample => ({
         time: new Date(sample.ts).toLocaleTimeString('es-ES', {
             hour: '2-digit',
             minute: '2-digit',
@@ -58,6 +68,26 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
         value: sample.value,
         fullTimestamp: new Date(sample.ts).toLocaleString('es-ES'),
     }));
+
+    const summary = valueTransform
+        ? displaySamples.reduce(
+            (acc, sample) => {
+                acc.min = Math.min(acc.min, sample.value);
+                acc.max = Math.max(acc.max, sample.value);
+                acc.sum += sample.value;
+                return acc;
+            },
+            { min: Number.POSITIVE_INFINITY, max: Number.NEGATIVE_INFINITY, sum: 0 }
+        )
+        : null;
+
+    const manualSummaryDisplay = summary
+        ? {
+            min: summary.min === Number.POSITIVE_INFINITY ? 0 : summary.min,
+            max: summary.max === Number.NEGATIVE_INFINITY ? 0 : summary.max,
+            avg: displaySamples.length ? summary.sum / displaySamples.length : 0,
+        }
+        : manualSummary;
 
     const chartTypes = [
         { value: 'area' as ChartType, label: 'Area', Icon: AreaChartIcon },
@@ -90,6 +120,7 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
                     strokeColor={strokeColor}
                     fillColor={fillColor}
                     valueFormatter={valueToDisplay}
+                    yDomain={yDomain}
                 />
             </div>
 
@@ -113,7 +144,11 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
                 />
             </div>
 
-            <SummaryStats manualSummary={manualSummary} valueFormatter={valueToDisplay} sampleCount={samples.length} />
+            <SummaryStats
+                manualSummary={manualSummaryDisplay}
+                valueFormatter={valueToDisplay}
+                sampleCount={displaySamples.length}
+            />
 
             {error && (
                 <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">

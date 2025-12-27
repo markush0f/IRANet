@@ -89,6 +89,7 @@ const CpuMetricsView: React.FC = () => {
                         metric="cpu.total"
                         seriesLabel="CPU total metrics series"
                         valueFormatter={value => `${value.toFixed(2)}%`}
+                        yDomain={[0, 100]}
                     />
                 </div>
             </Card>

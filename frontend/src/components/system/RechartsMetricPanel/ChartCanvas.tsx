@@ -28,6 +28,7 @@ interface ChartCanvasProps {
     strokeColor: string;
     fillColor: string;
     valueFormatter: (value: number) => string;
+    yDomain?: [number, number];
 }
 
 const CustomTooltip = ({ active, payload, formatter }: { active?: boolean; payload?: any; formatter: (value: number) => string }) => {
@@ -35,7 +36,7 @@ const CustomTooltip = ({ active, payload, formatter }: { active?: boolean; paylo
         return (
             <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-3 shadow-lg">
                 <p className="text-xs text-zinc-400 mb-1">{payload[0].payload.fullTimestamp}</p>
-                <p className="text-sm font-semibold text-purple-400">{formatter(payload[0].value)}</p>
+                <p className="text-lg font-bold text-emerald-300">{formatter(payload[0].value)}</p>
             </div>
         );
     }
@@ -49,6 +50,7 @@ const ChartCanvas: React.FC<ChartCanvasProps> = ({
     strokeColor,
     fillColor,
     valueFormatter,
+    yDomain,
 }) => {
     const commonProps = {
         data: chartData,
@@ -58,17 +60,20 @@ const ChartCanvas: React.FC<ChartCanvasProps> = ({
     const commonXAxisProps = {
         dataKey: 'time',
         stroke: '#71717a',
-        style: { fontSize: '11px' },
+        style: { fontSize: '12px' },
         tickLine: false,
+        tick: { fill: '#a1a1aa', fontSize: 12 },
         interval: 'preserveStartEnd' as const,
     };
 
     const commonYAxisProps = {
-        stroke: '#71717a',
-        style: { fontSize: '11px' },
+        stroke: '#a1a1aa',
+        style: { fontSize: '12px' },
         tickLine: false,
+        tick: { fill: '#e5e7eb', fontSize: 12, fontWeight: 600 },
         tickFormatter: (value: number) => valueFormatter(value),
-        width: 60,
+        width: 70,
+        domain: yDomain,
     };
 
     if (!chartData.length) {
@@ -80,7 +85,7 @@ const ChartCanvas: React.FC<ChartCanvasProps> = ({
     }
 
     return (
-        <div className="h-[240px] sm:h-[300px] pt-12 sm:pt-14 pb-8 sm:pb-10">
+        <div className="h-[320px] sm:h-[380px] pt-12 sm:pt-14 pb-8 sm:pb-10">
             <ResponsiveContainer width="100%" height="100%">
                 {selectedChartType === 'area' && (
                     <AreaChart {...commonProps}>

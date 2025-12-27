@@ -10,8 +10,13 @@ const MemoryMetricsView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [overrideHost, setOverrideHost] = useState('');
     const memoryMetrics = [
-        { id: 'memory.available_percent', label: 'Available memory' },
-        { id: 'memory.used_percent', label: 'Used memory' },
+        { id: 'memory.available_percent', label: 'Available memory', metric: 'memory.available_percent' },
+        {
+            id: 'memory.used_percent',
+            label: 'Used memory',
+            metric: 'memory.available_percent',
+            transform: (value: number) => Math.max(0, 100 - value),
+        },
     ];
     const [activeMemoryMetric, setActiveMemoryMetric] = useState(memoryMetrics[0]);
 
@@ -107,9 +112,11 @@ const MemoryMetricsView: React.FC = () => {
                     )}
                     <RechartsMetricPanel
                         hostname={hostToUse || undefined}
-                        metric={activeMemoryMetric.id}
+                        metric={activeMemoryMetric.metric}
                         seriesLabel={`Metrics series for ${activeMemoryMetric.label.toLowerCase()}`}
                         valueFormatter={value => `${value.toFixed(2)}%`}
+                        valueTransform={activeMemoryMetric.transform}
+                        yDomain={[0, 100]}
                     />
                 </div>
             </Card>
