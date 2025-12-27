@@ -25,7 +25,7 @@ const SystemDiskView = () => {
 
     if (loading || !diskInfo) {
         return (
-            <div className="min-h-full bg-black p-4 sm:p-6">
+            <div className="min-h-full bg-black px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm">
                 <div className="w-full">
                     <div className="bg-zinc-900 rounded-lg p-4 sm:p-6 border border-zinc-800">
                         <div className="animate-pulse space-y-3">
@@ -39,7 +39,7 @@ const SystemDiskView = () => {
     }
 
     return (
-        <div className="min-h-full bg-zinc-950 p-4 sm:p-6">
+        <div className="min-h-full bg-zinc-950 px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm">
             <div className="w-full space-y-6">
                 <DiskSummary
                     summary={summary}

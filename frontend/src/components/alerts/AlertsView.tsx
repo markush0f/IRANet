@@ -58,7 +58,7 @@ const AlertsView: React.FC = () => {
     const formatMoment = (alert: AlertRecord) => formatTimestamp(alert.first_seen_at ?? alert.timestamp ?? alert.last_seen_at ?? '');
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm min-h-full flex flex-col">
             {/* Header */}
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -125,14 +125,14 @@ const AlertsView: React.FC = () => {
                         <div className="flex items-center justify-center h-full p-12">
                             <div className="text-center">
                                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                                <p className="text-sm text-zinc-400">Loading alerts...</p>
+                                <p className="text-[10px] text-zinc-500">Loading alerts...</p>
                             </div>
                         </div>
                     ) : filteredAlerts.length === 0 ? (
                         <div className="flex items-center justify-center h-full p-12">
                             <div className="text-center">
                                 <div className="text-4xl mb-3">📭</div>
-                                <p className="text-sm text-zinc-400">No alerts match the current filter</p>
+                                <p className="text-[10px] text-zinc-500">No alerts match the current filter</p>
                             </div>
                         </div>
                     ) : (
@@ -148,14 +148,14 @@ const AlertsView: React.FC = () => {
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${levelStyle.bg}`}>
                                                 {alert.level}
                                             </span>
-                                            <span className="text-[11px] text-zinc-500 font-mono whitespace-nowrap">
+                                            <span className="text-[10px] text-zinc-500 font-mono whitespace-nowrap">
                                                 {formatMoment(alert)}
                                             </span>
                                         </div>
                                         <p className="text-sm text-zinc-200 mb-2 break-words">
                                             {alert.message}
                                         </p>
-                                        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+                                        <div className="flex items-center gap-2 text-[10px] text-zinc-500">
                                             <span className="font-mono">{alert.host ?? alert.source ?? 'N/A'}</span>
                                         </div>
                                     </div>

@@ -174,12 +174,12 @@ const SystemPackagesHistoryView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm space-y-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p className="text-xs uppercase tracking-wide text-zinc-500">System</p>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Packages</h2>
-                    <p className="text-sm text-zinc-400 mt-2 max-w-2xl"> 
+                    <p className="text-[10px] text-zinc-500 mt-2 max-w-2xl"> 
                         Review installed packages and package with a focus on traceability.
                     </p>
                 </div>
@@ -216,7 +216,7 @@ const SystemPackagesHistoryView: React.FC = () => {
                         </div>
 
                         {!isSearching && (
-                            <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+                            <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-500">
                                 <span>{pageLabel}</span>
                                 <div className="relative">
                                     <select
@@ -239,11 +239,11 @@ const SystemPackagesHistoryView: React.FC = () => {
                                         </svg>
                                     </span>
                                 </div>
-                                <span className="text-[11px] text-zinc-500">Pagination enabled</span>
+                                <span className="text-[10px] text-zinc-500">Pagination enabled</span>
                             </div>
                         )}
                         {isSearching && (
-                            <div className="text-[11px] text-zinc-500">
+                            <div className="text-[10px] text-zinc-500">
                                 Search active: pagination disabled.
                             </div>
                         )}
@@ -257,7 +257,7 @@ const SystemPackagesHistoryView: React.FC = () => {
                         />
 
                         {!isSearching && (
-                            <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-zinc-500">
+                            <div className="flex flex-wrap items-center justify-between gap-3 text-[10px] text-zinc-500">
                                 <span>Page {page} of {totalPages}</span>
                                 <div className="flex flex-wrap gap-2">
                                     <button
@@ -329,7 +329,7 @@ const SystemPackagesHistoryView: React.FC = () => {
                         ) : historyError ? (
                             <div className="text-sm text-amber-400">{historyError}</div>
                         ) : historyItems.length === 0 ? (
-                            <div className="text-sm text-zinc-400">
+                            <div className="text-[10px] text-zinc-500">
                                 No events for the selected filters.
                             </div>
                         ) : (

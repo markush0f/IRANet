@@ -78,7 +78,7 @@ const SystemPackagesView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm space-y-4">
             {/* Header */}
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -88,7 +88,7 @@ const SystemPackagesView: React.FC = () => {
                     <h2 className="text-xl font-semibold text-zinc-100">
                         System packages
                     </h2>
-                    <p className="text-xs text-zinc-500 mt-1 max-w-xl">
+                    <p className="text-[10px] text-zinc-500 mt-1 max-w-xl">
                         Installed packages list with search, sorting, and pagination.
                     </p>
                     {error && (
@@ -99,7 +99,7 @@ const SystemPackagesView: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+                    <div className="flex items-center gap-2 text-[10px] text-zinc-500">
                         <span>Sort</span>
 
                         <button
@@ -154,7 +154,7 @@ const SystemPackagesView: React.FC = () => {
                     />
                 </div>
 
-                <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
                     <span>{pageLabel}</span>
                     <div className="relative">
                         <select
@@ -188,7 +188,7 @@ const SystemPackagesView: React.FC = () => {
                         <span>Loading packages...</span>
                     </div>
                 ) : items.length === 0 ? (
-                    <div className="text-sm text-zinc-400 px-4 py-6">
+                    <div className="text-[10px] text-zinc-500 px-4 py-6">
                         No packages match the filter.
                     </div>
                 ) : (
@@ -238,7 +238,7 @@ const SystemPackagesView: React.FC = () => {
 
             {/* Footer pagination */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-[11px] text-zinc-500">
+                <div className="text-[10px] text-zinc-500">
                     Page {page} of {totalPages}
                 </div>
 

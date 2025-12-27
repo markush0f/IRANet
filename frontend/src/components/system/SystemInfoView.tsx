@@ -52,14 +52,14 @@ const SystemInfoView: React.FC = () => {
 
     if (loading || !info) {
         return (
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+            <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
                 <SystemInfoHeader loading />
             </div>
         );
     }
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <SystemInfoHeader error={error} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -93,7 +93,7 @@ const SystemInfoView: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <InfoCard title="Boot time">
-                    <p className="text-sm text-zinc-400 mb-4">
+                    <p className="text-[10px] text-zinc-500 mb-4">
                         Unix timestamp for system boot with a readable date.
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">

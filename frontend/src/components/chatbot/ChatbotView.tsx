@@ -32,7 +32,7 @@ const ChatbotView: React.FC = () => {
     } = useChatbot();
 
     return (
-        <div className="w-full h-full min-h-full px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full h-full min-h-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <div className="grid gap-6 lg:grid-cols-[280px_1fr] h-full">
                 <ChatSidebar
                     chats={chats}

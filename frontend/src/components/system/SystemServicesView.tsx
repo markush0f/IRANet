@@ -72,7 +72,7 @@ const SystemServicesView: React.FC = () => {
     });
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">
@@ -90,7 +90,7 @@ const SystemServicesView: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-end gap-3">
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <div className="flex items-center gap-2 text-[10px] text-zinc-500">
                         <span>Limit</span>
                         <div className="relative">
                             <select
@@ -113,7 +113,7 @@ const SystemServicesView: React.FC = () => {
                     </div>
 
                     {!loading && (
-                        <div className="text-xs text-zinc-500 font-mono text-right">
+                        <div className="text-[10px] text-zinc-500 font-mono text-right">
                             Total <span className="text-zinc-200 font-semibold">{services.length}</span> ·
                             Active <span className="text-emerald-400 font-semibold ml-1">{activeCount}</span>
                         </div>
@@ -145,7 +145,7 @@ const SystemServicesView: React.FC = () => {
                     <span>Loading system services...</span>
                 </div>
             ) : filteredServices.length === 0 ? (
-                <div className="text-sm text-zinc-400">
+                <div className="text-[10px] text-zinc-500">
                     No services to display.
                 </div>
             ) : (
@@ -163,7 +163,7 @@ const SystemServicesView: React.FC = () => {
                                         <h3 className="text-base font-semibold text-zinc-100 leading-tight">
                                             {service.id}
                                         </h3>
-                                        <p className="text-sm text-zinc-400 mt-1">
+                                        <p className="text-[10px] text-zinc-500 mt-1">
                                             {formatNullable(service.description)}
                                         </p>
                                     </div>
@@ -197,7 +197,7 @@ const SystemServicesView: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <p className="text-[11px] text-zinc-500 uppercase tracking-wide">
+                                    <p className="text-[10px] text-zinc-500 uppercase tracking-wide">
                                         Exec start
                                     </p>
                                     <div className="mt-1 rounded-md bg-zinc-950 border border-zinc-800 px-2 py-1 overflow-x-auto">

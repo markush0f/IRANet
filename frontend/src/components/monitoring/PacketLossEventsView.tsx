@@ -130,13 +130,13 @@ const PacketLossEventsView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <Card className="space-y-6 p-4 sm:p-6">
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Internet</Text>
                         <Title className="text-2xl sm:text-3xl text-zinc-100">Packet loss events</Title>
-                        <Text className="text-sm text-zinc-400 max-w-3xl">
+                        <Text className="text-[10px] text-zinc-500 max-w-3xl">
                             Query packet loss events over a time range for the selected host.
                             Review duration, max, and average to identify degradation spikes.
                         </Text>
@@ -147,7 +147,7 @@ const PacketLossEventsView: React.FC = () => {
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
-                    <Text className="text-sm text-zinc-400">
+                    <Text className="text-[10px] text-zinc-500">
                         {loadingHost && 'Loading host information…'}
                         {!loadingHost && hostname && `Detected host: ${hostname}`}
                         {!loadingHost && !hostname && 'No default hostname detected.'}
@@ -220,7 +220,7 @@ const PacketLossEventsView: React.FC = () => {
                     </div>
 
                     {events.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-center text-sm text-zinc-500">
+                        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950 p-8 text-center text-[10px] text-zinc-500">
                             No events in the selected range.
                         </div>
                     ) : (
@@ -235,7 +235,7 @@ const PacketLossEventsView: React.FC = () => {
                                             <div className="text-sm font-semibold text-zinc-100">
                                                 {formatTimestamp(event.start)} → {formatTimestamp(event.end)}
                                             </div>
-                                            <div className="text-xs text-zinc-500">
+                                            <div className="text-[10px] text-zinc-500">
                                                 Duration: {event.duration_seconds.toFixed(2)}s
                                             </div>
                                         </div>

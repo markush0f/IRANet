@@ -80,7 +80,7 @@ const DockerView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Docker Containers</h2>
@@ -97,7 +97,7 @@ const DockerView: React.FC = () => {
                 {!loading && (
                     <div className="flex flex-col items-start lg:items-end gap-2">
                         <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-zinc-500">Filter:</span>
+                            <span className="text-[10px] text-zinc-500">Filter:</span>
                             <div className="inline-flex rounded-full bg-zinc-900 p-1 border border-zinc-800">
                                 <button
                                     onClick={() => setStatusFilter('running')}
@@ -131,7 +131,7 @@ const DockerView: React.FC = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="text-xs text-zinc-500 font-mono text-right">
+                        <div className="text-[10px] text-zinc-500 font-mono text-right">
                             Total: <span className="text-zinc-200 font-semibold">{containers.length}</span> ·
                             Running: <span className="text-emerald-400 font-semibold ml-1">{runningContainers.length}</span>
                         </div>
@@ -163,7 +163,7 @@ const DockerView: React.FC = () => {
                     <span>Loading Docker containers...</span>
                 </div>
             ) : filteredContainers.length === 0 ? (
-                <div className="text-sm text-zinc-400">
+                <div className="text-[10px] text-zinc-500">
                     No containers match the current filter.
                 </div>
             ) : (
@@ -182,7 +182,7 @@ const DockerView: React.FC = () => {
                                     <h3 className="text-base font-bold text-zinc-100 truncate">
                                         {container.name.toUpperCase()}
                                     </h3>
-                                    <p className="text-sm text-zinc-500 font-mono truncate mt-1">
+                                    <p className="text-[10px] text-zinc-500 font-mono truncate mt-1">
                                         {container.id}
                                     </p>
                                 </div>

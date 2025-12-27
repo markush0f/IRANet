@@ -18,7 +18,7 @@ const UsersView: React.FC = () => {
     } = useUsersData();
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm min-h-full flex flex-col">
             {/* Header */}
             <div className="flex flex-col gap-4 mb-6">
                 <UsersPageHeader

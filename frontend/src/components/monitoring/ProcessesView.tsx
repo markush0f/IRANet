@@ -81,7 +81,7 @@ const ProcessesView: React.FC = () => {
     }, [processes, userFilter, stateFilter, search]);
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 min-h-full flex flex-col">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm min-h-full flex flex-col">
             <header className="mb-6 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -173,7 +173,7 @@ const ProcessesView: React.FC = () => {
                                             </span>
                                         </div>
 
-                                        <div className="mt-1 text-xs text-zinc-500 flex gap-4">
+                                        <div className="mt-1 text-[10px] text-zinc-500 flex gap-4">
                                             <span>User: {p.user}</span>
                                             <span>RES: {formatKbToMiB(p.memory.res_kb)}</span>
                                             <span>VIRT: {formatKbToMiB(p.memory.virt_kb)}</span>

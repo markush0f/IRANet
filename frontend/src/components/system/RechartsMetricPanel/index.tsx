@@ -102,59 +102,62 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
                 <ChartTypeSelector selected={selectedChartType} onSelect={setSelectedChartType} options={chartTypes} />
             </div>
 
-            <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5">
-                <div className="absolute left-4 top-4 z-10 flex items-center gap-3">
-                    <span className="text-[11px] uppercase tracking-wide text-zinc-400">{seriesLabel}</span>
-                </div>
-                <div className="absolute left-4 bottom-3 z-10 text-[11px] uppercase tracking-wide text-zinc-400">
-                    {summaryLabel}
-                </div>
-                <div className="absolute right-4 bottom-3 z-10 text-[11px] text-zinc-500">
-                    Actualizado {lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : '—'}
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                <div className="space-y-4">
+                    <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5">
+                        <div className="absolute left-4 top-4 z-10 flex items-center gap-3">
+                            <span className="text-[11px] uppercase tracking-wide text-zinc-400">{seriesLabel}</span>
+                        </div>
+                    <div className="absolute left-4 bottom-3 z-10 text-[11px] uppercase tracking-wide text-zinc-400">
+                        {summaryLabel}
+                    </div>
+                    <div className="absolute right-4 bottom-3 z-10 text-[11px] text-zinc-500">
+                        Actualizado {lastLoadedAt ? lastLoadedAt.toLocaleTimeString() : '—'}
+                    </div>
+
+                        <ChartCanvas
+                            chartData={chartData}
+                            selectedChartType={selectedChartType}
+                            metric={metric}
+                            strokeColor={strokeColor}
+                            fillColor={fillColor}
+                            valueFormatter={valueToDisplay}
+                            yDomain={yDomain}
+                        />
+                    </div>
+
+                    <SummaryStats
+                        manualSummary={manualSummaryDisplay}
+                        valueFormatter={valueToDisplay}
+                        sampleCount={displaySamples.length}
+                    />
                 </div>
 
-                <ChartCanvas
-                    chartData={chartData}
-                    selectedChartType={selectedChartType}
-                    metric={metric}
-                    strokeColor={strokeColor}
-                    fillColor={fillColor}
-                    valueFormatter={valueToDisplay}
-                    yDomain={yDomain}
-                />
+                <div className="space-y-4">
+                    <ManualControl
+                        manualStart={manualStart}
+                        manualEnd={manualEnd}
+                        setManualStart={setManualStart}
+                        setManualEnd={setManualEnd}
+                        handleManualFetch={handleManualFetch}
+                        loading={loading}
+                        latestValueLabel={latestValueLabel}
+                    />
+                    <LiveControl
+                        liveStart={liveStart}
+                        setLiveStart={setLiveStart}
+                        startLive={startLive}
+                        stopLive={stopLive}
+                        liveLoading={liveLoading}
+                        isLiveState={isLiveState}
+                    />
+                    {error && (
+                        <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">
+                            {error}
+                        </div>
+                    )}
+                </div>
             </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <ManualControl
-                    manualStart={manualStart}
-                    manualEnd={manualEnd}
-                    setManualStart={setManualStart}
-                    setManualEnd={setManualEnd}
-                    handleManualFetch={handleManualFetch}
-                    loading={loading}
-                    latestValueLabel={latestValueLabel}
-                />
-                <LiveControl
-                    liveStart={liveStart}
-                    setLiveStart={setLiveStart}
-                    startLive={startLive}
-                    stopLive={stopLive}
-                    liveLoading={liveLoading}
-                    isLiveState={isLiveState}
-                />
-            </div>
-
-            <SummaryStats
-                manualSummary={manualSummaryDisplay}
-                valueFormatter={valueToDisplay}
-                sampleCount={displaySamples.length}
-            />
-
-            {error && (
-                <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">
-                    {error}
-                </div>
-            )}
         </div>
     );
 };

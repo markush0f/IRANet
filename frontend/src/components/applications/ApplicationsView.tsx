@@ -211,11 +211,11 @@ const ApplicationsView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 space-y-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm space-y-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Applications</h2>
-                    <p className="text-sm text-zinc-400 mt-1">Simple applications + logs model based on backend tables.</p>
+                    <p className="text-[10px] text-zinc-500 mt-1">Simple applications + logs model based on backend tables.</p>
                 </div>
                 {mode === 'list' && (
                     <button
@@ -297,7 +297,7 @@ const ApplicationsView: React.FC = () => {
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <span className="text-[11px] text-zinc-500">No logs</span>
+                                                    <span className="text-[10px] text-zinc-500">No logs</span>
                                                 ))}
                                             </td>
                                         </tr>

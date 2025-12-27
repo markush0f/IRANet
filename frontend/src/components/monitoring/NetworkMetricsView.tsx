@@ -49,13 +49,13 @@ const NetworkMetricsView: React.FC = () => {
     const hostToUse = overrideHost.trim() || hostname;
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <Card className="space-y-6 p-4 sm:p-6">
                 <Flex alignItems="start" justifyContent="between" className="gap-6 flex-wrap">
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Metrics series</Text>
                         <Title className="text-2xl sm:text-3xl text-zinc-100">Real-time network latency</Title>
-                        <Text className="text-sm text-zinc-400 max-w-3xl">
+                        <Text className="text-[10px] text-zinc-500 max-w-3xl">
                             Monitor latency and jitter in milliseconds with updates every 5 seconds.
                             You can switch metrics and set a hostname to query the correct instance.
                         </Text>
@@ -66,7 +66,7 @@ const NetworkMetricsView: React.FC = () => {
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
-                    <Text className="text-sm text-zinc-400">
+                    <Text className="text-[10px] text-zinc-500">
                         {loading && 'Loading host information…'}
                         {!loading && hostname && `Detected host: ${hostname}`}
                         {!loading && !hostname && 'No default hostname detected.'}

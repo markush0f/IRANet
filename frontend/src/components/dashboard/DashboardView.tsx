@@ -173,7 +173,7 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
                 />
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-zinc-500">
                 <span>Max {formatValue(manualSummary.max)}</span>
                 <span>Min {formatValue(manualSummary.min)}</span>
                 <span>Avg {formatValue(manualSummary.avg)}</span>
@@ -223,12 +223,12 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
     const hostToUse = overrideHost.trim() || hostname;
 
     return (
-        <main className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <main className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
             <section className="space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
                         <h2 className="text-2xl font-semibold text-zinc-100">Charts panel</h2>
-                        <p className="text-sm text-zinc-400">Drag and resize cards; the grid auto-adjusts.</p>
+                        <p className="text-[10px] text-zinc-500">Drag and resize cards; the grid auto-adjusts.</p>
                     </div>
                     <div className="flex flex-wrap items-end gap-4">
                         <div className="flex flex-col gap-1">
@@ -245,7 +245,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                     </div>
                 </div>
 
-                <p className="text-sm text-zinc-400">
+                <p className="text-[10px] text-zinc-500">
                     {loadingHost && 'Loading host information…'}
                     {!loadingHost && hostname && `Detected host: ${hostname}`}
                     {!loadingHost && !hostname && 'No default hostname detected.'}
