@@ -41,6 +41,24 @@ class ChatStorageService:
         self._logger.debug("Loaded %s chats", len(chats))
         return chats
 
+    async def get_chat_with_messages(
+        self,
+        *,
+        chat_id: UUID,
+        limit: int | None = None,
+        offset: int | None = None,
+    ):
+        chat = await self._repo.get_chat(chat_id=chat_id)
+        if chat is None:
+            self._logger.warning("Chat not found: %s", chat_id)
+            return None, []
+        messages = await self._repo.list_messages(
+            chat_id=chat_id,
+            limit=limit,
+            offset=offset,
+        )
+        return chat, messages
+
     async def update_chat_title(
         self,
         *,

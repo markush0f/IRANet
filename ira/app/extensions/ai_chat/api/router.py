@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from uuid import UUID
 
@@ -99,6 +101,41 @@ async def list_chats(
     ]
 
 
+@router.get("/{chat_id}")
+async def get_chat(
+    chat_id: UUID,
+    page: int = Query(1, ge=1),
+    session: AsyncSession = Depends(get_session),
+):
+    service = ChatStorageService(session)
+    page_size = 20
+    offset = (page - 1) * page_size
+    chat, messages = await service.get_chat_with_messages(
+        chat_id=chat_id,
+        limit=page_size,
+        offset=offset,
+    )
+    if chat is None:
+        raise HTTPException(status_code=404, detail="chat_not_found")
+    return {
+        "id": chat.id,
+        "title": chat.title,
+        "server_id": chat.server_id,
+        "created_at": chat.created_at,
+        "page": page,
+        "page_size": page_size,
+        "messages": [
+            {
+                "id": msg.id,
+                "role": msg.role,
+                "content": msg.content,
+                "created_at": msg.created_at,
+            }
+            for msg in messages
+        ],
+    }
+
+
 @router.post("/ask")
 async def ask_chat(
     payload: ChatRequest,
@@ -113,7 +150,13 @@ async def ask_chat(
         )
 
         chat_service = get_chat_service()
-        return await chat_service.ask(question=payload.question)
+        response = await chat_service.ask(question=payload.question)
+        await storage_service.add_message(
+            chat_id=payload.chat_id,
+            role="assistant",
+            content=json.dumps(response),
+        )
+        return response
     except Exception as exc:
         raise HTTPException(
             status_code=500,

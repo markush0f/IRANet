@@ -61,11 +61,15 @@ class AiChatRepository:
         self,
         *,
         chat_id: UUID,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> Sequence[AiChatMessage]:
         result = await self._session.exec(
             select(AiChatMessage)
             .where(AiChatMessage.chat_id == chat_id)
             .order_by(AiChatMessage.created_at.asc())  # type: ignore
+            .limit(limit)
+            .offset(offset)
         )
         return result.all()
 
