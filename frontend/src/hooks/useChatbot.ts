@@ -28,6 +28,7 @@ export const useChatbot = () => {
     const [editingChatId, setEditingChatId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const [chatSearch, setChatSearch] = useState('');
     const abortRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
@@ -63,6 +64,15 @@ export const useChatbot = () => {
         const match = chats.find(chat => chat.id === activeChatId);
         return match ? match.title?.trim() || match.id : 'Chat';
     }, [activeChatId, chats]);
+
+    const filteredChats = useMemo(() => {
+        const query = chatSearch.trim().toLowerCase();
+        if (!query) return chats;
+        return chats.filter(chat => {
+            const title = chat.title?.toLowerCase() ?? '';
+            return title.includes(query) || chat.id.toLowerCase().includes(query);
+        });
+    }, [chats, chatSearch]);
 
     const appendMessageToChat = (chatId: string, message: ChatMessage) => {
         setMessagesByChat(prev => {
@@ -227,7 +237,7 @@ export const useChatbot = () => {
     };
 
     return {
-        chats,
+        chats: filteredChats,
         loadingChats,
         chatError,
         activeChatId,
@@ -238,8 +248,10 @@ export const useChatbot = () => {
         loadingMessages,
         editingChatId,
         editingTitle,
+        chatSearch,
         setInput,
         setEditingTitle,
+        setChatSearch,
         handleNewChat,
         handleSelectChat,
         handleStartEdit,

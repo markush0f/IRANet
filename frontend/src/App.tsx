@@ -161,7 +161,7 @@ function App() {
             />
           )}
 
-          <AppFooter />
+          {/* <AppFooter /> */}
         </div>
       </div>
 
@@ -172,7 +172,7 @@ function App() {
         serviceName={currentServiceName}
       />
 
-      <EnvBadge />
+      {/* <EnvBadge /> */}
       <Toaster
         position="top-center"
         gutter={12}

@@ -8,6 +8,8 @@ interface ChatSidebarProps {
     error: string | null;
     editingChatId: string | null;
     editingTitle: string;
+    searchValue: string;
+    onSearchChange: (value: string) => void;
     onNewChat: () => void;
     onSelectChat: (chatId: string) => void;
     onStartEdit: (chat: ChatRecord) => void;
@@ -26,6 +28,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     error,
     editingChatId,
     editingTitle,
+    searchValue,
+    onSearchChange,
     onNewChat,
     onSelectChat,
     onStartEdit,
@@ -54,6 +58,15 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     {error}
                 </div>
             )}
+
+            <div className="px-4 pt-3">
+                <input
+                    value={searchValue}
+                    onChange={(event) => onSearchChange(event.target.value)}
+                    placeholder="Search chats..."
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+            </div>
 
             <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
                 {loading && (

@@ -18,8 +18,10 @@ const ChatbotView: React.FC = () => {
         loadingMessages,
         editingChatId,
         editingTitle,
+        chatSearch,
         setInput,
         setEditingTitle,
+        setChatSearch,
         handleNewChat,
         handleSelectChat,
         handleStartEdit,
@@ -30,17 +32,8 @@ const ChatbotView: React.FC = () => {
     } = useChatbot();
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-            <header className="mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">
-                    Chatbot
-                </h2>
-                <p className="mt-2 text-sm text-zinc-400 max-w-2xl">
-                    AI assistant for IRANet operations. Extension id: ai_chat.
-                </p>
-            </header>
-
-            <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="w-full h-full min-h-full px-4 sm:px-6 lg:px-8 py-6">
+            <div className="grid gap-6 lg:grid-cols-[280px_1fr] h-full">
                 <ChatSidebar
                     chats={chats}
                     activeChatId={activeChatId}
@@ -48,6 +41,8 @@ const ChatbotView: React.FC = () => {
                     error={chatError}
                     editingChatId={editingChatId}
                     editingTitle={editingTitle}
+                    searchValue={chatSearch}
+                    onSearchChange={setChatSearch}
                     onNewChat={handleNewChat}
                     onSelectChat={handleSelectChat}
                     onStartEdit={handleStartEdit}
@@ -57,7 +52,7 @@ const ChatbotView: React.FC = () => {
                     onDeleteChat={handleDeleteChat}
                 />
 
-                <section className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-lg min-h-[600px] max-h-[calc(100vh-220px)]">
+                <section className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-lg min-h-[600px] h-full">
                     <div className="shrink-0 border-b border-zinc-800 px-5 py-4">
                         <ChatHeader
                             title={activeChatLabel}
