@@ -13,9 +13,16 @@ interface SidebarProps {
     onNavigate: (viewId: string) => void;
     isMobileOpen?: boolean;
     onMobileClose?: () => void;
+    showChatbot?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen = false, onMobileClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+    activeView,
+    onNavigate,
+    isMobileOpen = false,
+    onMobileClose,
+    showChatbot = false,
+}) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [servicesOpen, setServicesOpen] = useState(true);
     const [metricsOpen, setMetricsOpen] = useState(true);
@@ -222,6 +229,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
                 </svg>
             )
         },
+        {
+            id: 'chatbot',
+            label: 'Chatbot',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M9 12h6M8 16h3M5 20l2-2h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v9a1 1 0 001 1h1z" />
+                </svg>
+            )
+        },
         // {
         //     id: 'deployments',
         //     label: 'Deployments',
@@ -252,6 +268,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
             )
         }
     ];
+
+    const visibleNavItems = showChatbot
+        ? navItems
+        : navItems.filter(item => item.id !== 'chatbot');
 
     return (
         <div
@@ -306,7 +326,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
 
             {/* Navigation */}
             <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
-                {navItems.map(item => {
+                {visibleNavItems.map(item => {
                     const isMetricsGroup = item.id === 'metrics';
                     const isInternetGroup = item.id === 'internet';
                     const isApplicationsGroup = item.id === 'applications';

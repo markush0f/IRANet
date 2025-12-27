@@ -2,7 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { disableExtension, enableExtension, getExtensions } from '../../services/api';
 import type { ExtensionRecord } from '../../types';
 
-const ExtensionsView: React.FC = () => {
+interface ExtensionsViewProps {
+    onExtensionsUpdated?: (signal?: AbortSignal) => Promise<void> | void;
+}
+
+const ExtensionsView: React.FC<ExtensionsViewProps> = ({ onExtensionsUpdated }) => {
     const [extensions, setExtensions] = useState<ExtensionRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -59,6 +63,9 @@ const ExtensionsView: React.FC = () => {
             setError(null);
             const updated = await disableExtension(extensionId);
             setExtensions(prev => prev.map(item => (item.id === extensionId ? updated : item)));
+            if (onExtensionsUpdated) {
+                await onExtensionsUpdated();
+            }
         } catch (err) {
             console.error('Error disabling extension', err);
             setError('The extension could not be disabled.');
@@ -73,6 +80,9 @@ const ExtensionsView: React.FC = () => {
             setError(null);
             const updated = await enableExtension(extensionId);
             setExtensions(prev => prev.map(item => (item.id === extensionId ? updated : item)));
+            if (onExtensionsUpdated) {
+                await onExtensionsUpdated();
+            }
         } catch (err) {
             console.error('Error enabling extension', err);
             setError('The extension could not be enabled.');

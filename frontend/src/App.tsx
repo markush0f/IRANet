@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import LogsViewer from './components/dashboard/LogsViewer';
 import Sidebar from './components/layout/Sidebar';
 import PerformanceView from './components/monitoring/PerformanceView';
@@ -24,20 +24,40 @@ import SystemPackagesView from './components/system/SystemPackagesView';
 import SystemPackagesHistoryView from './components/system/SystemPackagesHistoryView';
 import SystemDatabasesView from './components/system/SystemDatabasesView';
 import ExtensionsView from './components/extensions/ExtensionsView';
+import ChatbotView from './components/chatbot/ChatbotView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
 import { useSystemAlerts } from './hooks/useSystemAlerts';
+import { getExtensions } from './services/api';
+import type { ExtensionRecord } from './types';
 
 function App() {
   const { services, handleAddService, handleDeleteService, handleRefreshAll, handleCheckStatus, handleUpdateService } = useServices();
   const { logsOpen, currentLogs, currentServiceId, openLogs, closeLogs } = useLogsModal();
   const [currentView, setCurrentView] = useState('system');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [extensions, setExtensions] = useState<ExtensionRecord[]>([]);
 
   useSystemAlerts();
 
   const currentServiceName = services.find(s => s.id === currentServiceId)?.name || 'Unknown Service';
+  const isChatbotEnabled = extensions.some(extension => extension.id === 'ai_chat' && extension.enabled);
+
+  const refreshExtensions = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const data = await getExtensions(signal);
+      setExtensions(data);
+    } catch (err) {
+      console.error('Error loading extensions', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void refreshExtensions(controller.signal);
+    return () => controller.abort();
+  }, [refreshExtensions]);
 
   return (
     <div className="flex min-h-screen lg:h-screen bg-zinc-950 selection:bg-indigo-500/30 selection:text-indigo-200 lg:overflow-hidden">
@@ -49,6 +69,7 @@ function App() {
         }}
         isMobileOpen={isSidebarOpen}
         onMobileClose={() => setIsSidebarOpen(false)}
+        showChatbot={isChatbotEnabled}
       />
 
       {isSidebarOpen && (
@@ -109,7 +130,9 @@ function App() {
           ) : currentView === 'system-databases' ? (
             <SystemDatabasesView />
           ) : currentView === 'extensions' ? (
-            <ExtensionsView />
+            <ExtensionsView onExtensionsUpdated={refreshExtensions} />
+          ) : currentView === 'chatbot' && isChatbotEnabled ? (
+            <ChatbotView />
           ) : currentView === 'system-packages' ? (
             <SystemPackagesView />
           ) : currentView === 'packages-history' ? (
