@@ -104,7 +104,7 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
                 <div className="space-y-4">
-                    <div className="relative bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5">
+                    <div className="relative bg-zinc-950 border border-zinc-800 accent-border rounded-2xl p-4 sm:p-5">
                         <div className="absolute left-4 top-4 z-10 flex items-center gap-3">
                             <span className="text-[11px] uppercase tracking-wide text-zinc-400">{seriesLabel}</span>
                         </div>

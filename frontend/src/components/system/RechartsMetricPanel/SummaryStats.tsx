@@ -7,7 +7,7 @@ interface SummaryStatsProps {
 }
 
 const SummaryStats: React.FC<SummaryStatsProps> = ({ manualSummary, valueFormatter, sampleCount }) => (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-zinc-950 border border-zinc-800 px-4 sm:px-5 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-zinc-950 border border-zinc-800 accent-border px-4 sm:px-5 py-3">
         <div className="flex flex-col">
             <span className="text-[10px] uppercase tracking-wide text-zinc-500">Maximum</span>
             <span className="text-lg font-bold text-emerald-200">{valueFormatter(manualSummary.max)}</span>

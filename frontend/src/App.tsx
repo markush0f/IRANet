@@ -79,7 +79,7 @@ function App() {
         />
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen lg:min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen lg:min-h-0 overflow-hidden app-accent">
         <div className="lg:hidden sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-zinc-900 bg-zinc-950/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
