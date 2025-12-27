@@ -2,7 +2,7 @@ from app.repositories.extensions import ExtensionsRepository
 from app.extensions.ai_chat.tools.registry import tool_class
 
 
-@tool_class(name_prefix="extensions")
+# @tool_class(name_prefix="extensions")
 class ExtensionsService:
     def __init__(self, session):
         self._repository = ExtensionsRepository(session)
@@ -14,3 +14,34 @@ class ExtensionsService:
         self,
     ):
         return await self._repository.get_all_extensions()
+
+    async def set_extension_enabled(
+        self,
+        *,
+        extension_id: str,
+        enabled: bool,
+    ):
+        return await self._repository.set_enabled(
+            extension_id=extension_id,
+            enabled=enabled,
+        )
+
+    async def enable_extension(
+        self,
+        *,
+        extension_id: str,
+    ):
+        return await self.set_extension_enabled(
+            extension_id=extension_id,
+            enabled=True,
+        )
+
+    async def disable_extension(
+        self,
+        *,
+        extension_id: str,
+    ):
+        return await self.set_extension_enabled(
+            extension_id=extension_id,
+            enabled=False,
+        )

@@ -1,9 +1,10 @@
 import docker
 from docker.errors import DockerException
 
+from app.extensions.ai_chat.tools.registry import tool
 from app.modules.types.DOCKER_CONTAINER import DockerContainer
 
-
+@tool()
 def system_docker_containers() -> list[DockerContainer] | dict:
     try:
         client = docker.from_env()

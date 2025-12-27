@@ -1,19 +1,4 @@
 {
-  "extensions.extension_is_enabled": {
-    "arguments": {
-      "extension_id": {
-        "required": true,
-        "type": "string"
-      }
-    },
-    "description": "Tool call for extension_is_enabled.",
-    "handler": "app.services.extensions.ExtensionsService.extension_is_enabled"
-  },
-  "extensions.get_all_extensions": {
-    "arguments": {},
-    "description": "Tool call for get_all_extensions.",
-    "handler": "app.services.extensions.ExtensionsService.get_all_extensions"
-  },
   "logs.attach_log_base_paths": {
     "arguments": {
       "application_id": {
