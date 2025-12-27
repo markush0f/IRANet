@@ -510,6 +510,19 @@ export interface ChatRecord {
     created_at?: string | null;
 }
 
+export interface ChatMessageRecord {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    created_at?: string | null;
+}
+
+export interface ChatWithMessages extends ChatRecord {
+    page: number;
+    page_size: number;
+    messages: ChatMessageRecord[];
+}
+
 export interface ChatAskResponse {
     answer?: string;
     response?: string;
@@ -589,6 +602,23 @@ export const deleteChat = async (chatId: string, signal?: AbortSignal): Promise<
     if (!response.ok) {
         throw new Error(`HTTP ${response.status} al eliminar chat`);
     }
+};
+
+export const getChat = async (
+    chatId: string,
+    page = 1,
+    signal?: AbortSignal
+): Promise<ChatWithMessages> => {
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    const url = `${getBaseUrl()}/chat/${encodeURIComponent(chatId)}?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener chat`);
+    }
+
+    return response.json() as Promise<ChatWithMessages>;
 };
 
 export const askChat = async (

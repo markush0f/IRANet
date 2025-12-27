@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { askChat, createChat, deleteChat, listChats, updateChatTitle } from '../../services/api';
-import type { ChatRecord } from '../../services/api';
+import { askChat, createChat, deleteChat, getChat, listChats, updateChatTitle } from '../../services/api';
+import type { ChatRecord, ChatMessageRecord } from '../../services/api';
+import ChatSidebar from './ChatSidebar';
+import ChatHeader from './ChatHeader';
+import ChatMessageList from './ChatMessageList';
+import ChatComposer from './ChatComposer';
 
 type ChatMessage = {
     id: string;
@@ -16,13 +20,6 @@ const defaultGreeting: ChatMessage = {
     timestamp: new Date().toISOString(),
 };
 
-const formatTimestamp = (value: string) => {
-    const parsed = new Date(value);
-    return isNaN(parsed.getTime()) ? value : parsed.toLocaleTimeString();
-};
-
-const getChatLabel = (chat: ChatRecord) => chat.title?.trim() || chat.id;
-
 const ChatbotView: React.FC = () => {
     const [chats, setChats] = useState<ChatRecord[]>([]);
     const [loadingChats, setLoadingChats] = useState(true);
@@ -34,6 +31,7 @@ const ChatbotView: React.FC = () => {
     const [sending, setSending] = useState(false);
     const [editingChatId, setEditingChatId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
+    const [loadingMessages, setLoadingMessages] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
 
     useEffect(() => {
@@ -67,7 +65,7 @@ const ChatbotView: React.FC = () => {
     const activeChatLabel = useMemo(() => {
         if (!activeChatId) return 'New chat';
         const match = chats.find(chat => chat.id === activeChatId);
-        return match ? getChatLabel(match) : 'Chat';
+        return match ? match.title?.trim() || match.id : 'Chat';
     }, [activeChatId, chats]);
 
     const appendMessageToChat = (chatId: string, message: ChatMessage) => {
@@ -88,6 +86,34 @@ const ChatbotView: React.FC = () => {
         setActiveChatId(chatId);
         setEditingChatId(null);
         setEditingTitle('');
+
+        if (!messagesByChat[chatId]) {
+            const controller = new AbortController();
+            setLoadingMessages(true);
+            getChat(chatId, 1, controller.signal)
+                .then(chat => {
+                    const incoming = (chat.messages ?? []).map((msg: ChatMessageRecord) => ({
+                        id: String(msg.id),
+                        role: msg.role === 'assistant' ? 'assistant' : 'user',
+                        content: msg.content,
+                        timestamp: msg.created_at ?? new Date().toISOString(),
+                    }));
+                    setMessagesByChat(prev => ({
+                        ...prev,
+                        [chatId]: incoming,
+                    }));
+                })
+                .catch(err => {
+                    if (err instanceof DOMException && err.name === 'AbortError') {
+                        return;
+                    }
+                    console.error('Error loading chat messages', err);
+                    setChatError('The chat history could not be loaded.');
+                })
+                .finally(() => {
+                    setLoadingMessages(false);
+                });
+        }
     };
 
     const handleStartEdit = (chat: ChatRecord) => {
@@ -209,171 +235,37 @@ const ChatbotView: React.FC = () => {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-                <aside className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 shadow-lg flex flex-col">
-                    <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs uppercase tracking-wide text-zinc-500">Chats</p>
-                        <button
-                            type="button"
-                            onClick={handleNewChat}
-                            className="rounded-full border border-zinc-700 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100"
-                        >
-                            New
-                        </button>
-                    </div>
-
-                    {chatError && (
-                        <p className="mt-3 text-xs text-amber-400">{chatError}</p>
-                    )}
-
-                    <div className="mt-4 flex-1 space-y-2 overflow-y-auto">
-                        {loadingChats && (
-                            <div className="flex items-center gap-2 text-xs text-zinc-400">
-                                <div className="h-3 w-3 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
-                                Loading chats...
-                            </div>
-                        )}
-                        {!loadingChats && chats.length === 0 && (
-                            <p className="text-xs text-zinc-500">No chats yet.</p>
-                        )}
-                        {!loadingChats && chats.map(chat => {
-                            const isActive = chat.id === activeChatId;
-                            return (
-                                <div
-                                    key={chat.id}
-                                    className={`rounded-xl border px-3 py-2 flex items-center gap-2 ${isActive
-                                        ? 'border-indigo-500/40 bg-indigo-500/10'
-                                        : 'border-zinc-800 bg-zinc-950/40'
-                                        }`}
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() => handleSelectChat(chat.id)}
-                                        className="flex-1 text-left text-sm text-zinc-200"
-                                    >
-                                        {editingChatId === chat.id ? (
-                                            <input
-                                                value={editingTitle}
-                                                onChange={(event) => setEditingTitle(event.target.value)}
-                                                placeholder="Chat title"
-                                                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                            />
-                                        ) : (
-                                            <span className="truncate block">{getChatLabel(chat)}</span>
-                                        )}
-                                    </button>
-                                    {editingChatId === chat.id ? (
-                                        <div className="flex items-center gap-1 text-[10px]">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleSaveEdit(chat.id)}
-                                                className="rounded-full border border-emerald-500/50 px-2 py-1 font-semibold uppercase tracking-wide text-emerald-300"
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setEditingChatId(null);
-                                                    setEditingTitle('');
-                                                }}
-                                                className="rounded-full border border-zinc-700 px-2 py-1 font-semibold uppercase tracking-wide text-zinc-400"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-1 text-[10px]">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleStartEdit(chat)}
-                                                className="rounded-full border border-zinc-700 px-2 py-1 font-semibold uppercase tracking-wide text-zinc-400"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDeleteChat(chat.id)}
-                                                className="rounded-full border border-rose-500/50 px-2 py-1 font-semibold uppercase tracking-wide text-rose-300"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </aside>
+                <ChatSidebar
+                    chats={chats}
+                    activeChatId={activeChatId}
+                    loading={loadingChats}
+                    error={chatError}
+                    editingChatId={editingChatId}
+                    editingTitle={editingTitle}
+                    onNewChat={handleNewChat}
+                    onSelectChat={handleSelectChat}
+                    onStartEdit={handleStartEdit}
+                    onEditingTitleChange={setEditingTitle}
+                    onSaveEdit={handleSaveEdit}
+                    onCancelEdit={() => {
+                        setEditingChatId(null);
+                        setEditingTitle('');
+                    }}
+                    onDeleteChat={handleDeleteChat}
+                />
 
                 <section className="rounded-2xl border border-zinc-800 bg-zinc-950/50 p-5 shadow-lg flex flex-col min-h-[520px]">
-                    <div className="flex items-center justify-between gap-3 border-b border-zinc-800 pb-4">
-                        <div>
-                            <p className="text-xs uppercase tracking-wide text-zinc-500">Active chat</p>
-                            <h3 className="text-lg font-semibold text-zinc-100">{activeChatLabel}</h3>
-                        </div>
-                        <span className="text-[11px] text-zinc-500">
-                            {activeChatId ? 'Saved' : 'Draft'}
-                        </span>
-                    </div>
-
-                    <div className="flex-1 space-y-4 overflow-y-auto pr-2 pt-4">
-                        {activeMessages.length === 0 && (
-                            <p className="text-sm text-zinc-500">Start the conversation by asking a question.</p>
-                        )}
-                        {activeMessages.map(message => (
-                            <div
-                                key={message.id}
-                                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div
-                                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed border ${message.role === 'user'
-                                        ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-100'
-                                        : 'bg-zinc-900 border-zinc-800 text-zinc-200'
-                                        }`}
-                                >
-                                    <p className="whitespace-pre-wrap">{message.content}</p>
-                                    <p className="mt-2 text-[10px] uppercase tracking-wide text-zinc-500">
-                                        {message.role} - {formatTimestamp(message.timestamp)}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                        {sending && (
-                            <div className="flex justify-start">
-                                <div className="rounded-2xl px-4 py-3 text-sm border border-zinc-800 bg-zinc-900 text-zinc-400">
-                                    Thinking...
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="mt-4 border-t border-zinc-800 pt-4">
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <input
-                                value={input}
-                                onChange={(event) => setInput(event.target.value)}
-                                placeholder="Ask about users, services, disks, or alerts..."
-                                onKeyDown={(event) => {
-                                    if (event.key === 'Enter') {
-                                        event.preventDefault();
-                                        void handleSend();
-                                    }
-                                }}
-                                className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900/80 px-4 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleSend}
-                                disabled={sending}
-                                className="rounded-xl bg-indigo-500 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-indigo-800"
-                            >
-                                {sending ? 'Sending...' : 'Send'}
-                            </button>
-                        </div>
-                        <p className="mt-2 text-[11px] text-zinc-500">
-                            The first message creates the chat if it does not exist.
-                        </p>
-                    </div>
+                    <ChatHeader
+                        title={activeChatLabel}
+                        status={activeChatId ? 'saved' : 'draft'}
+                    />
+                    <ChatMessageList messages={activeMessages} sending={sending || loadingMessages} />
+                    <ChatComposer
+                        value={input}
+                        onChange={setInput}
+                        onSend={handleSend}
+                        disabled={sending}
+                    />
                 </section>
             </div>
         </div>
