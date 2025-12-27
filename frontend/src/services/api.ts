@@ -481,6 +481,28 @@ export const getExtensions = async (signal?: AbortSignal): Promise<ExtensionReco
     return [];
 };
 
+export const enableExtension = async (extensionId: string, signal?: AbortSignal): Promise<ExtensionRecord> => {
+    const url = `${getBaseUrl()}/extensions/${encodeURIComponent(extensionId)}/enable`;
+    const response = await fetch(url, { method: 'PUT', signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al habilitar extension`);
+    }
+
+    return response.json() as Promise<ExtensionRecord>;
+};
+
+export const disableExtension = async (extensionId: string, signal?: AbortSignal): Promise<ExtensionRecord> => {
+    const url = `${getBaseUrl()}/extensions/${encodeURIComponent(extensionId)}/disable`;
+    const response = await fetch(url, { method: 'PUT', signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al deshabilitar extension`);
+    }
+
+    return response.json() as Promise<ExtensionRecord>;
+};
+
 export interface ApplicationLogFilesResponse {
     page: number;
     page_size: number;

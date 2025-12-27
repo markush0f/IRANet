@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { getExtensions } from '../../services/api';
+import { disableExtension, enableExtension, getExtensions } from '../../services/api';
 import type { ExtensionRecord } from '../../types';
 
 const ExtensionsView: React.FC = () => {
     const [extensions, setExtensions] = useState<ExtensionRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [actionId, setActionId] = useState<string | null>(null);
     const [query, setQuery] = useState('');
     const [showEnabledOnly, setShowEnabledOnly] = useState(false);
 
@@ -50,6 +51,34 @@ const ExtensionsView: React.FC = () => {
         if (!value) return '—';
         const parsed = new Date(value);
         return isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+    };
+
+    const handleDisable = async (extensionId: string) => {
+        try {
+            setActionId(extensionId);
+            setError(null);
+            const updated = await disableExtension(extensionId);
+            setExtensions(prev => prev.map(item => (item.id === extensionId ? updated : item)));
+        } catch (err) {
+            console.error('Error disabling extension', err);
+            setError('The extension could not be disabled.');
+        } finally {
+            setActionId(null);
+        }
+    };
+
+    const handleEnable = async (extensionId: string) => {
+        try {
+            setActionId(extensionId);
+            setError(null);
+            const updated = await enableExtension(extensionId);
+            setExtensions(prev => prev.map(item => (item.id === extensionId ? updated : item)));
+        } catch (err) {
+            console.error('Error enabling extension', err);
+            setError('The extension could not be enabled.');
+        } finally {
+            setActionId(null);
+        }
     };
 
     return (
@@ -131,12 +160,25 @@ const ExtensionsView: React.FC = () => {
                         </div>
                         <div className="mt-4 flex items-center justify-between">
                             <span className="text-xs text-zinc-500">ID: {item.id}</span>
-                            <button
-                                type="button"
-                                className="rounded-full border border-indigo-500/50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-300 transition hover:border-indigo-400 hover:text-indigo-200"
-                            >
-                                Download
-                            </button>
+                            {item.enabled ? (
+                                <button
+                                    type="button"
+                                    onClick={() => handleDisable(item.id)}
+                                    disabled={actionId === item.id}
+                                    className="rounded-full border border-rose-500/50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-rose-300 transition hover:border-rose-400 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {actionId === item.id ? 'Deleting...' : 'Delete'}
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => handleEnable(item.id)}
+                                    disabled={actionId === item.id}
+                                    className="rounded-full border border-emerald-500/50 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-300 transition hover:border-emerald-400 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {actionId === item.id ? 'Downloading...' : 'Download'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}
