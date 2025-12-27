@@ -503,6 +503,127 @@ export const disableExtension = async (extensionId: string, signal?: AbortSignal
     return response.json() as Promise<ExtensionRecord>;
 };
 
+export interface ChatRecord {
+    id: string;
+    title?: string | null;
+    server_id?: string | null;
+    created_at?: string | null;
+}
+
+export interface ChatAskResponse {
+    answer?: string;
+    response?: string;
+    message?: string;
+    result?: unknown;
+}
+
+export interface CreateChatPayload {
+    title?: string | null;
+    server_id?: string | null;
+}
+
+export const createChat = async (
+    payload: CreateChatPayload,
+    signal?: AbortSignal
+): Promise<ChatRecord> => {
+    const url = `${getBaseUrl()}/chat/create`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal,
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al crear chat`);
+    }
+
+    return response.json() as Promise<ChatRecord>;
+};
+
+export const listChats = async (signal?: AbortSignal): Promise<ChatRecord[]> => {
+    const url = `${getBaseUrl()}/chat/`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al listar chats`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as ChatRecord[];
+    }
+    return [];
+};
+
+export const updateChatTitle = async (
+    chatId: string,
+    title: string | null,
+    signal?: AbortSignal
+): Promise<ChatRecord> => {
+    const url = `${getBaseUrl()}/chat/${encodeURIComponent(chatId)}`;
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title }),
+        signal,
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al actualizar chat`);
+    }
+
+    return response.json() as Promise<ChatRecord>;
+};
+
+export const deleteChat = async (chatId: string, signal?: AbortSignal): Promise<void> => {
+    const url = `${getBaseUrl()}/chat/${encodeURIComponent(chatId)}`;
+    const response = await fetch(url, { method: 'DELETE', signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al eliminar chat`);
+    }
+};
+
+export const askChat = async (
+    chatId: string,
+    question: string,
+    signal?: AbortSignal
+): Promise<string> => {
+    const url = `${getBaseUrl()}/chat/ask`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chat_id: chatId, question }),
+        signal,
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al preguntar al chatbot`);
+    }
+
+    const data = (await response.json()) as ChatAskResponse | string;
+    if (typeof data === 'string') {
+        return data;
+    }
+    if (data.answer || data.response || data.message) {
+        return data.answer ?? data.response ?? data.message ?? 'No response';
+    }
+    if ('result' in data) {
+        return JSON.stringify(data.result, null, 2);
+    }
+    return JSON.stringify(data, null, 2);
+};
+
 export interface ApplicationLogFilesResponse {
     page: number;
     page_size: number;
