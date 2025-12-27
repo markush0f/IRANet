@@ -27,11 +27,15 @@ class ChatStorageService:
         chat_id: UUID,
         role: str,
         content: str,
+        content_json: str | None = None,
+        content_markdown: str | None = None,
     ):
         message = await self._repo.create_message(
             chat_id=chat_id,
             role=role,
             content=content,
+            content_json=content_json,
+            content_markdown=content_markdown,
         )
         self._logger.debug("Stored chat message %s for chat %s", message.id, chat_id)
         return message

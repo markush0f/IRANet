@@ -24,6 +24,8 @@ class AiChatMessage(SQLModel, table=True):
     chat_id: UUID = Field(foreign_key="ai_chats.id")
     role: str
     content: str
+    content_json: str | None = None
+    content_markdown: str | None = None
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
         sa_column=Column(DateTime(timezone=False), nullable=False),

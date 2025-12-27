@@ -14,6 +14,21 @@ from app.extensions.ai_chat.services.chat_storage_service import ChatStorageServ
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
+def _format_bot_markdown(response: dict) -> str:
+    if response.get("executed") is True:
+        tool = response.get("tool")
+        result = response.get("result")
+        return (
+            f"**Tool ejecutada:** `{tool}`\n\n"
+            f"```json\n{json.dumps(result, indent=2, ensure_ascii=False)}\n```"
+        )
+    error = response.get("error", "unknown_error")
+    raw = response.get("raw_output")
+    if raw:
+        return f"**Error:** `{error}`\n\n```text\n{raw}\n```"
+    return f"**Error:** `{error}`"
+
+
 class ChatRequest(BaseModel):
     chat_id: UUID
     question: str
@@ -128,7 +143,11 @@ async def get_chat(
             {
                 "id": msg.id,
                 "role": msg.role,
-                "content": msg.content,
+                "content": (
+                    msg.content_markdown
+                    if msg.role == "assistant" and msg.content_markdown
+                    else msg.content
+                ),
                 "created_at": msg.created_at,
             }
             for msg in messages
@@ -151,10 +170,13 @@ async def ask_chat(
 
         chat_service = get_chat_service()
         response = await chat_service.ask(question=payload.question)
+        response_markdown = _format_bot_markdown(response)
         await storage_service.add_message(
             chat_id=payload.chat_id,
             role="assistant",
             content=json.dumps(response),
+            content_json=json.dumps(response),
+            content_markdown=response_markdown,
         )
         return response
     except Exception as exc:

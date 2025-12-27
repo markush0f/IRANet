@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from sqlmodel import select
+from sqlmodel import select, delete
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.entities.ai_chat import AiChat, AiChatMessage
@@ -53,6 +53,9 @@ class AiChatRepository:
         chat = await self._session.get(AiChat, chat_id)
         if chat is None:
             return False
+        await self._session.exec(
+            delete(AiChatMessage).where(AiChatMessage.chat_id == chat_id)
+        )
         await self._session.delete(chat)
         await self._session.commit()
         return True
@@ -87,11 +90,15 @@ class AiChatRepository:
         chat_id: UUID,
         role: str,
         content: str,
+        content_json: str | None = None,
+        content_markdown: str | None = None,
     ) -> AiChatMessage:
         message = AiChatMessage(
             chat_id=chat_id,
             role=role,
             content=content,
+            content_json=content_json,
+            content_markdown=content_markdown,
         )
         self._session.add(message)
         await self._session.commit()

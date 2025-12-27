@@ -15,7 +15,8 @@ MODEL_URL = (
     "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/"
     "qwen2.5-1.5b-instruct-q4_k_m.gguf?download=true"
 )
-MIGRATION_PATH = BASE_DIR / "migrations" / "001_init_.sql"
+MIGRATIONS_DIR = BASE_DIR / "migrations"
+MIGRATION_PATH = MIGRATIONS_DIR / "001_init_.sql"
 
 
 def _require_database_url() -> str:
@@ -45,6 +46,14 @@ def _run_migration(database_url: str, migration_path: Path) -> None:
     )
 
 
+def _run_migrations(database_url: str, migrations_dir: Path) -> None:
+    migration_paths = sorted(migrations_dir.glob("*.sql"))
+    for path in migration_paths:
+        if path.name.startswith("999_"):
+            continue
+        _run_migration(database_url, path)
+
+
 def main() -> None:
     print(f"Installing extension: {EXTENSION_NAME}")
 
@@ -57,7 +66,7 @@ def main() -> None:
 
     print("Applying database migrations...")
     database_url = _require_database_url()
-    _run_migration(database_url, MIGRATION_PATH)
+    _run_migrations(database_url, MIGRATIONS_DIR)
 
     print(f"Extension {EXTENSION_NAME} installed successfully")
 
