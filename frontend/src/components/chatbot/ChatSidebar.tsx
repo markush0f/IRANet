@@ -35,60 +35,96 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     onDeleteChat,
 }) => {
     return (
-        <aside className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 shadow-lg flex flex-col">
-            <div className="flex items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-wide text-zinc-500">Chats</p>
+        <aside className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-lg">
+            <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+                <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    Chats
+                </span>
                 <button
                     type="button"
                     onClick={onNewChat}
-                    className="rounded-full border border-zinc-700 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100"
+                    className="rounded-full border border-zinc-700 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100"
                 >
                     New
                 </button>
-            </div>
+            </header>
 
             {error && (
-                <p className="mt-3 text-xs text-amber-400">{error}</p>
+                <div className="px-4 pt-3 text-xs text-amber-400">
+                    {error}
+                </div>
             )}
 
-            <div className="mt-4 flex-1 space-y-2 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
                 {loading && (
-                    <div className="flex items-center gap-2 text-xs text-zinc-400">
-                        <div className="h-3 w-3 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
+                    <div className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-400">
+                        <div className="h-3 w-3 rounded-full border-2 border-zinc-700 border-t-indigo-400 animate-spin" />
                         Loading chats...
                     </div>
                 )}
+
                 {!loading && chats.length === 0 && (
-                    <p className="text-xs text-zinc-500">No chats yet.</p>
+                    <p className="px-3 py-2 text-xs text-zinc-500">
+                        No chats yet.
+                    </p>
                 )}
+
                 {!loading && chats.map(chat => {
                     const isActive = chat.id === activeChatId;
+                    const isEditing = editingChatId === chat.id;
+
                     return (
                         <div
                             key={chat.id}
-                            className={`rounded-xl border px-3 py-2 flex items-center gap-2 ${isActive
+                            className={`group rounded-xl border px-3 py-2 transition ${isActive
                                 ? 'border-indigo-500/40 bg-indigo-500/10'
-                                : 'border-zinc-800 bg-zinc-950/40'
+                                : 'border-zinc-800 bg-zinc-950/40 hover:bg-zinc-900/40'
                                 }`}
                         >
-                            <button
-                                type="button"
-                                onClick={() => onSelectChat(chat.id)}
-                                className="flex-1 text-left text-sm text-zinc-200"
-                            >
-                                {editingChatId === chat.id ? (
-                                    <input
-                                        value={editingTitle}
-                                        onChange={(event) => onEditingTitleChange(event.target.value)}
-                                        placeholder="Chat title"
-                                        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                    />
-                                ) : (
-                                    <span className="truncate block">{getChatLabel(chat)}</span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => onSelectChat(chat.id)}
+                                    className="flex-1 min-w-0 text-left"
+                                >
+                                    {isEditing ? (
+                                        <input
+                                            value={editingTitle}
+                                            onChange={(event) =>
+                                                onEditingTitleChange(event.target.value)
+                                            }
+                                            placeholder="Chat title"
+                                            className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        />
+                                    ) : (
+                                        <span className="block truncate text-sm text-zinc-200">
+                                            {getChatLabel(chat)}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {!isEditing && (
+                                    <div className="hidden group-hover:flex items-center gap-1 text-[10px]">
+                                        <button
+                                            type="button"
+                                            onClick={() => onStartEdit(chat)}
+                                            className="rounded-full border border-zinc-700 px-2 py-1 font-semibold uppercase tracking-wide text-zinc-400 hover:text-zinc-200"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => onDeleteChat(chat.id)}
+                                            className="rounded-full border border-rose-500/50 px-2 py-1 font-semibold uppercase tracking-wide text-rose-300"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 )}
-                            </button>
-                            {editingChatId === chat.id ? (
-                                <div className="flex items-center gap-1 text-[10px]">
+                            </div>
+
+                            {isEditing && (
+                                <div className="mt-2 flex justify-end gap-1 text-[10px]">
                                     <button
                                         type="button"
                                         onClick={() => onSaveEdit(chat.id)}
@@ -102,23 +138,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                                         className="rounded-full border border-zinc-700 px-2 py-1 font-semibold uppercase tracking-wide text-zinc-400"
                                     >
                                         Cancel
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-1 text-[10px]">
-                                    <button
-                                        type="button"
-                                        onClick={() => onStartEdit(chat)}
-                                        className="rounded-full border border-zinc-700 px-2 py-1 font-semibold uppercase tracking-wide text-zinc-400"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => onDeleteChat(chat.id)}
-                                        className="rounded-full border border-rose-500/50 px-2 py-1 font-semibold uppercase tracking-wide text-rose-300"
-                                    >
-                                        Delete
                                     </button>
                                 </div>
                             )}
