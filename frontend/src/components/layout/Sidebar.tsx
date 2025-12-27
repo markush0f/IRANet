@@ -213,6 +213,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, isMobileOpen 
             ),
             children: applicationsChildren,
         },
+        {
+            id: 'extensions',
+            label: 'Extensions',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v4a1 1 0 01-1 1H4m5-5h6m0 0v4a1 1 0 001 1h4m-5-5v4M7 11h10M7 15h10M7 19h10" />
+                </svg>
+            )
+        },
         // {
         //     id: 'deployments',
         //     label: 'Deployments',

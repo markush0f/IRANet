@@ -178,6 +178,12 @@ export interface DockerContainer {
     created: string;
 }
 
+export interface ExtensionRecord {
+    id: string;
+    enabled: boolean;
+    created_at: string;
+}
+
 export interface ProcessState {
     code: string;
     label: string;

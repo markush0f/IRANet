@@ -23,6 +23,7 @@ import SystemServicesView from './components/system/SystemServicesView';
 import SystemPackagesView from './components/system/SystemPackagesView';
 import SystemPackagesHistoryView from './components/system/SystemPackagesHistoryView';
 import SystemDatabasesView from './components/system/SystemDatabasesView';
+import ExtensionsView from './components/extensions/ExtensionsView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -107,6 +108,8 @@ function App() {
             <SystemServicesView />
           ) : currentView === 'system-databases' ? (
             <SystemDatabasesView />
+          ) : currentView === 'extensions' ? (
+            <ExtensionsView />
           ) : currentView === 'system-packages' ? (
             <SystemPackagesView />
           ) : currentView === 'packages-history' ? (

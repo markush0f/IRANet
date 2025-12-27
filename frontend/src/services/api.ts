@@ -15,6 +15,7 @@ import type {
     SystemPackageInstalledAtResponse,
     DatabaseClassification,
     LogEvent,
+    ExtensionRecord,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -458,6 +459,24 @@ export const getApplicationsLogsList = async (signal?: AbortSignal): Promise<Rem
     }
     if (data && typeof data === 'object' && Array.isArray((data as any).applications)) {
         return (data as any).applications as RemoteApplicationRecord[];
+    }
+    return [];
+};
+
+export const getExtensions = async (signal?: AbortSignal): Promise<ExtensionRecord[]> => {
+    const url = `${getBaseUrl()}/extensions/all`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener extensiones`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as ExtensionRecord[];
+    }
+    if (data && typeof data === 'object' && Array.isArray((data as any).extensions)) {
+        return (data as any).extensions as ExtensionRecord[];
     }
     return [];
 };
