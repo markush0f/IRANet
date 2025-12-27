@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from app.core.database import get_session
 from app.core.logger import get_logger
-from app.services.extensions import ExtensionsService
+from app.services.extensions.extensions import ExtensionsService
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 

@@ -20,7 +20,7 @@ from app.core.config import load_config
 from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
 from app.core.database import engine, get_session
-from app.services.extensions import ExtensionsService
+from app.services.extensions.extensions import ExtensionsService
 from app.extensions.ai_chat.tools.generate_tools_calls import main as generate_tools_calls
 
 

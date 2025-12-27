@@ -22,6 +22,13 @@ class ExtensionsRepository:
         result = await self._session.exec(select(Extensions))
         return result.all()
 
+    async def get_by_id(
+        self,
+        *,
+        extension_id: str,
+    ) -> Extensions | None:
+        return await self._session.get(Extensions, extension_id)
+
     async def set_enabled(
         self,
         *,
