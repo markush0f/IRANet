@@ -57,8 +57,14 @@ def main() -> None:
     _run_drop_migration(database_url, DROP_MIGRATION_PATH)
 
     if MODEL_DIR.exists():
-        print("Removing model directory...")
-        shutil.rmtree(MODEL_DIR)
+        print("Removing model directory contents...")
+        for path in MODEL_DIR.iterdir():
+            if path.name == ".gitignore":
+                continue
+            if path.is_dir():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
     else:
         print("Model directory not found, skipping")
 
