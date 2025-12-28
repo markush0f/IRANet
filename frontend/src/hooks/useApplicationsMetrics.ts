@@ -63,6 +63,22 @@ const sortApplications = (items: RemoteApplicationRecord[]) => {
     });
 };
 
+const isDownloadedApplication = (app: RemoteApplicationRecord) => {
+    const kind = (app.kind ?? '').toLowerCase();
+    if (kind) {
+        if (['downloaded', 'managed', 'registered', 'custom', 'app', 'application'].includes(kind)) {
+            return true;
+        }
+        if (['system', 'discovered', 'process', 'auto', 'builtin', 'service'].includes(kind)) {
+            return false;
+        }
+    }
+
+    // Fallback heuristic: downloaded/registered apps usually come from DB and have created_at.
+    // Discovered/system entries tend to have only last_seen_at.
+    return Boolean(app.created_at);
+};
+
 export const useApplicationsMetrics = () => {
     const [applications, setApplications] = useState<RemoteApplicationRecord[]>([]);
     const [appsLoading, setAppsLoading] = useState(true);
@@ -132,8 +148,14 @@ export const useApplicationsMetrics = () => {
         setAppsError(null);
         try {
             const apps = await getApplicationsList(signal);
-            setApplications(apps);
-            setSelectedAppId(current => current ?? apps[0]?.id ?? null);
+            const downloadedApps = apps.filter(isDownloadedApplication);
+            setApplications(downloadedApps);
+            setSelectedAppId(current => {
+                if (current && downloadedApps.some(app => app.id === current)) {
+                    return current;
+                }
+                return downloadedApps[0]?.id ?? null;
+            });
         } catch (err) {
             const aborted =
                 err instanceof DOMException && err.name === 'AbortError' ||
@@ -444,4 +466,3 @@ export const useApplicationsMetrics = () => {
         rescanLogs,
     };
 };
-

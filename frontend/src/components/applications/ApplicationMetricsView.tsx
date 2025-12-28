@@ -200,7 +200,9 @@ const ApplicationMetricsView: React.FC = () => {
                         {appsLoading ? (
                             <div className="text-xs text-zinc-500 px-2 py-3">Loading applications…</div>
                         ) : applications.length === 0 ? (
-                            <div className="text-xs text-zinc-500 px-2 py-3">No applications found.</div>
+                            <div className="text-xs text-zinc-500 px-2 py-3">
+                                No downloaded applications found.
+                            </div>
                         ) : (
                             applications.map(app => {
                                 const label = app.name || app.identifier || app.workdir || app.id;
