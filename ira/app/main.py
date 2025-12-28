@@ -16,12 +16,15 @@ from app.api.logs import router as logs_router
 from app.api.system_packages import router as system_packages_router
 from app.api.services_clasification import router as services_clasification_router
 from app.api.extensions import router as extensions_router
+from app.core.application_metrics_scheduler import application_metrics_scheduler
 from app.core.config import load_config
 from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
 from app.core.database import engine, get_session
 from app.services.extensions.extensions import ExtensionsService
-from app.extensions.ai_chat.tools.generate_tools_calls import main as generate_tools_calls
+from app.extensions.ai_chat.tools.generate_tools_calls import (
+    main as generate_tools_calls,
+)
 
 
 logger = get_logger(__name__)
@@ -30,7 +33,8 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Start background metrics scheduler
-    task = asyncio.create_task(metrics_scheduler())
+    system_metrics_task = asyncio.create_task(metrics_scheduler())
+    application_metrics_task = asyncio.create_task(application_metrics_scheduler())
 
     # Laod enabled extensions from database at startup
     async for session in get_session():
@@ -46,8 +50,9 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        # Stop background task and close database engine
-        task.cancel()
+        # Stop background tasks and close database engine
+        system_metrics_task.cancel()
+        application_metrics_task.cancel()
         await engine.dispose()
 
 

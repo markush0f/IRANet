@@ -10,6 +10,7 @@ from app.core.logger import get_logger
 from app.models.dto.application_metrics_create_dto import ApplicationMetricsCreateDTO
 from app.models.entities.application import Application
 from app.services.applications.applications_metrics import ApplicationMetricsService
+from app.services.collector.application_collector import collect_application_metrics
 
 
 COLLECT_INTERVAL_SECONDS = 5
@@ -27,19 +28,20 @@ async def application_metrics_scheduler() -> None:
             async with AsyncSessionLocal() as session:
                 service = ApplicationMetricsService(session)
 
-                statement = (
-                    select(Application)
-                    .where(
-                        Application.enabled.is_(True),
-                    )
+                statement = select(Application).where(
+                    Application.enabled.is_(True),
                 )
 
                 applications = (await session.exec(statement)).all()
-
+                logger.info(
+                    "application metrics scheduler: %d enabled applications found",
+                    len(applications),
+                )
                 metrics_batch: list[ApplicationMetricsCreateDTO] = []
 
                 for application in applications:
                     try:
+
                         raw_metrics = await collect_application_metrics(
                             application=application,
                         )
@@ -48,7 +50,7 @@ async def application_metrics_scheduler() -> None:
                             continue
 
                         metrics_batch.append(
-                            ApplicationMetricsCreate(
+                            ApplicationMetricsCreateDTO(
                                 application_id=application.id,
                                 cpu_percent=raw_metrics.cpu_percent,
                                 memory_mb=raw_metrics.memory_mb,
@@ -66,10 +68,16 @@ async def application_metrics_scheduler() -> None:
                             application.identifier,
                         )
 
-                service.store_metrics_bulk(
+                await service.store_metrics_bulk(
                     metrics=metrics_batch,
                     ts=now,
                 )
+                if metrics_batch:
+                    logger.info(
+                        "inserted %d application metrics at %s",
+                        len(metrics_batch),
+                        now.isoformat(),
+                    )
 
         except Exception:
             logger.exception("application metrics scheduler tick failed")

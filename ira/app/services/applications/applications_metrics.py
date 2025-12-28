@@ -2,9 +2,12 @@ from datetime import datetime
 from typing import Iterable
 from uuid import UUID
 
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.models.dto.application_metrics_create_dto import ApplicationMetricsCreateDTO
+from app.models.dto.application_metrics_create_dto import (
+    ApplicationMetricsCreateDTO,
+)
 from app.models.entities.application import Application
 from app.models.entities.application_metrics import ApplicationMetrics
 from app.repositories.application_metrics_repository import (
@@ -13,12 +16,15 @@ from app.repositories.application_metrics_repository import (
 
 
 class ApplicationMetricsService:
-    def __init__(self, session) -> None:
+    def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self._repo = ApplicationMetricssRepository(session)
 
-    def store_metric(self, metric: ApplicationMetricsCreateDTO) -> None:
-        application = self._get_enabled_application(metric.application_id)
+    async def store_metric(
+        self,
+        metric: ApplicationMetricsCreateDTO,
+    ) -> None:
+        application = await self._get_enabled_application(metric.application_id)
 
         application.last_seen_at = metric.ts
 
@@ -34,9 +40,9 @@ class ApplicationMetricsService:
             status=metric.status,
         )
 
-        self._repo.insert(db_metric)
+        await self._repo.insert(db_metric)
 
-    def store_metrics_bulk(
+    async def store_metrics_bulk(
         self,
         *,
         metrics: Iterable[ApplicationMetricsCreateDTO],
@@ -47,7 +53,7 @@ class ApplicationMetricsService:
             return
 
         application_ids = {m.application_id for m in metrics_list}
-        applications = self._get_enabled_applications(application_ids)
+        applications = await self._get_enabled_applications(application_ids)
 
         db_metrics: list[ApplicationMetrics] = []
 
@@ -72,17 +78,21 @@ class ApplicationMetricsService:
                 )
             )
 
-        self._repo.insert_many(db_metrics)
+        await self._repo.insert_many(db_metrics)
 
-    def _get_enabled_application(self, application_id: UUID) -> Application:
+    async def _get_enabled_application(
+        self,
+        application_id: UUID,
+    ) -> Application:
         statement = select(Application).where(
             Application.id == application_id,
             Application.enabled.is_(True),  # type: ignore
         )
 
-        return self._session.exec(statement).one()
+        result = await self._session.exec(statement)
+        return result.one()
 
-    def _get_enabled_applications(
+    async def _get_enabled_applications(
         self,
         application_ids: set[UUID],
     ) -> dict[UUID, Application]:
@@ -91,5 +101,7 @@ class ApplicationMetricsService:
             Application.enabled.is_(True),  # type: ignore
         )
 
-        result = self._session.exec(statement).all()
-        return {app.id: app for app in result}
+        result = await self._session.exec(statement)
+        applications = result.all()
+
+        return {app.id: app for app in applications}
