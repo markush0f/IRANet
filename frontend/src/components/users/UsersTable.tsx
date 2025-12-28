@@ -8,10 +8,11 @@ interface UsersTableProps {
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
-    <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
+    <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden shadow-xl flex flex-col">
+        {/* Scroll container with max height */}
+        <div className="overflow-x-auto overflow-y-auto max-h-[520px]">
             <table className="min-w-full divide-y divide-zinc-800 text-xs">
-                <thead className="bg-zinc-950/70">
+                <thead className="bg-zinc-950/70 sticky top-0 z-10">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Username</th>
                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">UID</th>
@@ -36,17 +37,22 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
                         </tr>
                     ) : (
                         users.map(user => (
-                            <tr key={`${user.username}-${user.uid}`} className="hover:bg-zinc-800/40 transition-colors">
+                            <tr
+                                key={`${user.username}-${user.uid}`}
+                                className="hover:bg-zinc-800/40 transition-colors"
+                            >
                                 <td className="px-4 py-3 text-zinc-200 font-semibold">{user.username}</td>
                                 <td className="px-4 py-3 font-mono text-zinc-400">{user.uid}</td>
                                 <td className="px-4 py-3 font-mono text-zinc-400">{user.gid}</td>
                                 <td className="px-4 py-3 text-zinc-300">{user.home}</td>
                                 <td className="px-4 py-3 text-zinc-300">{user.shell}</td>
                                 <td className="px-4 py-3 text-zinc-300">
-                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${user.type === 'human'
+                                    <span
+                                        className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${user.type === 'human'
                                             ? 'bg-emerald-500/10 border border-emerald-500/40 text-emerald-300'
                                             : 'bg-rose-500/10 border border-rose-500/40 text-rose-300'
-                                        }`}>
+                                            }`}
+                                    >
                                         {user.type}
                                     </span>
                                 </td>
@@ -56,6 +62,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
                 </tbody>
             </table>
         </div>
+
         {!loading && (
             <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <span>

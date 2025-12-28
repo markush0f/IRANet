@@ -31,6 +31,16 @@ const formatTimestamp = (value: string) => {
     });
 };
 
+const formatDuration = (seconds: number) => {
+    if (!Number.isFinite(seconds)) return '—';
+    if (seconds < 0.001) return '0 ms';
+    if (seconds < 1) return `${Math.round(seconds * 1000)} ms`;
+    if (seconds < 60) return `${seconds.toFixed(seconds < 10 ? 2 : 1)} s`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds.toFixed(0)}s`;
+};
+
 const getSeverityStyles = (maxPercent: number) => {
     if (maxPercent >= 50) {
         return 'border-rose-500/40 bg-rose-500/10 text-rose-300';
@@ -45,7 +55,6 @@ const PacketLossEventsView: React.FC = () => {
     const [hostname, setHostname] = useState<string | null>(null);
     const [loadingHost, setLoadingHost] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [overrideHost, setOverrideHost] = useState('');
     const [events, setEvents] = useState<PacketLossEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [manualStart, setManualStart] = useState(() => createLocalDatetimeValue(new Date(Date.now() - DEFAULT_LOOKBACK_MS)));
@@ -81,7 +90,7 @@ const PacketLossEventsView: React.FC = () => {
         return () => controller.abort();
     }, []);
 
-    const hostToUse = overrideHost.trim() || hostname || '';
+    const hostToUse = hostname || '';
 
     const summary = useMemo(() => {
         if (!events.length) {
@@ -94,7 +103,7 @@ const PacketLossEventsView: React.FC = () => {
 
     const handleFetch = async () => {
         if (!hostToUse) {
-            setError('You need a valid hostname to query events.');
+            setError('Host information is not available yet.');
             return;
         }
 
@@ -131,7 +140,7 @@ const PacketLossEventsView: React.FC = () => {
 
     return (
         <div className="w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm flex flex-col">
-            <Card className="space-y-4 p-4 sm:p-5 flex-1 min-h-0 flex flex-col">
+            <Card className="space-y-3 p-3 sm:p-4 flex-1 min-h-0 flex flex-col">
                 <Flex alignItems="start" justifyContent="between" className="gap-4 flex-wrap">
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Internet</Text>
@@ -146,28 +155,15 @@ const PacketLossEventsView: React.FC = () => {
                     </Badge>
                 </Flex>
 
-                <Flex justifyContent="between" alignItems="end" className="gap-3 flex-wrap">
-                    <Text className="text-xs text-zinc-400 leading-relaxed">
-                        {loadingHost && 'Loading host information…'}
-                        {!loadingHost && hostname && `Detected host: ${hostname}`}
-                        {!loadingHost && !hostname && 'No default hostname detected.'}
+                {loadingHost && (
+                    <Text className="text-xs text-zinc-500 leading-relaxed">
+                        Loading…
                     </Text>
-                    <div className="flex flex-col gap-0.5">
-                        <Text className="text-xs uppercase tracking-wide text-zinc-500">Host override</Text>
-                        <input
-                            id="packet-host-input"
-                            type="text"
-                            placeholder="DESKTOP-B5V272O"
-                            className="w-full sm:w-56 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-rose-500 focus:outline-none"
-                            value={overrideHost}
-                            onChange={event => setOverrideHost(event.target.value)}
-                        />
-                    </div>
-                </Flex>
+                )}
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6 shadow-xl flex-1 min-h-0 flex flex-col gap-5">
-                    <div className="grid gap-4 md:grid-cols-3">
-                        <div className="flex flex-col gap-2">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4 shadow-xl flex-1 min-h-0 flex flex-col gap-2">
+                    <div className="grid gap-2 md:grid-cols-3">
+                        <div className="flex flex-col gap-1">
                             <Text className="text-xs uppercase tracking-wide text-zinc-500">From</Text>
                             <input
                                 type="datetime-local"
@@ -176,7 +172,7 @@ const PacketLossEventsView: React.FC = () => {
                                 onChange={event => setManualStart(event.target.value)}
                             />
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1">
                             <Text className="text-xs uppercase tracking-wide text-zinc-500">To</Text>
                             <input
                                 type="datetime-local"
@@ -185,13 +181,13 @@ const PacketLossEventsView: React.FC = () => {
                                 onChange={event => setManualEnd(event.target.value)}
                             />
                         </div>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1">
                             <Text className="text-xs uppercase tracking-wide text-zinc-500">Actions</Text>
                             <button
                                 type="button"
                                 onClick={handleFetch}
                                 disabled={loading}
-                                className="h-[42px] rounded-lg border border-rose-500/50 bg-rose-500/10 px-4 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-500"
+                                className="h-[38px] rounded-lg border border-rose-500/50 bg-rose-500/10 px-4 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-500"
                             >
                                 {loading ? 'Querying…' : 'Query events'}
                             </button>
@@ -204,16 +200,16 @@ const PacketLossEventsView: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="grid gap-4 md:grid-cols-3">
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                    <div className="grid gap-2 md:grid-cols-3">
+                        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
                             <Text className="text-xs uppercase tracking-wide text-zinc-500">Events</Text>
                             <div className="text-2xl font-semibold text-zinc-100">{summary.total}</div>
                         </div>
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
                             <Text className="text-xs uppercase tracking-wide text-zinc-500">Max observed</Text>
                             <div className="text-2xl font-semibold text-zinc-100">{summary.max.toFixed(1)}%</div>
                         </div>
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
                             <Text className="text-xs uppercase tracking-wide text-zinc-500">Average</Text>
                             <div className="text-2xl font-semibold text-zinc-100">{summary.avg.toFixed(1)}%</div>
                         </div>
@@ -224,24 +220,38 @@ const PacketLossEventsView: React.FC = () => {
                             No events in the selected range.
                         </div>
                     ) : (
-                        <div className="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-strong space-y-3">
+                        <div className="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-strong space-y-1">
                             {events.map((event, index) => (
                                 <div
                                     key={`${event.start}-${event.end}-${index}`}
-                                    className="rounded-xl border border-zinc-800 bg-zinc-950 p-4"
-                                >
-                                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                                        <div className="space-y-1">
-                                            <div className="text-sm font-semibold text-zinc-100">
-                                                {formatTimestamp(event.start)} → {formatTimestamp(event.end)}
-                                            </div>
-                                            <div className="text-xs text-zinc-400 leading-relaxed">
-                                                Duration: {event.duration_seconds.toFixed(2)}s
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getSeverityStyles(event.max_percent)}`}>
-                                                Max {event.max_percent.toFixed(0)}%
+	                                    className="rounded-xl border border-zinc-800 bg-zinc-950 p-3"
+	                                >
+	                                    <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+	                                        <div className="space-y-1">
+	                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+	                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+	                                                    Start
+	                                                </span>
+	                                                <span className="font-mono text-sm font-semibold text-zinc-100">
+	                                                    {formatTimestamp(event.start)}
+	                                                </span>
+	                                                <span className="text-zinc-600">→</span>
+	                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+	                                                    End
+	                                                </span>
+	                                                <span className="font-mono text-sm font-semibold text-zinc-100">
+	                                                    {formatTimestamp(event.end)}
+	                                                </span>
+	                                            </div>
+	                                            <div className="flex flex-wrap items-center gap-2">
+	                                                <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[11px] font-semibold text-zinc-200">
+	                                                    Duration <span className="font-mono">{formatDuration(event.duration_seconds)}</span>
+	                                                </span>
+	                                            </div>
+	                                        </div>
+	                                        <div className="flex items-center gap-3">
+	                                            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getSeverityStyles(event.max_percent)}`}>
+	                                                Max {event.max_percent.toFixed(0)}%
                                             </span>
                                             <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs font-semibold text-zinc-300">
                                                 Avg {event.avg_percent.toFixed(0)}%
