@@ -8,11 +8,10 @@ interface UsersTableProps {
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
-    <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden shadow-xl flex flex-col">
-        {/* Scroll container with max height */}
-        <div className="overflow-x-auto overflow-y-auto max-h-[520px]">
+    <div className="bg-zinc-900 rounded-xl border border-zinc-800 shadow-xl flex flex-col min-h-0">
+        <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0">
             <table className="min-w-full divide-y divide-zinc-800 text-xs">
-                <thead className="bg-zinc-950/70 sticky top-0 z-10">
+                <thead className="bg-zinc-950 sticky top-0 z-10">
                     <tr>
                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Username</th>
                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">UID</th>
@@ -64,7 +63,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
         </div>
 
         {!loading && (
-            <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between">
                 <span>
                     Showing <span className="text-zinc-200 font-semibold">{users.length}</span> users
                 </span>
