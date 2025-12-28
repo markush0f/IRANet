@@ -1,7 +1,6 @@
 import React from 'react';
 import UsersPageHeader from './UsersPageHeader';
 import UsersSummaryGrid from './UsersSummaryGrid';
-import UsersFilterBar from './UsersFilterBar';
 import UsersTable from './UsersTable';
 import { useUsersData } from '../../hooks/useUsersData';
 
@@ -24,12 +23,12 @@ const UsersView: React.FC = () => {
                 <UsersPageHeader
                     searchTerm={searchTerm}
                     onSearchTermChange={setSearchTerm}
+                    typeFilter={typeFilter}
+                    onTypeFilterChange={setTypeFilter}
                     error={error}
                 />
 
                 <UsersSummaryGrid summary={summary} />
-
-                <UsersFilterBar currentFilter={typeFilter} onFilterChange={setTypeFilter} />
             </div>
 
             {/* Users Container with Fixed Height */}

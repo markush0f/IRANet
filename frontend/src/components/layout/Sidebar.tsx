@@ -84,6 +84,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             ),
         },
         {
+            id: 'application-metrics',
+            label: 'Application metrics',
+            icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 19V5m0 14h16M8 17V9m4 8V7m4 10v-4" />
+                </svg>
+            ),
+        },
+        {
             id: 'system-applications',
             label: 'System applications',
             icon: (

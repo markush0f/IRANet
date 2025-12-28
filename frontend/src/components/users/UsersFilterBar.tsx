@@ -10,10 +10,17 @@ const FILTER_OPTIONS: { value: UserFilterOption; label: string }[] = [
 interface UsersFilterBarProps {
     currentFilter: UserFilterOption;
     onFilterChange: (filter: UserFilterOption) => void;
+    showIndicator?: boolean;
+    className?: string;
 }
 
-const UsersFilterBar: React.FC<UsersFilterBarProps> = ({ currentFilter, onFilterChange }) => (
-    <div className="flex flex-wrap gap-2 items-center">
+const UsersFilterBar: React.FC<UsersFilterBarProps> = ({
+    currentFilter,
+    onFilterChange,
+    showIndicator = true,
+    className,
+}) => (
+    <div className={`flex flex-wrap gap-2 items-center ${className ?? ''}`}>
         {FILTER_OPTIONS.map(option => (
             <button
                 key={option.value}
@@ -28,9 +35,11 @@ const UsersFilterBar: React.FC<UsersFilterBarProps> = ({ currentFilter, onFilter
                 {option.label}
             </button>
         ))}
-        <span className="text-[11px] text-zinc-400 font-mono">
-            Filtering <strong>{currentFilter}</strong>
-        </span>
+        {showIndicator && (
+            <span className="text-[11px] text-zinc-400 font-mono">
+                Filtering <strong>{currentFilter}</strong>
+            </span>
+        )}
     </div>
 );
 

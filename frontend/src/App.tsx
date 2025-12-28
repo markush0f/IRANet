@@ -14,6 +14,7 @@ import NetworkMetricsView from './components/monitoring/NetworkMetricsView';
 import PacketLossEventsView from './components/monitoring/PacketLossEventsView';
 import AlertsView from './components/alerts/AlertsView';
 import ApplicationsView from './components/applications/ApplicationsView';
+import ApplicationMetricsView from './components/applications/ApplicationMetricsView';
 import SystemApplicationsView from './components/system/SystemApplicationsView';
 import ApplicationsLogsView from './components/logs/ApplicationsLogsView';
 import SystemServicesView from './components/system/SystemServicesView';
@@ -43,6 +44,7 @@ const ACCENT_BY_VIEW: Record<string, string> = {
   processes: '34 197 94',
   alerts: '245 158 11',
   applications: '99 102 241',
+  'application-metrics': '99 102 241',
   'system-applications': '99 102 241',
   'system-services': '56 189 248',
   'system-databases': '16 185 129',
@@ -64,7 +66,10 @@ function App() {
 
   const currentServiceName = services.find(s => s.id === currentServiceId)?.name || 'Unknown Service';
   const isChatbotEnabled = extensions.some(extension => extension.id === 'ai_chat' && extension.enabled);
-  const isPackagesView = currentView === 'system-packages' || currentView === 'packages-history';
+  const isOverflowHiddenView =
+    currentView === 'system-packages' ||
+    currentView === 'packages-history' ||
+    currentView === 'application-metrics';
 
   const refreshExtensions = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -132,7 +137,7 @@ function App() {
 
         {/* Scrollable Content Area */}
         <div
-          className={`flex-1 min-h-0 flex flex-col ${isPackagesView ? 'overflow-hidden' : 'overflow-y-auto'}`}
+          className={`flex-1 min-h-0 flex flex-col ${isOverflowHiddenView ? 'overflow-hidden' : 'overflow-y-auto'}`}
         >
           {currentView === 'system' ? (
             <SystemInfoView />
@@ -158,6 +163,8 @@ function App() {
             <AlertsView />
           ) : currentView === 'applications' ? (
             <ApplicationsView />
+          ) : currentView === 'application-metrics' ? (
+            <ApplicationMetricsView />
           ) : currentView === 'system-applications' ? (
             <SystemApplicationsView />
           ) : currentView === 'system-services' ? (
