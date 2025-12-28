@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Iterable
 from uuid import UUID
 
@@ -13,6 +13,9 @@ from app.models.entities.application_metrics import ApplicationMetrics
 from app.repositories.application_metrics_repository import (
     ApplicationMetricssRepository,
 )
+
+MAX_RANGE = timedelta(hours=6)
+DEFAULT_STEP_SECONDS = 5
 
 
 class ApplicationMetricsService:
@@ -93,6 +96,65 @@ class ApplicationMetricsService:
             end=ts_to,
         )
         return [self._serialize_metric(row) for row in rows]
+
+    async def list_metrics_series(
+        self,
+        *,
+        application_id: UUID,
+        ts_from: datetime,
+        ts_to: datetime,
+        step_seconds: int = DEFAULT_STEP_SECONDS,
+    ) -> dict:
+        if ts_to <= ts_from:
+            raise ValueError("ts_to must be greater than ts_from")
+
+        if ts_to - ts_from > MAX_RANGE:
+            raise ValueError(f"time range too large (max {MAX_RANGE})")
+
+        rows = await self._repo.list_by_application(
+            application_id=application_id,
+            start=ts_from,
+            end=ts_to,
+        )
+
+        series: dict[str, list[list]] = {
+            "cpu_percent": [],
+            "memory_mb": [],
+            "memory_percent": [],
+            "uptime_seconds": [],
+            "threads": [],
+            "restart_count": [],
+            "status": [],
+        }
+
+        for row in rows:
+            ts = row.ts.isoformat()
+
+            series["status"].append([ts, row.status])
+
+            if row.status != "running":
+                for key in series:
+                    if key != "status":
+                        series[key].append([ts, None])
+                continue
+
+            series["cpu_percent"].append([ts, row.cpu_percent])
+            series["memory_mb"].append([ts, row.memory_mb])
+            series["memory_percent"].append([ts, row.memory_percent])
+            series["uptime_seconds"].append([ts, row.uptime_seconds])
+            series["threads"].append([ts, row.threads])
+            series["restart_count"].append([ts, row.restart_count])
+
+        return {
+            "application_id": application_id,
+            "range": {
+                "from": ts_from.isoformat(),
+                "to": ts_to.isoformat(),
+                "step_seconds": step_seconds,
+                "max_range_seconds": int(MAX_RANGE.total_seconds()),
+            },
+            "series": series,
+        }
 
     async def list_latest_metrics(
         self,

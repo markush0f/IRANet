@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
@@ -37,3 +37,28 @@ async def application_metrics_latest(
         application_id=application_id,
         limit=limit,
     )
+
+
+@router.get(
+    "/{application_id}/metrics/series",
+    summary="Get application metrics as time series",
+)
+async def get_application_metrics_series(
+    application_id: UUID,
+    ts_from: datetime = Query(...),
+    ts_to: datetime = Query(...),
+    session: AsyncSession = Depends(get_session),
+):
+    service = ApplicationMetricsService(session)
+
+    try:
+        return await service.list_metrics_series(
+            application_id=application_id,
+            ts_from=ts_from,
+            ts_to=ts_to,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
