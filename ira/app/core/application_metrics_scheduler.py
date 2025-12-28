@@ -52,6 +52,8 @@ async def application_metrics_scheduler() -> None:
                         metrics_batch.append(
                             ApplicationMetricsCreateDTO(
                                 application_id=application.id,
+                                pid=getattr(raw_metrics, "pid", None),
+                                port=getattr(raw_metrics, "port", None),
                                 cpu_percent=raw_metrics.cpu_percent,
                                 memory_mb=raw_metrics.memory_mb,
                                 memory_percent=raw_metrics.memory_percent,

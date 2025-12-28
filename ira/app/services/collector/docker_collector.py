@@ -61,28 +61,46 @@ async def collect_docker_metrics(
             memory_mb = _parse_mem_to_mb(used.strip())
             memory_percent = float(data["MemPerc"].replace("%", ""))
 
-        uptime_seconds = None
+        uptime_seconds: Optional[int] = None
+        pid: Optional[int] = None
+        port: Optional[int] = None
+
         try:
             inspect = subprocess.run(
-                [
-                    "docker",
-                    "inspect",
-                    "-f",
-                    "{{ .State.StartedAt }}",
-                    application.identifier,
-                ],
+                ["docker", "inspect", application.identifier],
                 capture_output=True,
                 text=True,
                 check=True,
             )
+            inspect_data = json.loads(inspect.stdout.strip())
+            container = inspect_data[0] if inspect_data else {}
 
-            started_at = inspect.stdout.strip()
-            started_dt = datetime.fromisoformat(
-                started_at.replace("Z", "+00:00")
-            )
-            uptime_seconds = int(
-                (datetime.now(timezone.utc) - started_dt).total_seconds()
-            )
+            started_at = container.get("State", {}).get("StartedAt")
+            if isinstance(started_at, str) and started_at:
+                started_dt = datetime.fromisoformat(
+                    started_at.replace("Z", "+00:00")
+                )
+                uptime_seconds = int(
+                    (datetime.now(timezone.utc) - started_dt).total_seconds()
+                )
+
+            parsed_pid = container.get("State", {}).get("Pid")
+            if isinstance(parsed_pid, int) and parsed_pid > 0:
+                pid = parsed_pid
+
+            ports = container.get("NetworkSettings", {}).get("Ports") or {}
+            if isinstance(ports, dict):
+                host_ports: list[int] = []
+                for _container_port, bindings in ports.items():
+                    if not bindings:
+                        continue
+                    if isinstance(bindings, list):
+                        for binding in bindings:
+                            host_port = binding.get("HostPort") if isinstance(binding, dict) else None
+                            if isinstance(host_port, str) and host_port.isdigit():
+                                host_ports.append(int(host_port))
+                host_ports.sort()
+                port = host_ports[0] if host_ports else None
         except Exception:
             pass
 
@@ -90,6 +108,8 @@ async def collect_docker_metrics(
             cpu_percent=cpu_percent,
             memory_mb=memory_mb,
             memory_percent=memory_percent,
+            pid=pid,
+            port=port,
             uptime_seconds=uptime_seconds,
             threads=None,
             restart_count=None,

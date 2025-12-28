@@ -4,6 +4,9 @@ from pydantic import BaseModel
 
 
 class ApplicationCollectedMetricsDTO(BaseModel):
+    pid: Optional[int] = None
+    port: Optional[int] = None
+
     cpu_percent: Optional[float] = None
     memory_mb: Optional[float] = None
     memory_percent: Optional[float] = None

@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Iterable
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -13,6 +14,7 @@ from app.models.entities.application_metrics import ApplicationMetrics
 from app.repositories.application_metrics_repository import (
     ApplicationMetricssRepository,
 )
+from app.services.collector.application_collector import collect_application_metrics
 
 MAX_RANGE = timedelta(hours=6)
 DEFAULT_STEP_SECONDS = 5
@@ -30,6 +32,9 @@ class ApplicationMetricsService:
         application = await self._get_enabled_application(metric.application_id)
 
         application.last_seen_at = metric.ts
+        application.status = metric.status
+        application.pid = getattr(metric, "pid", None)
+        application.port = getattr(metric, "port", None)
 
         db_metric = ApplicationMetrics(
             application_id=metric.application_id,
@@ -66,6 +71,9 @@ class ApplicationMetricsService:
                 continue
 
             application.last_seen_at = ts
+            application.status = metric.status
+            application.pid = getattr(metric, "pid", None)
+            application.port = getattr(metric, "port", None)
 
             db_metrics.append(
                 ApplicationMetrics(
@@ -166,12 +174,21 @@ class ApplicationMetricsService:
             application_id=application_id,
             limit=limit,
         )
-        return [self._serialize_metric(row) for row in rows]
+        application = await self._get_application(application_id)
+        return [self._serialize_metric(row, application=application) for row in rows]
 
-    def _serialize_metric(self, metric: ApplicationMetrics) -> dict:
+    def _serialize_metric(
+        self,
+        metric: ApplicationMetrics,
+        *,
+        application: Application | None = None,
+    ) -> dict:
         return {
             "application_id": metric.application_id,
             "ts": metric.ts,
+            "pid": getattr(application, "pid", None),
+            "port": getattr(application, "port", None),
+            "last_seen_at": getattr(application, "last_seen_at", None),
             "cpu_percent": metric.cpu_percent,
             "memory_mb": metric.memory_mb,
             "memory_percent": metric.memory_percent,
@@ -180,6 +197,90 @@ class ApplicationMetricsService:
             "restart_count": metric.restart_count,
             "status": metric.status,
         }
+
+    async def get_runtime_snapshot(
+        self,
+        *,
+        application_id: UUID,
+    ) -> dict:
+        application = await self._get_application(application_id)
+        now = datetime.now(timezone.utc)
+
+        raw_metrics = await collect_application_metrics(application=application)
+        if raw_metrics is not None:
+            application.last_seen_at = now
+            application.status = raw_metrics.status
+            application.pid = getattr(raw_metrics, "pid", None)
+            application.port = getattr(raw_metrics, "port", None)
+            self._session.add(application)
+            await self._session.commit()
+
+        return {
+            "application_id": application.id,
+            "is_running": application.status == "running",
+            "pid": application.pid,
+            "port": application.port,
+            "last_seen_at": application.last_seen_at,
+            "memory_res_mb": getattr(raw_metrics, "memory_mb", None)
+            if raw_metrics is not None
+            else None,
+            "status": application.status,
+        }
+
+    async def list_runtime_snapshots(
+        self,
+        *,
+        enabled_only: bool = True,
+    ) -> list[dict]:
+        max_ts_subq = (
+            select(
+                ApplicationMetrics.application_id,
+                func.max(ApplicationMetrics.ts).label("max_ts"),
+            )
+            .group_by(ApplicationMetrics.application_id)
+            .subquery()
+        )
+
+        statement = (
+            select(Application, ApplicationMetrics)
+            .join(
+                max_ts_subq,
+                max_ts_subq.c.application_id == Application.id,
+                isouter=True,
+            )
+            .join(
+                ApplicationMetrics,
+                (ApplicationMetrics.application_id == max_ts_subq.c.application_id)
+                & (ApplicationMetrics.ts == max_ts_subq.c.max_ts),
+                isouter=True,
+            )
+        )
+
+        if enabled_only:
+            statement = statement.where(Application.enabled.is_(True))  # type: ignore
+
+        rows = (await self._session.exec(statement)).all()
+
+        snapshots: list[dict] = []
+        for application, metric in rows:
+            snapshots.append(
+                {
+                    "application_id": application.id,
+                    "name": application.name,
+                    "kind": application.kind,
+                    "identifier": application.identifier,
+                    "status": application.status,
+                    "is_running": application.status == "running",
+                    "pid": application.pid,
+                    "port": application.port,
+                    "last_seen_at": application.last_seen_at,
+                    "memory_mb": getattr(metric, "memory_mb", None),
+                    "memory_percent": getattr(metric, "memory_percent", None),
+                    "ts": getattr(metric, "ts", None),
+                }
+            )
+
+        return snapshots
 
     async def _get_enabled_application(
         self,
@@ -190,6 +291,14 @@ class ApplicationMetricsService:
             Application.enabled.is_(True),  # type: ignore
         )
 
+        result = await self._session.exec(statement)
+        return result.one()
+
+    async def _get_application(
+        self,
+        application_id: UUID,
+    ) -> Application:
+        statement = select(Application).where(Application.id == application_id)
         result = await self._session.exec(statement)
         return result.one()
 

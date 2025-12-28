@@ -40,6 +40,18 @@ async def application_metrics_latest(
 
 
 @router.get(
+    "/{application_id}/runtime",
+    summary="Get application runtime info (pid/port/memory/last_seen)",
+)
+async def application_runtime_snapshot(
+    application_id: UUID,
+    session: AsyncSession = Depends(get_session),
+):
+    service = ApplicationMetricsService(session)
+    return await service.get_runtime_snapshot(application_id=application_id)
+
+
+@router.get(
     "/{application_id}/metrics/series",
     summary="Get application metrics as time series",
 )

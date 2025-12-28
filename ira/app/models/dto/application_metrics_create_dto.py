@@ -9,6 +9,9 @@ class ApplicationMetricsCreateDTO(SQLModel):
     application_id: UUID
     ts: datetime = Field(default_factory=datetime.utcnow)
 
+    pid: Optional[int] = None
+    port: Optional[int] = None
+
     cpu_percent: Optional[float] = None
     memory_mb: Optional[float] = None
     memory_percent: Optional[float] = None
