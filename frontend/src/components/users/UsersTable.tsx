@@ -8,8 +8,8 @@ interface UsersTableProps {
 }
 
 const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
-    <div className="bg-zinc-900 rounded-xl border border-zinc-800 shadow-xl flex flex-col min-h-0">
-        <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0">
+    <div className="flex flex-col max-h-[min(70vh,720px)]">
+        <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto scrollbar-strong">
             <table className="min-w-full divide-y divide-zinc-800 text-xs">
                 <thead className="bg-zinc-950 sticky top-0 z-10">
                     <tr>
@@ -63,7 +63,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading, summary }) => (
         </div>
 
         {!loading && (
-            <div className="px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between">
+            <div className="shrink-0 px-4 py-3 border-t border-zinc-800 text-[11px] text-zinc-500 flex items-center justify-between bg-zinc-950/30">
                 <span>
                     Showing <span className="text-zinc-200 font-semibold">{users.length}</span> users
                 </span>

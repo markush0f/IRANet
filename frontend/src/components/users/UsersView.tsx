@@ -31,8 +31,8 @@ const UsersView: React.FC = () => {
                 <UsersSummaryGrid summary={summary} />
             </div>
 
-            {/* Users Container with Fixed Height */}
-            <div className="flex-1 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-xl overflow-hidden flex flex-col min-h-0">
+            {/* Users container (auto height, scroll inside table if needed) */}
+            <div className="panel accent-border rounded-2xl shadow-lg overflow-hidden">
                 <UsersTable users={filteredUsers} loading={loading} summary={summary} />
             </div>
         </div>
