@@ -98,12 +98,15 @@ export const useChatbot = () => {
             setLoadingMessages(true);
             getChat(chatId, 1, controller.signal)
                 .then(chat => {
-                    const incoming = (chat.messages ?? []).map((msg: ChatMessageRecord) => ({
-                        id: String(msg.id),
-                        role: msg.role === 'assistant' ? 'assistant' : 'user',
-                        content: msg.content,
-                        timestamp: msg.created_at ?? new Date().toISOString(),
-                    }));
+                    const incoming: ChatMessage[] = (chat.messages ?? []).map((msg: ChatMessageRecord) => {
+                        const role: ChatMessage['role'] = msg.role === 'assistant' ? 'assistant' : 'user';
+                        return {
+                            id: String(msg.id),
+                            role,
+                            content: msg.content,
+                            timestamp: msg.created_at ?? new Date().toISOString(),
+                        };
+                    });
                     setMessagesByChat(prev => ({
                         ...prev,
                         [chatId]: incoming,

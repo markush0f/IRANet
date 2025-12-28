@@ -215,7 +215,7 @@ const ApplicationsView: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Applications</h2>
-                    <p className="text-[10px] text-zinc-500 mt-1">Simple applications + logs model based on backend tables.</p>
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-1">Simple applications + logs model based on backend tables.</p>
                 </div>
                 {mode === 'list' && (
                     <button
@@ -297,7 +297,7 @@ const ApplicationsView: React.FC = () => {
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <span className="text-[10px] text-zinc-500">No logs</span>
+                                                    <span className="text-xs text-zinc-400 leading-relaxed">No logs</span>
                                                 ))}
                                             </td>
                                         </tr>

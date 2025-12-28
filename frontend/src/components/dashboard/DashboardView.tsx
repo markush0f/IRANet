@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout/legacy';
-import type { Layout, Layouts } from 'react-grid-layout';
+import type { Layout } from 'react-grid-layout';
 import type { Service } from '../../types';
 import { getSystemInfo } from '../../services/api';
 import { useMetricSeriesPanel } from '../../hooks/useMetricSeriesPanel';
@@ -18,6 +18,8 @@ interface DashboardViewProps {
     onUpdateService: (id: string, field: 'url' | 'healthEndpoint' | 'name', value: string) => void;
     onDeleteService: (id: string) => void;
 }
+
+type Layouts = Partial<Record<string, Layout>>;
 
 interface MetricPreviewConfig {
     id: string;
@@ -81,7 +83,7 @@ const METRIC_PANELS: MetricPreviewConfig[] = [
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-const createLayoutForCols = (cols: number): Layout[] => {
+const createLayoutForCols = (cols: number): Layout => {
     const baseW = Math.min(4, cols);
     const baseH = 5;
     const itemsPerRow = Math.max(1, Math.floor(cols / baseW));
@@ -173,7 +175,7 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
                 />
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-zinc-500">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400 leading-relaxed">
                 <span>Max {formatValue(manualSummary.max)}</span>
                 <span>Min {formatValue(manualSummary.min)}</span>
                 <span>Avg {formatValue(manualSummary.avg)}</span>
@@ -228,7 +230,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
                         <h2 className="text-2xl font-semibold text-zinc-100">Charts panel</h2>
-                        <p className="text-[10px] text-zinc-500">Drag and resize cards; the grid auto-adjusts.</p>
+                        <p className="text-xs text-zinc-400 leading-relaxed">Drag and resize cards; the grid auto-adjusts.</p>
                     </div>
                     <div className="flex flex-wrap items-end gap-4">
                         <div className="flex flex-col gap-1">
@@ -245,7 +247,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                     </div>
                 </div>
 
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-xs text-zinc-400 leading-relaxed">
                     {loadingHost && 'Loading host information…'}
                     {!loadingHost && hostname && `Detected host: ${hostname}`}
                     {!loadingHost && !hostname && 'No default hostname detected.'}

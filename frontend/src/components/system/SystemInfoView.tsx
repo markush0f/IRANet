@@ -93,7 +93,7 @@ const SystemInfoView: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <InfoCard title="Boot time">
-                    <p className="text-[10px] text-zinc-500 mb-4">
+                    <p className="text-xs text-zinc-400 leading-relaxed mb-4">
                         Unix timestamp for system boot with a readable date.
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">

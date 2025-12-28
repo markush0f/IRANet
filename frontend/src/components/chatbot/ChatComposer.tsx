@@ -30,7 +30,7 @@ const ChatComposer: React.FC<ChatComposerProps> = ({
                             onSend();
                         }
                     }}
-                    className="flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-0"
                 />
 
                 <button

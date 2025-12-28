@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import LogsViewer from './components/dashboard/LogsViewer';
 import Sidebar from './components/layout/Sidebar';
 import PerformanceView from './components/monitoring/PerformanceView';
@@ -6,9 +6,6 @@ import UsersView from './components/users/UsersView';
 import SystemInfoView from './components/system/SystemInfoView';
 import SystemDiskView from './components/system/SystemDiskView';
 import CpuMetricsView from './components/monitoring/CpuMetricsView';
-import AppHeader from './components/layout/AppHeader';
-import AppFooter from './components/layout/AppFooter';
-import EnvBadge from './components/layout/EnvBadge';
 import DashboardView from './components/dashboard/DashboardView';
 import DockerView from './components/monitoring/DockerView';
 import ProcessesView from './components/monitoring/ProcessesView';
@@ -32,6 +29,30 @@ import { useSystemAlerts } from './hooks/useSystemAlerts';
 import { getExtensions } from './services/api';
 import type { ExtensionRecord } from './types';
 
+const ACCENT_BY_VIEW: Record<string, string> = {
+  dashboard: '168 85 247',
+  system: '56 189 248',
+  'system-disk': '34 197 94',
+  'cpu-metrics': '99 102 241',
+  'memory-metrics': '16 185 129',
+  'network-metrics': '56 189 248',
+  'packet-loss-events': '244 63 94',
+  performance: '168 85 247',
+  users: '99 102 241',
+  docker: '56 189 248',
+  processes: '34 197 94',
+  alerts: '245 158 11',
+  applications: '99 102 241',
+  'system-applications': '99 102 241',
+  'system-services': '56 189 248',
+  'system-databases': '16 185 129',
+  'system-packages': '56 189 248',
+  'packages-history': '56 189 248',
+  logs: '168 85 247',
+  extensions: '16 185 129',
+  chatbot: '59 130 246',
+};
+
 function App() {
   const { services, handleAddService, handleDeleteService, handleRefreshAll, handleCheckStatus, handleUpdateService } = useServices();
   const { logsOpen, currentLogs, currentServiceId, openLogs, closeLogs } = useLogsModal();
@@ -43,6 +64,7 @@ function App() {
 
   const currentServiceName = services.find(s => s.id === currentServiceId)?.name || 'Unknown Service';
   const isChatbotEnabled = extensions.some(extension => extension.id === 'ai_chat' && extension.enabled);
+  const isPackagesView = currentView === 'system-packages' || currentView === 'packages-history';
 
   const refreshExtensions = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -55,9 +77,13 @@ function App() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void refreshExtensions(controller.signal);
+    getExtensions(controller.signal)
+      .then(setExtensions)
+      .catch(err => {
+        console.error('Error loading extensions', err);
+      });
     return () => controller.abort();
-  }, [refreshExtensions]);
+  }, []);
 
   return (
     <div className="flex min-h-screen lg:h-screen bg-zinc-950 selection:bg-indigo-500/30 selection:text-indigo-200 lg:overflow-hidden">
@@ -79,7 +105,14 @@ function App() {
         />
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen lg:min-h-0 overflow-hidden app-accent">
+      <div
+        className="flex-1 flex flex-col min-h-screen lg:min-h-0 overflow-hidden app-accent"
+        style={
+          {
+            ['--accent-rgb' as any]: ACCENT_BY_VIEW[currentView] ?? '56 189 248',
+          } as React.CSSProperties
+        }
+      >
         <div className="lg:hidden sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-zinc-900 bg-zinc-950/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
@@ -98,7 +131,9 @@ function App() {
         {/* <AppHeader /> */}
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto">
+        <div
+          className={`flex-1 min-h-0 flex flex-col ${isPackagesView ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        >
           {currentView === 'system' ? (
             <SystemInfoView />
           ) : currentView === 'system-disk' ? (

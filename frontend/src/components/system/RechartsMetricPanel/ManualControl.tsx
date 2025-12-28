@@ -19,7 +19,7 @@ const ManualControl: React.FC<ManualControlProps> = ({
     loading,
     latestValueLabel,
 }) => (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
+    <div className="panel-soft rounded-2xl p-4 sm:p-5 space-y-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Manual range</p>
             <span className={`text-sm font-semibold ${latestValueLabel ? 'text-emerald-200' : 'text-zinc-500'}`}>

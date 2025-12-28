@@ -136,6 +136,7 @@ export interface DatabaseClassification {
 }
 
 export interface SystemApplication {
+    name?: string;
     cwd: string;
     commands: string[];
 }

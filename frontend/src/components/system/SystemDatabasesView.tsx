@@ -83,7 +83,7 @@ const SystemDatabasesView: React.FC = () => {
                 <div>
                     <p className="text-xs uppercase tracking-wide text-zinc-500">Services</p>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Databases</h2>
-                    <p className="text-[10px] text-zinc-500 mt-2 max-w-2xl">
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-2 max-w-2xl">
                         Classified engines and detected services with status and execution source.
                     </p>
                     {error && (
@@ -91,7 +91,7 @@ const SystemDatabasesView: React.FC = () => {
                     )}
                 </div>
                 {!loading && (
-                    <div className="text-[10px] text-zinc-500 font-mono">
+                    <div className="text-xs text-zinc-400 leading-relaxed font-mono">
                         Total: <span className="text-zinc-200 font-semibold">{items.length}</span> ·
                         Running: <span className="text-emerald-400 font-semibold ml-1">{runningCount}</span>
                     </div>
@@ -113,7 +113,7 @@ const SystemDatabasesView: React.FC = () => {
                             className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 leading-relaxed">
                         <span>Engine</span>
                         <div className="relative">
                             <select
@@ -190,7 +190,7 @@ const SystemDatabasesView: React.FC = () => {
                     </div>
                 </div>
             ) : filteredItems.length === 0 ? (
-                <div className="text-[10px] text-zinc-500">No databases to display.</div>
+                <div className="text-xs text-zinc-400 leading-relaxed">No databases to display.</div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredItems.map((item, index) => {

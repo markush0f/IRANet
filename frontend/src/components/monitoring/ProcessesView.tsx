@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import type { ProcessesSnapshot, ProcessInfo } from '../../types';
+import type { ProcessesSnapshot } from '../../types';
 import { getProcessesSnapshot } from '../../services/api';
 
 const formatKbToMiB = (kb: number) => `${(kb / 1024).toFixed(1)} MiB`;
@@ -57,7 +57,6 @@ const ProcessesView: React.FC = () => {
     }, [limit]);
 
     const processes = snapshot?.processes ?? [];
-    const header = snapshot?.header;
 
     const users = useMemo(
         () => Array.from(new Set(processes.map(p => p.user))).sort(),
@@ -107,6 +106,12 @@ const ProcessesView: React.FC = () => {
                         </span>
                     </div>
                 </div>
+
+                {error && (
+                    <div className="rounded-xl border border-rose-500/40 bg-rose-500/5 px-4 py-2 text-xs text-rose-200">
+                        {error}
+                    </div>
+                )}
 
                 <div className="flex flex-wrap gap-2">
                     <input
@@ -173,7 +178,7 @@ const ProcessesView: React.FC = () => {
                                             </span>
                                         </div>
 
-                                        <div className="mt-1 text-[10px] text-zinc-500 flex gap-4">
+                                        <div className="mt-1 text-xs text-zinc-400 leading-relaxed flex gap-4">
                                             <span>User: {p.user}</span>
                                             <span>RES: {formatKbToMiB(p.memory.res_kb)}</span>
                                             <span>VIRT: {formatKbToMiB(p.memory.virt_kb)}</span>

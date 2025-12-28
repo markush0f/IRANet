@@ -15,6 +15,14 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ title, status }) => {
                 </h3>
             </div>
 
+            <span
+                className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${status === 'saved'
+                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                    : 'border-zinc-700 bg-zinc-900/50 text-zinc-300'
+                    }`}
+            >
+                {status}
+            </span>
         </div>
     );
 };

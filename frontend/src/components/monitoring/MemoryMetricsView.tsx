@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Card, Flex, Text, Title } from '@tremor/react';
-import MetricSeriesPanel from '../system/MetricSeriesPanel';
 import { getSystemInfo } from '../../services/api';
 import RechartsMetricPanel from '../system/RechartsMetricPanel';
 
@@ -59,7 +58,7 @@ const MemoryMetricsView: React.FC = () => {
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Metrics series</Text>
                         <Title className="text-2xl sm:text-3xl text-zinc-100">Real-time available memory</Title>
-                        <Text className="text-[10px] text-zinc-500 max-w-3xl">
+                        <Text className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
                             Check the host's available memory percentage every 5 seconds or over a custom range.
                             If the hostname is not detected automatically, you can provide one to target the correct instance.
                         </Text>
@@ -70,7 +69,7 @@ const MemoryMetricsView: React.FC = () => {
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
-                    <Text className="text-[10px] text-zinc-500">
+                    <Text className="text-xs text-zinc-400 leading-relaxed">
                         {loading && 'Loading host information…'}
                         {!loading && hostname && `Detected host: ${hostname}`}
                         {!loading && !hostname && 'No default hostname detected.'}

@@ -55,7 +55,7 @@ const NetworkMetricsView: React.FC = () => {
                     <div className="space-y-1">
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Metrics series</Text>
                         <Title className="text-2xl sm:text-3xl text-zinc-100">Real-time network latency</Title>
-                        <Text className="text-[10px] text-zinc-500 max-w-3xl">
+                        <Text className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
                             Monitor latency and jitter in milliseconds with updates every 5 seconds.
                             You can switch metrics and set a hostname to query the correct instance.
                         </Text>
@@ -66,7 +66,7 @@ const NetworkMetricsView: React.FC = () => {
                 </Flex>
 
                 <Flex justifyContent="between" className="gap-4 flex-wrap">
-                    <Text className="text-[10px] text-zinc-500">
+                    <Text className="text-xs text-zinc-400 leading-relaxed">
                         {loading && 'Loading host information…'}
                         {!loading && hostname && `Detected host: ${hostname}`}
                         {!loading && !hostname && 'No default hostname detected.'}

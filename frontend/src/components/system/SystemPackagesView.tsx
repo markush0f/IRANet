@@ -78,7 +78,7 @@ const SystemPackagesView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm space-y-4">
+        <div className="w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm flex flex-col gap-4">
             {/* Header */}
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -88,7 +88,7 @@ const SystemPackagesView: React.FC = () => {
                     <h2 className="text-xl font-semibold text-zinc-100">
                         System packages
                     </h2>
-                    <p className="text-[10px] text-zinc-500 mt-1 max-w-xl">
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-1 max-w-xl">
                         Installed packages list with search, sorting, and pagination.
                     </p>
                     {error && (
@@ -99,7 +99,7 @@ const SystemPackagesView: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2 text-[10px] text-zinc-500">
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 leading-relaxed">
                         <span>Sort</span>
 
                         <button
@@ -154,7 +154,7 @@ const SystemPackagesView: React.FC = () => {
                     />
                 </div>
 
-                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                <div className="flex items-center gap-3 text-xs text-zinc-400 leading-relaxed">
                     <span>{pageLabel}</span>
                     <div className="relative">
                         <select
@@ -181,51 +181,51 @@ const SystemPackagesView: React.FC = () => {
             </div>
 
             {/* Table */}
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 shadow-md">
+            <div className="panel accent-border rounded-xl shadow-md flex-1 min-h-0 overflow-hidden">
                 {loading ? (
                     <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-8">
                         <div className="w-5 h-5 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
                         <span>Loading packages...</span>
                     </div>
                 ) : items.length === 0 ? (
-                    <div className="text-[10px] text-zinc-500 px-4 py-6">
+                    <div className="text-xs text-zinc-400 leading-relaxed px-4 py-6">
                         No packages match the filter.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-xs divide-y divide-zinc-800">
-                            <thead className="bg-zinc-950">
+                    <div className="h-full overflow-auto scrollbar-strong">
+                        <table className="min-w-full text-sm divide-y divide-zinc-800">
+                            <thead className="bg-zinc-950/80 backdrop-blur supports-[backdrop-filter]:bg-zinc-950/60">
                                 <tr>
-                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-300 uppercase tracking-wide">
                                         Name
                                     </th>
-                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-300 uppercase tracking-wide">
                                         Version
                                     </th>
-                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-300 uppercase tracking-wide">
                                         Arch
                                     </th>
-                                    <th className="px-4 py-2.5 text-left font-semibold text-zinc-500 uppercase tracking-wide">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-300 uppercase tracking-wide">
                                         Origin
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-800">
-                                {items.map((pkg) => (
+                                {items.map((pkg, idx) => (
                                     <tr
                                         key={`${pkg.name}-${pkg.version}`}
-                                        className="hover:bg-zinc-900/50 transition-colors"
+                                        className={`transition-colors hover:bg-zinc-900/60 ${idx % 2 === 0 ? 'bg-zinc-950/20' : 'bg-transparent'}`}
                                     >
-                                        <td className="px-4 py-2.5 font-semibold text-zinc-100">
+                                        <td className="px-4 py-3 font-semibold text-zinc-100">
                                             {pkg.name}
                                         </td>
-                                        <td className="px-4 py-2.5 text-zinc-300 font-mono">
+                                        <td className="px-4 py-3 text-zinc-200 font-mono">
                                             {pkg.version}
                                         </td>
-                                        <td className="px-4 py-2.5 text-zinc-300">
+                                        <td className="px-4 py-3 text-zinc-200">
                                             {pkg.arch}
                                         </td>
-                                        <td className="px-4 py-2.5 text-zinc-300">
+                                        <td className="px-4 py-3 text-zinc-200">
                                             {pkg.origin}
                                         </td>
                                     </tr>
@@ -238,7 +238,7 @@ const SystemPackagesView: React.FC = () => {
 
             {/* Footer pagination */}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-[10px] text-zinc-500">
+                <div className="text-xs text-zinc-400 leading-relaxed">
                     Page {page} of {totalPages}
                 </div>
 

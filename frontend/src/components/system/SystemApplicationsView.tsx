@@ -8,7 +8,7 @@ const SystemApplicationsView: React.FC = () => {
             <div>
                 <p className="text-xs uppercase tracking-wide text-zinc-500">Applications</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">System applications</h2>
-                <p className="text-[10px] text-zinc-500 mt-2 max-w-2xl">
+                <p className="text-xs text-zinc-400 leading-relaxed mt-2 max-w-2xl">
                     Directory collection where the system runs critical commands. Each entry shows available binaries and lets you add new system applications to monitor.
                 </p>
             </div>

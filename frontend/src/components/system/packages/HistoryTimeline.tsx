@@ -27,7 +27,7 @@ const normalizeAction = (value?: string | null) => {
 
 const HistoryTimeline: React.FC<HistoryTimelineProps> = ({ events, emptyMessage, packageFallback }) => {
     if (events.length === 0) {
-        return <div className="text-sm text-zinc-500">{emptyMessage ?? 'No events recorded.'}</div>;
+        return <div className="text-sm text-zinc-400">{emptyMessage ?? 'No events recorded.'}</div>;
     }
 
     return (
@@ -36,14 +36,14 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({ events, emptyMessage,
                 const action = normalizeAction(event.action);
                 const date = event.date ?? event.timestamp ?? '';
                 return (
-                    <div key={`${action}-${date}-${index}`} className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+                    <div key={`${action}-${date}-${index}`} className="panel-soft rounded-xl p-4">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <span className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${getActionStyles(action)}`}>
                                 {action}
                             </span>
-                            <span className="text-xs font-mono text-zinc-400">{formatDateTime(date)}</span>
+                            <span className="text-xs font-mono text-zinc-300">{formatDateTime(date)}</span>
                         </div>
-                        <div className="mt-2 text-sm text-zinc-200">
+                        <div className="mt-2 text-sm text-zinc-100">
                             {(event.packages && event.packages.length > 0) ? (
                                 <span className="font-mono">{event.packages.join(', ')}</span>
                             ) : (
@@ -51,7 +51,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({ events, emptyMessage,
                             )}
                         </div>
                         {event.command && (
-                            <div className="mt-2 text-[11px] text-zinc-400 font-mono break-all">
+                            <div className="mt-2 text-xs text-zinc-300 font-mono break-all">
                                 {event.command}
                             </div>
                         )}

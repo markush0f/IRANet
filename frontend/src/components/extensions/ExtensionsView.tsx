@@ -96,7 +96,7 @@ const ExtensionsView: React.FC<ExtensionsViewProps> = ({ onExtensionsUpdated }) 
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Extensions</h2>
-                    <p className="text-[10px] text-zinc-500 mt-2 max-w-2xl">
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-2 max-w-2xl">
                         Manage available extensions. Download packages and enable them when ready.
                     </p>
                     {error && (
@@ -153,7 +153,7 @@ const ExtensionsView: React.FC<ExtensionsViewProps> = ({ onExtensionsUpdated }) 
                         <div className="flex items-start justify-between gap-3">
                             <div>
                                 <h3 className="text-base font-semibold text-zinc-100">{item.id}</h3>
-                                <p className="text-[10px] text-zinc-500 mt-1">Extension package ready to download.</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed mt-1">Extension package ready to download.</p>
                             </div>
                             <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${item.enabled
                                 ? 'border-emerald-500/40 text-emerald-300 bg-emerald-500/10'
@@ -163,13 +163,13 @@ const ExtensionsView: React.FC<ExtensionsViewProps> = ({ onExtensionsUpdated }) 
                                 {item.enabled ? 'Enabled' : 'Disabled'}
                             </span>
                         </div>
-                        <div className="mt-4 flex flex-wrap gap-2 text-[10px] text-zinc-500">
+                        <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-400 leading-relaxed">
                             <span className="rounded-full border border-zinc-800 px-2 py-1">
                                 Created {formatDate(item.created_at)}
                             </span>
                         </div>
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[10px] text-zinc-500">ID: {item.id}</span>
+                            <span className="text-xs text-zinc-400 leading-relaxed">ID: {item.id}</span>
                             {item.enabled ? (
                                 <button
                                     type="button"
@@ -195,7 +195,7 @@ const ExtensionsView: React.FC<ExtensionsViewProps> = ({ onExtensionsUpdated }) 
             </div>
 
             {!loading && filteredExtensions.length === 0 && (
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-[10px] text-zinc-500">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6 text-xs text-zinc-400 leading-relaxed">
                     No extensions match your search right now.
                 </div>
             )}

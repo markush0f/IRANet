@@ -84,79 +84,92 @@ const ChartCanvas: React.FC<ChartCanvasProps> = ({
         );
     }
 
+    const chartElement = (() => {
+        if (selectedChartType === 'area') {
+            return (
+                <AreaChart {...commonProps}>
+                    <defs>
+                        <linearGradient id={`gradient-${metric}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={fillColor} stopOpacity={0.8} />
+                            <stop offset="95%" stopColor={fillColor} stopOpacity={0.1} />
+                        </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis {...commonXAxisProps} />
+                    <YAxis {...commonYAxisProps} />
+                    <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
+                    <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke={strokeColor}
+                        strokeWidth={3}
+                        fill={`url(#gradient-${metric})`}
+                        animationDuration={300}
+                    />
+                </AreaChart>
+            );
+        }
+
+        if (selectedChartType === 'line') {
+            return (
+                <LineChart {...commonProps}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis {...commonXAxisProps} />
+                    <YAxis {...commonYAxisProps} />
+                    <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
+                    <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke={strokeColor}
+                        strokeWidth={3}
+                        dot={{ fill: strokeColor, r: 2 }}
+                        activeDot={{ r: 5 }}
+                        animationDuration={300}
+                    />
+                </LineChart>
+            );
+        }
+
+        if (selectedChartType === 'bar') {
+            return (
+                <BarChart {...commonProps}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis {...commonXAxisProps} />
+                    <YAxis {...commonYAxisProps} />
+                    <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
+                    <Bar dataKey="value" fill={fillColor} radius={[4, 4, 0, 0]} animationDuration={300} />
+                </BarChart>
+            );
+        }
+
+        return (
+            <ComposedChart {...commonProps}>
+                <defs>
+                    <linearGradient id={`gradient-composed-${metric}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={fillColor} stopOpacity={0.3} />
+                        <stop offset="95%" stopColor={fillColor} stopOpacity={0.05} />
+                    </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis {...commonXAxisProps} />
+                <YAxis {...commonYAxisProps} />
+                <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
+                <Area type="monotone" dataKey="value" fill={`url(#gradient-composed-${metric})`} stroke="none" />
+                <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={strokeColor}
+                    strokeWidth={3}
+                    dot={false}
+                />
+            </ComposedChart>
+        );
+    })();
+
     return (
         <div className="h-[320px] sm:h-[380px] pt-12 sm:pt-14 pb-8 sm:pb-10">
             <ResponsiveContainer width="100%" height="100%">
-                {selectedChartType === 'area' && (
-                    <AreaChart {...commonProps}>
-                        <defs>
-                            <linearGradient id={`gradient-${metric}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={fillColor} stopOpacity={0.8} />
-                                <stop offset="95%" stopColor={fillColor} stopOpacity={0.1} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                        <XAxis {...commonXAxisProps} />
-                        <YAxis {...commonYAxisProps} />
-                        <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
-                        <Area
-                            type="monotone"
-                            dataKey="value"
-                            stroke={strokeColor}
-                            strokeWidth={3}
-                            fill={`url(#gradient-${metric})`}
-                            animationDuration={300}
-                        />
-                    </AreaChart>
-                )}
-                {selectedChartType === 'line' && (
-                    <LineChart {...commonProps}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                        <XAxis {...commonXAxisProps} />
-                        <YAxis {...commonYAxisProps} />
-                        <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
-                        <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke={strokeColor}
-                            strokeWidth={3}
-                            dot={{ fill: strokeColor, r: 2 }}
-                            activeDot={{ r: 5 }}
-                            animationDuration={300}
-                        />
-                    </LineChart>
-                )}
-                {selectedChartType === 'bar' && (
-                    <BarChart {...commonProps}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                        <XAxis {...commonXAxisProps} />
-                        <YAxis {...commonYAxisProps} />
-                        <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
-                        <Bar dataKey="value" fill={fillColor} radius={[4, 4, 0, 0]} animationDuration={300} />
-                    </BarChart>
-                )}
-                {selectedChartType === 'composed' && (
-                    <ComposedChart {...commonProps}>
-                        <defs>
-                            <linearGradient id={`gradient-composed-${metric}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={fillColor} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={fillColor} stopOpacity={0.05} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                        <XAxis {...commonXAxisProps} />
-                        <YAxis {...commonYAxisProps} />
-                        <Tooltip content={<CustomTooltip formatter={valueFormatter} />} />
-                        <Area type="monotone" dataKey="value" fill={`url(#gradient-composed-${metric})`} stroke="none" />
-                        <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke={strokeColor}
-                            strokeWidth={3}
-                            dot={false}
-                        />
-                    </ComposedChart>
-                )}
+                {chartElement}
             </ResponsiveContainer>
         </div>
     );

@@ -37,7 +37,7 @@ const ApplicationsLogsView: React.FC = () => {
             <div>
                 <p className="text-xs uppercase tracking-wide text-zinc-500">Logs</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Applications with logs</h2>
-                <p className="text-[10px] text-zinc-500 mt-2 max-w-2xl">
+                <p className="text-xs text-zinc-400 leading-relaxed mt-2 max-w-2xl">
                     List of applications that have configured log paths.
                 </p>
             </div>

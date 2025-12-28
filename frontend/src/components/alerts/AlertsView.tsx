@@ -125,14 +125,14 @@ const AlertsView: React.FC = () => {
                         <div className="flex items-center justify-center h-full p-12">
                             <div className="text-center">
                                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                                <p className="text-[10px] text-zinc-500">Loading alerts...</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed">Loading alerts...</p>
                             </div>
                         </div>
                     ) : filteredAlerts.length === 0 ? (
                         <div className="flex items-center justify-center h-full p-12">
                             <div className="text-center">
                                 <div className="text-4xl mb-3">📭</div>
-                                <p className="text-[10px] text-zinc-500">No alerts match the current filter</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed">No alerts match the current filter</p>
                             </div>
                         </div>
                     ) : (
@@ -148,14 +148,14 @@ const AlertsView: React.FC = () => {
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${levelStyle.bg}`}>
                                                 {alert.level}
                                             </span>
-                                            <span className="text-[10px] text-zinc-500 font-mono whitespace-nowrap">
+                                            <span className="text-xs text-zinc-400 leading-relaxed font-mono whitespace-nowrap">
                                                 {formatMoment(alert)}
                                             </span>
                                         </div>
                                         <p className="text-sm text-zinc-200 mb-2 break-words">
                                             {alert.message}
                                         </p>
-                                        <div className="flex items-center gap-2 text-[10px] text-zinc-500">
+                                        <div className="flex items-center gap-2 text-xs text-zinc-400 leading-relaxed">
                                             <span className="font-mono">{alert.host ?? alert.source ?? 'N/A'}</span>
                                         </div>
                                     </div>

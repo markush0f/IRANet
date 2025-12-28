@@ -355,7 +355,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent transition-all duration-200 group relative
                                     ${groupActive
                                         ? 'bg-indigo-600/10 text-indigo-400 border-indigo-500/30 shadow-[0_0_0_1px_rgba(99,102,241,0.2)]'
-                                        : 'text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-100'
+                                        : 'text-zinc-300 hover:bg-zinc-900/70 hover:text-zinc-100'
                                     }
                                     ${isCollapsed ? 'justify-center' : ''}
                                 `}
@@ -364,7 +364,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r ${groupActive && !isCollapsed ? 'bg-indigo-400' : 'bg-transparent'
                                         }`}
                                 />
-                                <div className={`${groupActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-200'}`}>
+                                <div className={`${groupActive ? 'text-indigo-400' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
                                     {item.icon}
                                 </div>
 
@@ -430,7 +430,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                             ${activeView === 'docker'
                                                 ? 'bg-indigo-600/10 text-indigo-400'
-                                                : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
+                                                : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                                             }
                                         `}
                                     >
@@ -444,7 +444,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                             ${activeView === 'system-services'
                                                 ? 'bg-indigo-600/10 text-indigo-400'
-                                                : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
+                                                : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                                             }
                                         `}
                                     >
@@ -458,7 +458,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                         className={`w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                             ${activeView === 'system-databases'
                                                 ? 'bg-indigo-600/10 text-indigo-400'
-                                                : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
+                                                : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                                             }
                                         `}
                                     >
@@ -480,7 +480,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                                 ${activeView === child.id
                                                     ? 'bg-indigo-600/10 text-indigo-400'
-                                                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
+                                                    : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                                                 }
                                             `}
                                         >
@@ -504,7 +504,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                                 ${activeView === child.id
                                                     ? 'bg-indigo-600/10 text-indigo-400'
-                                                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
+                                                    : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                                                 }
                                             `}
                                         >
@@ -528,7 +528,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                             className={`relative w-[calc(100%-2rem)] flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
                                                 ${activeView === child.id
                                                     ? 'bg-indigo-600/10 text-indigo-400'
-                                                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-200'
+                                                    : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                                                 }
                                             `}
                                         >

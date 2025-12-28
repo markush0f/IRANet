@@ -52,7 +52,7 @@ const ChatbotView: React.FC = () => {
                     onDeleteChat={handleDeleteChat}
                 />
 
-                <section className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-lg min-h-[600px] h-full">
+                <section className="panel accent-border flex flex-col rounded-2xl shadow-lg min-h-[600px] h-full">
                     <div className="shrink-0 border-b border-zinc-800 px-5 py-4">
                         <ChatHeader
                             title={activeChatLabel}

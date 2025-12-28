@@ -35,6 +35,10 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
                             <div className="flex h-full items-center justify-center text-xs text-zinc-500">
                                 Loading chart…
                             </div>
+                        ) : totalError ? (
+                            <div className="flex h-full items-center justify-center text-xs text-amber-300">
+                                {totalError}
+                            </div>
                         ) : totalInfo ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>

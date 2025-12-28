@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSystemDiskView } from '../../hooks/useSystemDiskView';
 import DiskHeader from './DiskHeader';
 import DiskSummary from './DiskSummary';

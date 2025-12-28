@@ -97,7 +97,7 @@ const DockerView: React.FC = () => {
                 {!loading && (
                     <div className="flex flex-col items-start lg:items-end gap-2">
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-zinc-500">Filter:</span>
+                            <span className="text-xs text-zinc-400 leading-relaxed">Filter:</span>
                             <div className="inline-flex rounded-full bg-zinc-900 p-1 border border-zinc-800">
                                 <button
                                     onClick={() => setStatusFilter('running')}
@@ -131,7 +131,7 @@ const DockerView: React.FC = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="text-[10px] text-zinc-500 font-mono text-right">
+                        <div className="text-xs text-zinc-400 leading-relaxed font-mono text-right">
                             Total: <span className="text-zinc-200 font-semibold">{containers.length}</span> ·
                             Running: <span className="text-emerald-400 font-semibold ml-1">{runningContainers.length}</span>
                         </div>
@@ -163,7 +163,7 @@ const DockerView: React.FC = () => {
                     <span>Loading Docker containers...</span>
                 </div>
             ) : filteredContainers.length === 0 ? (
-                <div className="text-[10px] text-zinc-500">
+                <div className="text-xs text-zinc-400 leading-relaxed">
                     No containers match the current filter.
                 </div>
             ) : (
@@ -182,7 +182,7 @@ const DockerView: React.FC = () => {
                                     <h3 className="text-base font-bold text-zinc-100 truncate">
                                         {container.name.toUpperCase()}
                                     </h3>
-                                    <p className="text-[10px] text-zinc-500 font-mono truncate mt-1">
+                                    <p className="text-xs text-zinc-400 leading-relaxed font-mono truncate mt-1">
                                         {container.id}
                                     </p>
                                 </div>

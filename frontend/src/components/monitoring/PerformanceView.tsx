@@ -46,7 +46,7 @@ const PerformanceView: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold text-zinc-200">CPU Usage</h3>
-                                <p className="text-[10px] text-zinc-500 font-mono">Core 0-15</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed font-mono">Core 0-15</p>
                             </div>
                         </div>
                         <span className="text-2xl font-mono font-bold text-zinc-100">{Math.round(dataPoints[dataPoints.length - 1])}%</span>
@@ -94,7 +94,7 @@ const PerformanceView: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold text-zinc-200">Memory</h3>
-                                <p className="text-[10px] text-zinc-500 font-mono">32GB Total</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed font-mono">32GB Total</p>
                             </div>
                         </div>
                         <span className="text-2xl font-mono font-bold text-zinc-100">{Math.round(memoryPoints[memoryPoints.length - 1])}%</span>
@@ -138,7 +138,7 @@ const PerformanceView: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold text-zinc-200">Network I/O</h3>
-                                <p className="text-[10px] text-zinc-500 font-mono">TX / RX (KB/s)</p>
+                                <p className="text-xs text-zinc-400 leading-relaxed font-mono">TX / RX (KB/s)</p>
                             </div>
 
                         </div>

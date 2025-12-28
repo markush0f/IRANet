@@ -39,7 +39,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     onDeleteChat,
 }) => {
     return (
-        <aside className="flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-lg">
+        <aside className="panel-soft accent-border flex flex-col rounded-2xl shadow-lg">
             <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
                 <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Chats

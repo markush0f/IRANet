@@ -17,7 +17,6 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
     const {
         samples,
         error,
-        mode,
         loading,
         liveLoading,
         lastLoadedAt,

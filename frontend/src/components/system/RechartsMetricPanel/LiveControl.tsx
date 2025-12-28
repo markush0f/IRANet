@@ -17,7 +17,7 @@ const LiveControl: React.FC<LiveControlProps> = ({
     liveLoading,
     isLiveState,
 }) => (
-    <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-5 space-y-3">
+    <div className="panel-soft rounded-2xl p-4 sm:p-5 space-y-3">
         <div className="flex items-center justify-between">
             <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">En vivo</p>

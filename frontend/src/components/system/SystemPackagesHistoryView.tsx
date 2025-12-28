@@ -174,12 +174,12 @@ const SystemPackagesHistoryView: React.FC = () => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm space-y-6">
+        <div className="w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm flex flex-col gap-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                     <p className="text-xs uppercase tracking-wide text-zinc-500">System</p>
                     <h2 className="text-2xl sm:text-3xl font-bold text-zinc-100 tracking-tight">Packages</h2>
-                    <p className="text-[10px] text-zinc-500 mt-2 max-w-2xl"> 
+                    <p className="text-xs text-zinc-400 leading-relaxed mt-2 max-w-2xl"> 
                         Review installed packages and package with a focus on traceability.
                     </p>
                 </div>
@@ -208,15 +208,15 @@ const SystemPackagesHistoryView: React.FC = () => {
             </div>
 
             {activeTab === 'installed' && (
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-                    <div className="space-y-4">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:[grid-template-rows:minmax(0,1fr)] lg:items-start flex-1 min-h-0 overflow-hidden">
+                    <div className="space-y-4 flex flex-col min-h-0 overflow-hidden">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <PackageSearchInput value={query} onChange={handleQueryChange} />
                             <PackageSortHeader sortBy={sortBy} sortDir={sortDir} onToggle={toggleSort} />
                         </div>
 
                         {!isSearching && (
-                            <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-500">
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 leading-relaxed">
                                 <span>{pageLabel}</span>
                                 <div className="relative">
                                     <select
@@ -239,11 +239,11 @@ const SystemPackagesHistoryView: React.FC = () => {
                                         </svg>
                                     </span>
                                 </div>
-                                <span className="text-[10px] text-zinc-500">Pagination enabled</span>
+                                <span className="text-xs text-zinc-400 leading-relaxed">Pagination enabled</span>
                             </div>
                         )}
                         {isSearching && (
-                            <div className="text-[10px] text-zinc-500">
+                            <div className="text-xs text-zinc-400 leading-relaxed">
                                 Search active: pagination disabled.
                             </div>
                         )}
@@ -254,10 +254,11 @@ const SystemPackagesHistoryView: React.FC = () => {
                             loading={packagesLoading}
                             error={packagesError}
                             onSelect={setSelectedPackage}
+                            className="flex-1 min-h-0"
                         />
 
                         {!isSearching && (
-                            <div className="flex flex-wrap items-center justify-between gap-3 text-[10px] text-zinc-500">
+                            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-400 leading-relaxed">
                                 <span>Page {page} of {totalPages}</span>
                                 <div className="flex flex-wrap gap-2">
                                     <button
@@ -297,18 +298,20 @@ const SystemPackagesHistoryView: React.FC = () => {
                         )}
                     </div>
 
-                    <PackageDetailPanel
-                        selectedPackage={selectedPackage}
-                        installedAt={installedAt}
-                        history={detailHistory}
-                        loading={detailLoading}
-                        error={detailError}
-                    />
+                    <div className="min-h-0">
+                        <PackageDetailPanel
+                            selectedPackage={selectedPackage}
+                            installedAt={installedAt}
+                            history={detailHistory}
+                            loading={detailLoading}
+                            error={detailError}
+                        />
+                    </div>
                 </div>
             )}
 
             {activeTab === 'history' && (
-                <div className="space-y-4">
+                <div className="space-y-4 flex-1 min-h-0 flex flex-col">
                     <HistoryFilters
                         action={historyAction}
                         sortDir={historySortDir}
@@ -320,7 +323,7 @@ const SystemPackagesHistoryView: React.FC = () => {
                         onDateToChange={setDateTo}
                     />
 
-                    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-5 shadow-lg">
+                    <div className="panel accent-border rounded-2xl p-4 sm:p-5 shadow-lg flex-1 min-h-0 overflow-hidden">
                         {historyLoading ? (
                             <div className="flex items-center justify-center gap-3 text-sm text-zinc-300 py-10">
                                 <div className="w-6 h-6 border-2 border-zinc-700 border-t-indigo-400 rounded-full animate-spin" />
@@ -329,11 +332,13 @@ const SystemPackagesHistoryView: React.FC = () => {
                         ) : historyError ? (
                             <div className="text-sm text-amber-400">{historyError}</div>
                         ) : historyItems.length === 0 ? (
-                            <div className="text-[10px] text-zinc-500">
+                            <div className="text-xs text-zinc-400 leading-relaxed">
                                 No events for the selected filters.
                             </div>
                         ) : (
-                            <HistoryTimeline events={historyItems} emptyMessage="No events for the selected filters." />
+                            <div className="h-full overflow-y-auto pr-1 scrollbar-strong">
+                                <HistoryTimeline events={historyItems} emptyMessage="No events for the selected filters." />
+                            </div>
                         )}
                     </div>
                 </div>
