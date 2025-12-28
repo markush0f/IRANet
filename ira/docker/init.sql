@@ -86,4 +86,20 @@ CREATE TABLE
 INSERT INTO
     extensions (id, enabled)
 VALUES
-    ('ai_chat', False)
+    ('ai_chat', False);
+
+CREATE TABLE
+    IF NOT EXISTS application_metrics (
+        id BIGSERIAL PRIMARY KEY,
+        application_id UUID NOT NULL,
+        ts TIMESTAMPTZ NOT NULL,
+        cpu_percent DOUBLE PRECISION,
+        memory_mb DOUBLE PRECISION,
+        memory_percent DOUBLE PRECISION,
+        status TEXT NOT NULL,
+        CONSTRAINT fk_application_metrics_application FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE
+    );
+
+CREATE INDEX IF NOT EXISTS idx_application_metrics_app_ts ON application_metrics (application_id, ts);
+
+CREATE INDEX IF NOT EXISTS idx_application_metrics_ts ON application_metrics (ts);
