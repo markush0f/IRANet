@@ -33,10 +33,10 @@ async def application_metrics_scheduler() -> None:
                 )
 
                 applications = (await session.exec(statement)).all()
-                logger.info(
-                    "application metrics scheduler: %d enabled applications found",
-                    len(applications),
-                )
+                # logger.info(
+                #     "application metrics scheduler: %d enabled applications found",
+                #     len(applications),
+                # )
                 metrics_batch: list[ApplicationMetricsCreateDTO] = []
 
                 for application in applications:
@@ -72,12 +72,6 @@ async def application_metrics_scheduler() -> None:
                     metrics=metrics_batch,
                     ts=now,
                 )
-                if metrics_batch:
-                    logger.info(
-                        "inserted %d application metrics at %s",
-                        len(metrics_batch),
-                        now.isoformat(),
-                    )
 
         except Exception:
             logger.exception("application metrics scheduler tick failed")

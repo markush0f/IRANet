@@ -105,6 +105,9 @@ ADD COLUMN uptime_seconds BIGINT,
 ADD COLUMN threads INTEGER,
 ADD COLUMN restart_count INTEGER;
 
+ALTER TABLE application_metrics
+ALTER COLUMN ts TYPE TIMESTAMPTZ USING ts AT TIME ZONE 'UTC';
+
 CREATE INDEX IF NOT EXISTS idx_application_metrics_app_ts ON application_metrics (application_id, ts);
 
 CREATE INDEX IF NOT EXISTS idx_application_metrics_ts ON application_metrics (ts);

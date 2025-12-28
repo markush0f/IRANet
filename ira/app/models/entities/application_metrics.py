@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel
 
 
@@ -17,9 +18,11 @@ class ApplicationMetrics(SQLModel, table=True):
     )
 
     ts: datetime = Field(
-        default_factory=datetime.utcnow,
-        nullable=False,
-        index=True,
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            index=True,
+        )
     )
 
     cpu_percent: Optional[float] = None

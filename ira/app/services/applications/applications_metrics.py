@@ -80,6 +80,45 @@ class ApplicationMetricsService:
 
         await self._repo.insert_many(db_metrics)
 
+    async def list_metrics(
+        self,
+        *,
+        application_id: UUID,
+        ts_from: datetime,
+        ts_to: datetime,
+    ) -> list[dict]:
+        rows = await self._repo.list_by_application(
+            application_id=application_id,
+            start=ts_from,
+            end=ts_to,
+        )
+        return [self._serialize_metric(row) for row in rows]
+
+    async def list_latest_metrics(
+        self,
+        *,
+        application_id: UUID,
+        limit: int = 1,
+    ) -> list[dict]:
+        rows = await self._repo.list_latest_by_application(
+            application_id=application_id,
+            limit=limit,
+        )
+        return [self._serialize_metric(row) for row in rows]
+
+    def _serialize_metric(self, metric: ApplicationMetrics) -> dict:
+        return {
+            "application_id": metric.application_id,
+            "ts": metric.ts,
+            "cpu_percent": metric.cpu_percent,
+            "memory_mb": metric.memory_mb,
+            "memory_percent": metric.memory_percent,
+            "uptime_seconds": metric.uptime_seconds,
+            "threads": metric.threads,
+            "restart_count": metric.restart_count,
+            "status": metric.status,
+        }
+
     async def _get_enabled_application(
         self,
         application_id: UUID,
