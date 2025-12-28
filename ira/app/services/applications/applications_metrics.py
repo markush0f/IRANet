@@ -1,5 +1,3 @@
-# app/services/application_metrics/service.py
-
 from datetime import datetime
 from typing import Iterable
 from uuid import UUID
@@ -15,7 +13,7 @@ from app.repositories.application_metrics_repository import (
 
 
 class ApplicationMetricsService:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session) -> None:
         self._session = session
         self._repo = ApplicationMetricssRepository(session)
 

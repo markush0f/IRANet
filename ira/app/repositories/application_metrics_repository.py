@@ -1,5 +1,3 @@
-# app/repositories/application_metrics_repository.py
-
 from datetime import datetime
 from typing import Iterable, Sequence
 from uuid import UUID
@@ -7,7 +5,6 @@ from uuid import UUID
 from sqlmodel import Session, select
 
 from app.models.entities.application_metrics import ApplicationMetrics
-
 
 
 class ApplicationMetricssRepository:
