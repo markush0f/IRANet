@@ -1,13 +1,24 @@
 import React from 'react';
 import type { SystemApplication } from '../../types';
 import SystemApplicationIcon from './SystemApplicationIcon';
+import type { RemoteApplicationRecord } from '../../services/api';
 
 interface SystemApplicationCardProps {
     application: SystemApplication;
     onOpen: (application: SystemApplication) => void;
+    registeredApp?: RemoteApplicationRecord | null;
+    registeredLoading?: boolean;
+    onDeleteRegistered?: (applicationId: string) => void;
 }
 
-const SystemApplicationCard: React.FC<SystemApplicationCardProps> = ({ application, onOpen }) => {
+const SystemApplicationCard: React.FC<SystemApplicationCardProps> = ({
+    application,
+    onOpen,
+    registeredApp,
+    registeredLoading,
+    onDeleteRegistered,
+}) => {
+    const isRegistered = Boolean(registeredApp?.id);
     return (
         <article className="flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-950/60 to-zinc-950/20 p-4 backdrop-blur-xl hover:border-zinc-700 transition-colors">
             <div className="flex gap-3">
@@ -35,14 +46,35 @@ const SystemApplicationCard: React.FC<SystemApplicationCardProps> = ({ applicati
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => onOpen(application)}
-                    className="shrink-0 rounded-full border border-zinc-800 bg-zinc-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
-                    title="Open detection modal"
-                >
-                    Add application
-                </button>
+                <div className="shrink-0 flex items-center gap-2">
+                    {isRegistered ? (
+                        <>
+                            <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-200">
+                                Downloaded
+                            </span>
+                            {onDeleteRegistered && (
+                                <button
+                                    type="button"
+                                    onClick={() => onDeleteRegistered(registeredApp!.id)}
+                                    className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-200 transition hover:border-rose-500/70"
+                                    title="Delete application"
+                                >
+                                    Delete
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => onOpen(application)}
+                            className="rounded-full border border-zinc-800 bg-zinc-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-50"
+                            title="Open detection modal"
+                            disabled={registeredLoading}
+                        >
+                            Add application
+                        </button>
+                    )}
+                </div>
             </div>
         </article>
     );

@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import type { ApplicationDiscoveryDetails, SystemApplication } from '../types';
-import { createApplication, getApplicationDiscoveryDetails } from '../services/api';
+import {
+    createApplication,
+    deleteApplication,
+    getApplicationDiscoveryDetails,
+    getApplicationsList,
+    type RemoteApplicationRecord,
+} from '../services/api';
 
 export const useSystemApplicationsSection = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +22,56 @@ export const useSystemApplicationsSection = () => {
     const [savingApplication, setSavingApplication] = useState(false);
     const [technicalDetailsOpen, setTechnicalDetailsOpen] = useState(false);
     const [fetchKey, setFetchKey] = useState(0);
+
+    const [registeredApplications, setRegisteredApplications] = useState<RemoteApplicationRecord[]>([]);
+    const [registeredLoading, setRegisteredLoading] = useState(false);
+
+    const refreshRegisteredApplications = useCallback(async (signal?: AbortSignal) => {
+        setRegisteredLoading(true);
+        try {
+            const apps = await getApplicationsList(signal);
+            setRegisteredApplications(apps);
+        } catch (err) {
+            const aborted =
+                err instanceof DOMException && err.name === 'AbortError' ||
+                (typeof err === 'object' && err !== null && 'name' in err && (err as any).name === 'AbortError');
+            if (!aborted) {
+                console.error('Error loading registered applications', err);
+            }
+        } finally {
+            setRegisteredLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        refreshRegisteredApplications(controller.signal);
+        return () => controller.abort();
+    }, [refreshRegisteredApplications]);
+
+    const registeredApplicationsByCwd = useMemo(() => {
+        const map = new Map<string, RemoteApplicationRecord>();
+        for (const app of registeredApplications) {
+            const cwd = (app.workdir ?? '').trim();
+            if (!cwd) continue;
+            map.set(cwd, app);
+        }
+        return map;
+    }, [registeredApplications]);
+
+    const deleteRegisteredApplication = useCallback(async (applicationId: string) => {
+        const confirmed = window.confirm('Delete this application? This cannot be undone.');
+        if (!confirmed) return;
+
+        try {
+            await deleteApplication(applicationId);
+            toast.success('Application deleted', { duration: 3000 });
+            await refreshRegisteredApplications();
+        } catch (err) {
+            console.error('Error deleting registered application', err);
+            toast.error('The application could not be deleted.', { duration: 4000 });
+        }
+    }, [refreshRegisteredApplications]);
 
     const prepareDiscoveryRequest = useCallback(() => {
         setLoadingDetails(true);
@@ -71,6 +127,7 @@ export const useSystemApplicationsSection = () => {
                 log_base_paths: cleanedBasePaths,
             });
             toast.success('Application created successfully', { duration: 4000 });
+            await refreshRegisteredApplications();
             closeModal();
         } catch (error) {
             console.error('Error creating system application', error);
@@ -206,5 +263,10 @@ export const useSystemApplicationsSection = () => {
         detectedBasePaths,
         modalDisplayName,
         modalDisplayCwd,
+
+        registeredApplicationsByCwd,
+        registeredLoading,
+        refreshRegisteredApplications,
+        deleteRegisteredApplication,
     };
 };

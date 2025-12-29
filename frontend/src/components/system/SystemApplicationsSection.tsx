@@ -38,6 +38,9 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         detectedBasePaths,
         modalDisplayName,
         modalDisplayCwd,
+        registeredApplicationsByCwd,
+        registeredLoading,
+        deleteRegisteredApplication,
     } = useSystemApplicationsSection();
 
     return (
@@ -56,6 +59,9 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             key={application.cwd}
                             application={application}
                             onOpen={openModal}
+                            registeredApp={registeredApplicationsByCwd.get(application.cwd.trim()) ?? null}
+                            registeredLoading={registeredLoading}
+                            onDeleteRegistered={deleteRegisteredApplication}
                         />
                     ))}
                 </div>

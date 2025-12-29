@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Database, Server, Satellite, Shield, Activity } from 'lucide-react';
-import { createApplication, getApplicationsList, type RemoteApplicationRecord } from '../../services/api';
+import { createApplication, deleteApplication, getApplicationsList, type RemoteApplicationRecord } from '../../services/api';
 import { toast } from 'react-hot-toast';
 
 type Application = {
@@ -20,40 +20,6 @@ type ApplicationLog = {
     createdAt: string;
 };
 
-const initialApplications: Application[] = [
-    {
-        id: 'app-1',
-        name: 'Control panel',
-        description: 'Main system operator interface',
-        createdAt: new Date('2024-07-01T08:30:00Z').toISOString(),
-        iconKey: 'activity',
-    },
-    {
-        id: 'app-2',
-        name: 'Metrics processor',
-        description: 'Service that normalizes metric series',
-        createdAt: new Date('2024-07-12T16:40:00Z').toISOString(),
-        iconKey: 'server',
-    },
-];
-
-const initialLogs: ApplicationLog[] = [
-    {
-        id: 'log-1',
-        applicationId: 'app-1',
-        logPath: '/var/log/panel/control.log',
-        enabled: true,
-        createdAt: new Date('2024-07-01T09:01:00Z').toISOString(),
-    },
-    {
-        id: 'log-2',
-        applicationId: 'app-2',
-        logPath: '/var/log/metrics/processor.log',
-        enabled: true,
-        createdAt: new Date('2024-07-12T17:05:00Z').toISOString(),
-    },
-];
-
 type Mode = 'list' | 'create';
 
 const ICON_OPTIONS = [
@@ -68,8 +34,8 @@ const iconFromKey = (key: string) => ICON_OPTIONS.find(opt => opt.key === key)?.
 
 const ApplicationsView: React.FC = () => {
     const [mode, setMode] = useState<Mode>('list');
-    const [applications, setApplications] = useState<Application[]>(initialApplications);
-    const [logs, setLogs] = useState<ApplicationLog[]>(initialLogs);
+    const [applications, setApplications] = useState<Application[]>([]);
+    const [logs, setLogs] = useState<ApplicationLog[]>([]);
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -79,6 +45,7 @@ const ApplicationsView: React.FC = () => {
         iconKey: 'activity',
     });
     const [saving, setSaving] = useState(false);
+    const [deletingAppId, setDeletingAppId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loadingList, setLoadingList] = useState(false);
     const [listError, setListError] = useState<string | null>(null);
@@ -96,9 +63,8 @@ const ApplicationsView: React.FC = () => {
                 }
 
                 setApplications(records.map((record: RemoteApplicationRecord) => {
-                    const recordId = record.id ?? record.identifier ?? crypto.randomUUID?.() ?? `app-${Date.now()}`;
                     return {
-                        id: recordId,
+                        id: record.id,
                         name: record.name || record.identifier || record.workdir || 'Application',
                         description: record.workdir,
                         createdAt: record.created_at ?? record.last_seen_at ?? new Date().toISOString(),
@@ -153,9 +119,9 @@ const ApplicationsView: React.FC = () => {
         setSaving(true);
         setError(null);
 
-        const id = crypto.randomUUID?.() ?? `app-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const optimisticId = crypto.randomUUID?.() ?? `app-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const newApplication: Application = {
-            id,
+            id: optimisticId,
             name: form.name.trim(),
             description: form.description.trim() || undefined,
             createdAt: new Date().toISOString(),
@@ -165,21 +131,25 @@ const ApplicationsView: React.FC = () => {
 
         const newLog: ApplicationLog = {
             id: crypto.randomUUID?.() ?? `log-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            applicationId: id,
+            applicationId: optimisticId,
             logPath: logPaths[0] ?? '/var/log/app.log',
             enabled: form.enabled,
             createdAt: new Date().toISOString(),
         };
 
         try {
-            await createApplication({
+            const created = await createApplication({
                 cwd: form.cwd.trim(),
                 name: form.name.trim(),
                 log_base_paths: logPaths,
             });
 
-            setApplications(prev => [newApplication, ...prev]);
-            setLogs(prev => [newLog, ...prev]);
+            const createdId = created && typeof created === 'object' && 'id' in (created as any) && typeof (created as any).id === 'string'
+                ? ((created as any).id as string)
+                : optimisticId;
+
+            setApplications(prev => [{ ...newApplication, id: createdId }, ...prev.filter(app => app.id !== optimisticId)]);
+            setLogs(prev => [{ ...newLog, applicationId: createdId }, ...prev.filter(log => log.applicationId !== optimisticId)]);
             toast.custom(
                 () => (
                     <div className="rounded-2xl border border-emerald-500/30 bg-zinc-950 px-5 py-4 text-base text-emerald-200 shadow-xl">
@@ -202,6 +172,25 @@ const ApplicationsView: React.FC = () => {
             setError('The application could not be created. Please check the backend.');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleDelete = async (app: Application) => {
+        const confirmed = window.confirm(`Delete application "${app.name}"? This cannot be undone.`);
+        if (!confirmed) return;
+
+        setDeletingAppId(app.id);
+        setListError(null);
+        try {
+            await deleteApplication(app.id);
+            setApplications(prev => prev.filter(entry => entry.id !== app.id));
+            setLogs(prev => prev.filter(entry => entry.applicationId !== app.id));
+            toast.success('Application deleted', { duration: 3000 });
+        } catch (err) {
+            console.error('Error deleting application', err);
+            toast.error('The application could not be deleted.', { duration: 4000 });
+        } finally {
+            setDeletingAppId(null);
         }
     };
 
@@ -253,18 +242,19 @@ const ApplicationsView: React.FC = () => {
                                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Description</th>
                                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Created</th>
                                         <th className="px-4 py-3 text-left font-semibold text-zinc-500 uppercase tracking-wide">Logs</th>
+                                        <th className="px-4 py-3 text-right font-semibold text-zinc-500 uppercase tracking-wide">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-800">
                                     {loadingList ? (
                                         <tr>
-                                            <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
+                                            <td className="px-4 py-6 text-center text-zinc-500" colSpan={5}>
                                                 Loading applications...
                                             </td>
                                         </tr>
                                     ) : applications.length === 0 ? (
                                         <tr>
-                                            <td className="px-4 py-6 text-center text-zinc-500" colSpan={4}>
+                                            <td className="px-4 py-6 text-center text-zinc-500" colSpan={5}>
                                                 No applications registered.
                                             </td>
                                         </tr>
@@ -299,6 +289,16 @@ const ApplicationsView: React.FC = () => {
                                                 ) : (
                                                     <span className="text-xs text-zinc-400 leading-relaxed">No logs</span>
                                                 ))}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(app)}
+                                                    disabled={deletingAppId === app.id}
+                                                    className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-200 hover:border-rose-500/70 disabled:opacity-50"
+                                                >
+                                                    {deletingAppId === app.id ? 'Deleting…' : 'Delete'}
+                                                </button>
                                             </td>
                                         </tr>
                                     )})}

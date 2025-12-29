@@ -505,6 +505,15 @@ export const createApplication = async (
     return response.json();
 };
 
+export const deleteApplication = async (applicationId: string, signal?: AbortSignal): Promise<void> => {
+    const url = `${getBaseUrl()}/applications/${encodeURIComponent(applicationId)}`;
+    const response = await fetch(url, { method: 'DELETE', signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while deleting application`);
+    }
+};
+
 export interface RemoteApplicationRecord {
     id: string;
     kind: string;
