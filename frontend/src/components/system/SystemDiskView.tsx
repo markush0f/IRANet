@@ -24,7 +24,7 @@ const SystemDiskView = () => {
 
     if (loading || !diskInfo) {
         return (
-            <div className="min-h-full bg-black px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm">
+            <div className="w-full h-full min-h-0 overflow-hidden bg-black px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm">
                 <div className="w-full">
                     <div className="bg-zinc-900 rounded-lg p-4 sm:p-6 border border-zinc-800">
                         <div className="animate-pulse space-y-3">
@@ -38,8 +38,7 @@ const SystemDiskView = () => {
     }
 
     return (
-        <div className="min-h-full bg-zinc-950 px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm">
-            <div className="w-full space-y-6">
+        <div className="w-full h-full min-h-0 overflow-hidden bg-zinc-950 px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm flex flex-col gap-6">
                 <DiskSummary
                     summary={summary}
                     totalInfo={totalInfo}
@@ -48,50 +47,51 @@ const SystemDiskView = () => {
                     formatBytes={formatBytes}
                 />
 
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl flex flex-col min-h-0 flex-1">
                     <DiskHeader
                         title="Disk Status"
                         subtitle="System storage monitoring"
                         error={error}
                     />
 
-                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-zinc-950 border-y border-zinc-800 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                        <div className="col-span-3">Partition</div>
-                        <div className="col-span-2">Device</div>
-                        <div className="col-span-1">FS</div>
-                        <div className="col-span-2">Used</div>
-                        <div className="col-span-2">Available</div>
-                        <div className="col-span-2">Usage</div>
-                    </div>
+                    <div className="flex-1 min-h-0 overflow-y-auto scrollbar-strong">
+                        <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-zinc-950 border-y border-zinc-800 text-xs font-semibold text-zinc-400 uppercase tracking-wider sticky top-0 z-10">
+                            <div className="col-span-3">Partition</div>
+                            <div className="col-span-2">Device</div>
+                            <div className="col-span-1">FS</div>
+                            <div className="col-span-2">Used</div>
+                            <div className="col-span-2">Available</div>
+                            <div className="col-span-2">Usage</div>
+                        </div>
 
-                    <div className="divide-y divide-zinc-800">
-                        {partitions.map((partition, index) => {
-                            const isExpanded = expandedMountpoints.has(partition.mountpoint);
-                            const processes = processesByMountpoint[partition.mountpoint] ?? null;
-                            const isLoading = Boolean(processesLoading[partition.mountpoint]);
-                            const processesErr = processesError[partition.mountpoint] ?? null;
+                        <div className="divide-y divide-zinc-800">
+                            {partitions.map((partition, index) => {
+                                const isExpanded = expandedMountpoints.has(partition.mountpoint);
+                                const processes = processesByMountpoint[partition.mountpoint] ?? null;
+                                const isLoading = Boolean(processesLoading[partition.mountpoint]);
+                                const processesErr = processesError[partition.mountpoint] ?? null;
 
-                            return (
-                                <DiskPartitionRow
-                                    key={`${partition.mountpoint}-${index}`}
-                                    partition={partition}
-                                    isExpanded={isExpanded}
-                                    processes={processes}
-                                    isLoading={isLoading}
-                                    error={processesErr}
-                                    formatBytes={formatBytes}
-                                    onToggle={() => {
-                                        toggleMountpoint(partition.mountpoint);
-                                        if (!isExpanded && !processes && !isLoading) {
-                                            void loadProcesses(partition.mountpoint);
-                                        }
-                                    }}
-                                />
-                            );
-                        })}
+                                return (
+                                    <DiskPartitionRow
+                                        key={`${partition.mountpoint}-${index}`}
+                                        partition={partition}
+                                        isExpanded={isExpanded}
+                                        processes={processes}
+                                        isLoading={isLoading}
+                                        error={processesErr}
+                                        formatBytes={formatBytes}
+                                        onToggle={() => {
+                                            toggleMountpoint(partition.mountpoint);
+                                            if (!isExpanded && !processes && !isLoading) {
+                                                void loadProcesses(partition.mountpoint);
+                                            }
+                                        }}
+                                    />
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
-            </div>
         </div>
 
     );

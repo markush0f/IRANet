@@ -39,33 +39,35 @@ const DiskProcessList: React.FC<DiskProcessListProps> = ({
     }
 
     return (
-        <div className="space-y-3">
-            {processes.processes.map(process => (
-                <div key={process.pid} className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 sm:px-4 py-3">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className="text-sm font-semibold text-zinc-100">{process.name}</div>
-                            <span className="rounded-full border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
-                                PID {process.pid}
-                            </span>
-                            <span className="text-xs text-zinc-500">User: {process.user}</span>
+        <div className="max-h-[420px] lg:max-h-[520px] overflow-y-auto pr-1 scrollbar-strong">
+            <div className="space-y-3">
+                {processes.processes.map(process => (
+                    <div key={process.pid} className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 sm:px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="text-sm font-semibold text-zinc-100">{process.name}</div>
+                                <span className="rounded-full border border-zinc-700 bg-zinc-950 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
+                                    PID {process.pid}
+                                </span>
+                                <span className="text-xs text-zinc-500">User: {process.user}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-zinc-400">
+                                <span>Read: <span className="text-zinc-200">{formatBytes(process.read_bytes)}</span></span>
+                                <span>Write: <span className="text-zinc-200">{formatBytes(process.write_bytes)}</span></span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-zinc-400">
-                            <span>Read: <span className="text-zinc-200">{formatBytes(process.read_bytes)}</span></span>
-                            <span>Write: <span className="text-zinc-200">{formatBytes(process.write_bytes)}</span></span>
-                        </div>
+                        {process.paths.length > 0 && (
+                            <div className="mt-3 grid gap-2 text-xs text-zinc-400">
+                                {process.paths.map(path => (
+                                    <div key={`${process.pid}-${path}`} className="font-mono text-[11px] text-zinc-300 break-all">
+                                        {path}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    {process.paths.length > 0 && (
-                        <div className="mt-3 grid gap-2 text-xs text-zinc-400">
-                            {process.paths.map(path => (
-                                <div key={`${process.pid}-${path}`} className="font-mono text-[11px] text-zinc-300 break-all">
-                                    {path}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };
