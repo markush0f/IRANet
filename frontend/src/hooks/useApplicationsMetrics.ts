@@ -3,16 +3,27 @@ import {
     getApplicationDiscoveryDetails,
     getApplicationLogFileHistory,
     getApplicationLogFiles,
+    getApplicationMetricSeries,
+    getApplicationRuntime,
     getApplicationsList,
     getProcessesSnapshot,
     rescanApplicationLogs,
     type RemoteApplicationRecord,
 } from '../services/api';
-import type { ApplicationDiscoveryDetails, LogEvent, ProcessInfo, ProcessesSnapshot } from '../types';
+import type {
+    ApplicationDiscoveryDetails,
+    ApplicationMetricSeriesResponse,
+    ApplicationRuntimeResponse,
+    LogEvent,
+    ProcessInfo,
+    ProcessesSnapshot,
+} from '../types';
 
-const DEFAULT_SNAPSHOT_LIMIT = 250;
+const DEFAULT_SNAPSHOT_LIMIT = 100;
 const DEFAULT_POLL_INTERVAL_MS = 5000;
 const MAX_LIVE_SAMPLES = 240;
+const DEFAULT_METRICS_LOOKBACK_MS = 5 * 60 * 1000;
+const DEFAULT_METRICS_STEP_SECONDS = 5;
 
 type AppTab = 'overview' | 'live' | 'logs' | 'diagnostics';
 
@@ -63,22 +74,6 @@ const sortApplications = (items: RemoteApplicationRecord[]) => {
     });
 };
 
-const isDownloadedApplication = (app: RemoteApplicationRecord) => {
-    const kind = (app.kind ?? '').toLowerCase();
-    if (kind) {
-        if (['downloaded', 'managed', 'registered', 'custom', 'app', 'application'].includes(kind)) {
-            return true;
-        }
-        if (['system', 'discovered', 'process', 'auto', 'builtin', 'service'].includes(kind)) {
-            return false;
-        }
-    }
-
-    // Fallback heuristic: downloaded/registered apps usually come from DB and have created_at.
-    // Discovered/system entries tend to have only last_seen_at.
-    return Boolean(app.created_at);
-};
-
 export const useApplicationsMetrics = () => {
     const [applications, setApplications] = useState<RemoteApplicationRecord[]>([]);
     const [appsLoading, setAppsLoading] = useState(true);
@@ -96,6 +91,16 @@ export const useApplicationsMetrics = () => {
     const [pollIntervalMs, setPollIntervalMs] = useState(DEFAULT_POLL_INTERVAL_MS);
     const [liveSamples, setLiveSamples] = useState<ProcessLiveSample[]>([]);
     const intervalRef = useRef<number | null>(null);
+
+    const [appRuntime, setAppRuntime] = useState<ApplicationRuntimeResponse | null>(null);
+    const [appRuntimeLoading, setAppRuntimeLoading] = useState(false);
+    const [appRuntimeError, setAppRuntimeError] = useState<string | null>(null);
+    const [appRuntimeById, setAppRuntimeById] = useState<Record<string, ApplicationRuntimeResponse>>({});
+    const [appRuntimeLoadingById, setAppRuntimeLoadingById] = useState<Record<string, boolean>>({});
+
+    const [appMetricsSeries, setAppMetricsSeries] = useState<ApplicationMetricSeriesResponse | null>(null);
+    const [appMetricsSeriesLoading, setAppMetricsSeriesLoading] = useState(false);
+    const [appMetricsSeriesError, setAppMetricsSeriesError] = useState<string | null>(null);
 
     const [discovery, setDiscovery] = useState<ApplicationDiscoveryDetails | null>(null);
     const [discoveryLoading, setDiscoveryLoading] = useState(false);
@@ -138,23 +143,87 @@ export const useApplicationsMetrics = () => {
     }, [applications, selectedAppId]);
 
     const selectedProcess = useMemo<ProcessInfo | null>(() => {
-        const pid = selectedApp?.pid;
+        const pid = appRuntime?.pid ?? selectedApp?.pid;
         if (!pid || !snapshot?.processes?.length) return null;
         return snapshot.processes.find(proc => proc.pid === pid) ?? null;
-    }, [selectedApp?.pid, snapshot?.processes]);
+    }, [appRuntime?.pid, selectedApp?.pid, snapshot?.processes]);
+
+    const refreshAppRuntime = useCallback(async (signal?: AbortSignal) => {
+        const applicationId = selectedApp?.id;
+        if (!applicationId) return;
+        setAppRuntimeLoading(true);
+        setAppRuntimeError(null);
+        setAppRuntimeLoadingById(prev => ({ ...prev, [applicationId]: true }));
+        try {
+            const data = await getApplicationRuntime(applicationId, signal);
+            setAppRuntime(data);
+            setAppRuntimeById(prev => ({ ...prev, [applicationId]: data }));
+        } catch (err) {
+            const aborted =
+                err instanceof DOMException && err.name === 'AbortError' ||
+                (typeof err === 'object' && err !== null && 'name' in err && (err as any).name === 'AbortError');
+            if (aborted) return;
+            console.error('Error loading application runtime', err);
+            setAppRuntimeError('Application runtime could not be loaded.');
+        } finally {
+            setAppRuntimeLoading(false);
+            setAppRuntimeLoadingById(prev => {
+                if (!prev[applicationId]) return prev;
+                const next = { ...prev };
+                delete next[applicationId];
+                return next;
+            });
+        }
+    }, [selectedApp?.id]);
+
+    const appRuntimeByIdRef = useRef(appRuntimeById);
+    const appRuntimeLoadingByIdRef = useRef(appRuntimeLoadingById);
+
+    useEffect(() => {
+        appRuntimeByIdRef.current = appRuntimeById;
+    }, [appRuntimeById]);
+
+    useEffect(() => {
+        appRuntimeLoadingByIdRef.current = appRuntimeLoadingById;
+    }, [appRuntimeLoadingById]);
+
+    const prefetchAppRuntime = useCallback(async (applicationId: string, signal?: AbortSignal) => {
+        const alreadyLoaded = Boolean(appRuntimeByIdRef.current[applicationId]);
+        const alreadyLoading = Boolean(appRuntimeLoadingByIdRef.current[applicationId]);
+        if (alreadyLoaded || alreadyLoading) return;
+
+        setAppRuntimeLoadingById(prev => ({ ...prev, [applicationId]: true }));
+        try {
+            const data = await getApplicationRuntime(applicationId, signal);
+            setAppRuntimeById(prev => ({ ...prev, [applicationId]: data }));
+        } catch (err) {
+            const aborted =
+                err instanceof DOMException && err.name === 'AbortError' ||
+                (typeof err === 'object' && err !== null && 'name' in err && (err as any).name === 'AbortError');
+            if (!aborted) {
+                console.error('Error prefetching application runtime', err);
+            }
+        } finally {
+            setAppRuntimeLoadingById(prev => {
+                if (!prev[applicationId]) return prev;
+                const next = { ...prev };
+                delete next[applicationId];
+                return next;
+            });
+        }
+    }, []);
 
     const refreshApplications = useCallback(async (signal?: AbortSignal) => {
         setAppsLoading(true);
         setAppsError(null);
         try {
             const apps = await getApplicationsList(signal);
-            const downloadedApps = apps.filter(isDownloadedApplication);
-            setApplications(downloadedApps);
+            setApplications(apps);
             setSelectedAppId(current => {
-                if (current && downloadedApps.some(app => app.id === current)) {
+                if (current && apps.some(app => app.id === current)) {
                     return current;
                 }
-                return downloadedApps[0]?.id ?? null;
+                return apps[0]?.id ?? null;
             });
         } catch (err) {
             const aborted =
@@ -173,6 +242,27 @@ export const useApplicationsMetrics = () => {
         refreshApplications(controller.signal);
         return () => controller.abort();
     }, [refreshApplications]);
+
+    useEffect(() => {
+        if (!selectedApp?.id) {
+            setAppRuntime(null);
+            setAppRuntimeError(null);
+            return;
+        }
+        const controller = new AbortController();
+        refreshAppRuntime(controller.signal);
+        return () => controller.abort();
+    }, [refreshAppRuntime, selectedApp?.id]);
+
+    useEffect(() => {
+        if (!filteredApplications.length) return;
+        const controller = new AbortController();
+        const ids = filteredApplications.slice(0, 12).map(app => app.id);
+        ids.forEach(id => {
+            prefetchAppRuntime(id, controller.signal);
+        });
+        return () => controller.abort();
+    }, [filteredApplications, prefetchAppRuntime]);
 
     const refreshSnapshot = useCallback(
         async (signal?: AbortSignal) => {
@@ -219,7 +309,7 @@ export const useApplicationsMetrics = () => {
             const data = await getProcessesSnapshot(snapshotLimit, controller.signal);
             setSnapshot(data);
 
-            const pid = selectedApp.pid;
+            const pid = appRuntime?.pid ?? selectedApp.pid;
             const process = pid ? data.processes.find(proc => proc.pid === pid) : null;
             appendLiveSample({
                 ts: Date.now(),
@@ -231,7 +321,35 @@ export const useApplicationsMetrics = () => {
         } finally {
             controller.abort();
         }
-    }, [appendLiveSample, selectedApp?.id, selectedApp?.pid, snapshotLimit]);
+    }, [appendLiveSample, appRuntime?.pid, selectedApp?.id, selectedApp?.pid, snapshotLimit]);
+
+    const refreshAppMetricsSeries = useCallback(async (signal?: AbortSignal) => {
+        const applicationId = selectedApp?.id;
+        if (!applicationId) return;
+        setAppMetricsSeriesLoading(true);
+        setAppMetricsSeriesError(null);
+        try {
+            const tsTo = new Date().toISOString();
+            const tsFrom = new Date(Date.now() - DEFAULT_METRICS_LOOKBACK_MS).toISOString();
+            const data = await getApplicationMetricSeries({
+                applicationId,
+                tsFrom,
+                tsTo,
+                stepSeconds: DEFAULT_METRICS_STEP_SECONDS,
+                signal,
+            });
+            setAppMetricsSeries(data);
+        } catch (err) {
+            const aborted =
+                err instanceof DOMException && err.name === 'AbortError' ||
+                (typeof err === 'object' && err !== null && 'name' in err && (err as any).name === 'AbortError');
+            if (aborted) return;
+            console.error('Error loading application metrics series', err);
+            setAppMetricsSeriesError('Application metrics series could not be loaded.');
+        } finally {
+            setAppMetricsSeriesLoading(false);
+        }
+    }, [selectedApp?.id]);
 
     useEffect(() => {
         stopLive();
@@ -248,6 +366,17 @@ export const useApplicationsMetrics = () => {
             pollTick();
         }
     }, [pollTick, selectedApp?.id]);
+
+    useEffect(() => {
+        if (!selectedApp?.id) {
+            setAppMetricsSeries(null);
+            setAppMetricsSeriesError(null);
+            return;
+        }
+        const controller = new AbortController();
+        refreshAppMetricsSeries(controller.signal);
+        return () => controller.abort();
+    }, [refreshAppMetricsSeries, selectedApp?.id]);
 
     useEffect(() => stopLive, [stopLive]);
 
@@ -405,14 +534,14 @@ export const useApplicationsMetrics = () => {
     const selectedAppMeta = useMemo(() => {
         if (!selectedApp) return null;
         const createdAt = safeDate(selectedApp.created_at);
-        const lastSeenAt = safeDate(selectedApp.last_seen_at);
+        const lastSeenAt = safeDate(appRuntime?.last_seen_at ?? selectedApp.last_seen_at);
         return {
             label: normalizeAppLabel(selectedApp),
-            status: normalizeStatus(selectedApp.status),
+            status: normalizeStatus(appRuntime?.status ?? selectedApp.status),
             createdAt,
             lastSeenAt,
         };
-    }, [selectedApp]);
+    }, [appRuntime?.last_seen_at, appRuntime?.status, selectedApp]);
 
     return {
         applications: filteredApplications,
@@ -442,6 +571,18 @@ export const useApplicationsMetrics = () => {
         pollIntervalMs,
         setPollIntervalMs,
         liveSamples,
+
+        appRuntime,
+        appRuntimeLoading,
+        appRuntimeError,
+        refreshAppRuntime,
+        appRuntimeById,
+        appRuntimeLoadingById,
+
+        appMetricsSeries,
+        appMetricsSeriesLoading,
+        appMetricsSeriesError,
+        refreshAppMetricsSeries,
 
         discovery,
         discoveryLoading,

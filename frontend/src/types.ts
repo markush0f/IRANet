@@ -170,6 +170,31 @@ export interface MetricSample {
     value: number;
 }
 
+export type ApplicationMetricSeriesPoint = [string, number | string | null];
+
+export interface ApplicationMetricSeriesRange {
+    from: string;
+    to: string;
+    step_seconds: number;
+    max_range_seconds: number;
+}
+
+export interface ApplicationMetricSeriesResponse {
+    application_id: string;
+    range: ApplicationMetricSeriesRange;
+    series: Record<string, ApplicationMetricSeriesPoint[]>;
+}
+
+export interface ApplicationRuntimeResponse {
+    application_id: string;
+    is_running: boolean;
+    pid: number | null;
+    port: number | null;
+    last_seen_at: string | null;
+    memory_res_mb: number | null;
+    status: string | null;
+}
+
 export interface DockerContainer {
     id: string;
     name: string;

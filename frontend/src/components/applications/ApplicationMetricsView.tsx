@@ -7,6 +7,7 @@ import {
     CartesianGrid,
     ResponsiveContainer,
     Tooltip,
+    type TooltipProps,
     XAxis,
     YAxis,
 } from 'recharts';
@@ -17,6 +18,11 @@ const formatMiB = (kb?: number | null) => {
     return `${(kb / 1024).toFixed(1)} MiB`;
 };
 
+const formatMB = (mb?: number | null, fractionDigits = 1) => {
+    if (mb === null || mb === undefined) return '—';
+    return `${mb.toFixed(fractionDigits)} MB`;
+};
+
 const formatTimestamp = (value?: Date | null) => {
     if (!value) return '—';
     return value.toLocaleString('es-ES', {
@@ -25,6 +31,40 @@ const formatTimestamp = (value?: Date | null) => {
         hour: '2-digit',
         minute: '2-digit',
     });
+};
+
+const formatNumber = (value: number | null | undefined, fractionDigits = 1) => {
+    if (value === null || value === undefined || Number.isNaN(value)) return '—';
+    return value.toFixed(fractionDigits);
+};
+
+const formatIso = (value?: string | null) => {
+    if (!value) return '—';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '—';
+    return parsed.toLocaleString('es-ES');
+};
+
+const lastDefinedNumber = (points: Array<[string, number | string | null]> | undefined) => {
+    if (!points?.length) return null;
+    for (let i = points.length - 1; i >= 0; i -= 1) {
+        const value = points[i]?.[1];
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return value;
+        }
+    }
+    return null;
+};
+
+const lastDefinedString = (points: Array<[string, number | string | null]> | undefined) => {
+    if (!points?.length) return null;
+    for (let i = points.length - 1; i >= 0; i -= 1) {
+        const value = points[i]?.[1];
+        if (typeof value === 'string' && value.trim()) {
+            return value.trim();
+        }
+    }
+    return null;
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -41,6 +81,19 @@ const StatusBadge = ({ status }: { status: string }) => {
             {status}
         </span>
     );
+};
+
+const normalizeStatus = (value?: string | null, isRunning?: boolean | null) => {
+    const raw = (value ?? '').trim().toLowerCase();
+    if (!raw) {
+        if (isRunning === true) return 'running';
+        if (isRunning === false) return 'stopped';
+        return 'unknown';
+    }
+    if (raw.includes('running') || raw.includes('online') || raw === 'ok') return 'running';
+    if (raw.includes('stopped') || raw.includes('offline') || raw.includes('dead')) return 'stopped';
+    if (raw.includes('error') || raw.includes('failed')) return 'error';
+    return raw;
 };
 
 const KpiCard = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
@@ -63,6 +116,20 @@ const ChartPlaceholder = ({ label }: { label: string }) => (
         {label}
     </div>
 );
+
+type BackendMetricKey =
+    | 'cpu_percent'
+    | 'memory_mb'
+    | 'memory_percent'
+    | 'uptime_seconds'
+    | 'threads'
+    | 'restart_count';
+
+type BackendChartPoint = {
+    tsMs: number;
+    time: string;
+    fullTimestamp: string;
+} & Record<BackendMetricKey, number | null>;
 
 const ApplicationMetricsView: React.FC = () => {
     const {
@@ -91,6 +158,18 @@ const ApplicationMetricsView: React.FC = () => {
         pollIntervalMs,
         setPollIntervalMs,
         liveSamples,
+
+        appRuntime,
+        appRuntimeLoading,
+        appRuntimeError,
+        refreshAppRuntime,
+        appRuntimeById,
+        appRuntimeLoadingById,
+
+        appMetricsSeries,
+        appMetricsSeriesLoading,
+        appMetricsSeriesError,
+        refreshAppMetricsSeries,
 
         discovery,
         discoveryLoading,
@@ -129,6 +208,54 @@ const ApplicationMetricsView: React.FC = () => {
 
     const hasMemoryData = useMemo(() => memorySeries.some(point => point.rssMiB !== null || point.virtMiB !== null), [memorySeries]);
 
+    const backendChartData = useMemo(() => {
+        const series = appMetricsSeries?.series;
+        if (!series) return [];
+        const bucket = new Map<number, BackendChartPoint>();
+
+        const pushPoints = (key: BackendMetricKey) => {
+            const points = series[key] ?? [];
+            for (const [ts, raw] of points) {
+                const parsed = new Date(ts);
+                const tsMs = parsed.getTime();
+                if (Number.isNaN(tsMs)) continue;
+                const entry: BackendChartPoint = bucket.get(tsMs) ?? {
+                    tsMs,
+                    time: parsed.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    fullTimestamp: parsed.toLocaleString('es-ES'),
+                    cpu_percent: null,
+                    memory_mb: null,
+                    memory_percent: null,
+                    uptime_seconds: null,
+                    threads: null,
+                    restart_count: null,
+                };
+                entry[key] = typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
+                bucket.set(tsMs, entry);
+            }
+        };
+
+        pushPoints('cpu_percent');
+        pushPoints('memory_mb');
+        pushPoints('memory_percent');
+        pushPoints('uptime_seconds');
+        pushPoints('threads');
+        pushPoints('restart_count');
+
+        return Array.from(bucket.values()).sort((a, b) => a.tsMs - b.tsMs);
+    }, [appMetricsSeries]);
+
+    const backendHasCpu = useMemo(() => backendChartData.some(point => point.cpu_percent !== null), [backendChartData]);
+    const backendHasMemory = useMemo(() => backendChartData.some(point => point.memory_mb !== null), [backendChartData]);
+
+    const latestBackendStatus = useMemo(() => lastDefinedString(appMetricsSeries?.series?.status), [appMetricsSeries]);
+    const latestCpuPercent = useMemo(() => lastDefinedNumber(appMetricsSeries?.series?.cpu_percent), [appMetricsSeries]);
+    const latestMemoryMb = useMemo(() => lastDefinedNumber(appMetricsSeries?.series?.memory_mb), [appMetricsSeries]);
+    const latestMemoryPercent = useMemo(() => lastDefinedNumber(appMetricsSeries?.series?.memory_percent), [appMetricsSeries]);
+    const latestThreads = useMemo(() => lastDefinedNumber(appMetricsSeries?.series?.threads), [appMetricsSeries]);
+    const latestUptimeSeconds = useMemo(() => lastDefinedNumber(appMetricsSeries?.series?.uptime_seconds), [appMetricsSeries]);
+    const latestRestartCount = useMemo(() => lastDefinedNumber(appMetricsSeries?.series?.restart_count), [appMetricsSeries]);
+
     const logVolumeSeries = useMemo(() => {
         if (!logTimeline.length) return [];
         return logTimeline.map(point => ({
@@ -143,10 +270,17 @@ const ApplicationMetricsView: React.FC = () => {
     const hasLogsTimeline = logVolumeSeries.length > 1;
 
     const processHint = useMemo(() => {
-        if (!selectedApp?.pid) return 'No PID reported by backend.';
-        if (!selectedProcess) return `PID ${selectedApp.pid} not found in snapshot. Increase snapshot limit.`;
+        const pid = appRuntime?.pid ?? selectedApp?.pid;
+        if (!pid) return 'No PID reported by backend.';
+        if (!selectedProcess) return `PID ${pid} not found in snapshot. Increase snapshot limit.`;
         return null;
-    }, [selectedApp?.pid, selectedProcess]);
+    }, [appRuntime?.pid, selectedApp?.pid, selectedProcess]);
+
+    const headerPid = appRuntime?.pid ?? selectedApp?.pid ?? null;
+    const headerPort = appRuntime?.port ?? (typeof selectedApp?.port === 'number' ? selectedApp.port : null);
+    const headerMemoryLabel = appRuntime?.memory_res_mb !== null && appRuntime?.memory_res_mb !== undefined
+        ? formatMB(appRuntime.memory_res_mb, 1)
+        : formatMiB(selectedProcess?.memory?.res_kb);
 
     const tabs = [
         { id: 'overview' as const, label: 'Overview' },
@@ -177,7 +311,7 @@ const ApplicationMetricsView: React.FC = () => {
             <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] flex-1 min-h-0 lg:overflow-hidden">
                 <aside className="panel accent-border rounded-2xl p-3 sm:p-4 flex flex-col min-h-0">
                     <div className="flex items-center justify-between gap-3">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Installed</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Applications</div>
                         <div className="text-[11px] text-zinc-500">{applications.length}</div>
                     </div>
 
@@ -201,18 +335,25 @@ const ApplicationMetricsView: React.FC = () => {
                             <div className="text-xs text-zinc-500 px-2 py-3">Loading applications…</div>
                         ) : applications.length === 0 ? (
                             <div className="text-xs text-zinc-500 px-2 py-3">
-                                No downloaded applications found.
+                                No applications found.
                             </div>
                         ) : (
                             applications.map(app => {
                                 const label = app.name || app.identifier || app.workdir || app.id;
                                 const isActive = selectedAppId === app.id;
-                                const status = (app.status || 'unknown').toLowerCase();
-                                const badgeTone = status.includes('running') || status.includes('online') || status === 'ok'
+                                const runtime = appRuntimeById[app.id];
+                                const displayStatus = (runtime?.status ?? app.status ?? (runtime?.is_running ? 'running' : 'unknown')) || 'unknown';
+                                const normalized = normalizeStatus(displayStatus, runtime?.is_running);
+                                const isLoadingRuntime = Boolean(appRuntimeLoadingById[app.id]);
+
+                                const badgeTone = normalized === 'running'
                                     ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/40'
-                                    : status.includes('error') || status.includes('failed')
+                                    : normalized === 'error'
                                         ? 'bg-rose-500/10 text-rose-300 border-rose-500/40'
                                         : 'bg-zinc-800/40 text-zinc-300 border-zinc-700';
+
+                                const chipPort = runtime?.port ?? (typeof app.port === 'number' ? app.port : null);
+                                const chipPid = runtime?.pid ?? (typeof app.pid === 'number' ? app.pid : null);
 
                                 return (
                                     <button
@@ -233,18 +374,18 @@ const ApplicationMetricsView: React.FC = () => {
                                                 </div>
                                             </div>
                                             <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${badgeTone}`}>
-                                                {app.status || 'unknown'}
+                                                {isLoadingRuntime && normalized === 'unknown' ? 'loading' : displayStatus}
                                             </span>
                                         </div>
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                            {typeof app.port === 'number' && (
+                                            {typeof chipPort === 'number' && (
                                                 <span className="rounded-full border border-zinc-800 bg-zinc-950/50 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
-                                                    Port {app.port}
+                                                    Port {chipPort}
                                                 </span>
                                             )}
-                                            {typeof app.pid === 'number' && (
+                                            {typeof chipPid === 'number' && (
                                                 <span className="rounded-full border border-zinc-800 bg-zinc-950/50 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
-                                                    PID {app.pid}
+                                                    PID {chipPid}
                                                 </span>
                                             )}
                                         </div>
@@ -286,15 +427,40 @@ const ApplicationMetricsView: React.FC = () => {
                                         >
                                             {snapshotLoading ? 'Refreshing…' : 'Refresh snapshot'}
                                         </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => refreshAppRuntime()}
+                                            className="rounded-full border border-zinc-800 bg-zinc-950/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 hover:border-zinc-700 disabled:text-zinc-600"
+                                            disabled={appRuntimeLoading}
+                                            title={appRuntimeError ?? undefined}
+                                        >
+                                            {appRuntimeLoading ? 'Refreshing…' : 'Refresh runtime'}
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                                    <KpiCard label="PID" value={selectedApp.pid ? String(selectedApp.pid) : '—'} hint={processHint ?? undefined} />
-                                    <KpiCard label="Port" value={typeof selectedApp.port === 'number' ? String(selectedApp.port) : '—'} />
-                                    <KpiCard label="Memory (RES)" value={formatMiB(selectedProcess?.memory?.res_kb)} hint={selectedProcess ? `VIRT ${formatMiB(selectedProcess.memory.virt_kb)}` : undefined} />
+                                    <KpiCard label="PID" value={headerPid ? String(headerPid) : '—'} hint={processHint ?? undefined} />
+                                    <KpiCard label="Port" value={headerPort ? String(headerPort) : '—'} />
+                                    <KpiCard
+                                        label="Memory (RES)"
+                                        value={headerMemoryLabel}
+                                        hint={
+                                            appRuntime?.memory_res_mb !== null && appRuntime?.memory_res_mb !== undefined
+                                                ? 'From /applications/:id/runtime'
+                                                : selectedProcess
+                                                    ? `VIRT ${formatMiB(selectedProcess.memory.virt_kb)}`
+                                                    : undefined
+                                        }
+                                    />
                                     <KpiCard label="Last seen" value={formatTimestamp(selectedAppMeta.lastSeenAt)} hint={selectedAppMeta.createdAt ? `Created ${formatTimestamp(selectedAppMeta.createdAt)}` : undefined} />
                                 </div>
+
+                                {appRuntimeError && (
+                                    <div className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                                        {appRuntimeError}
+                                    </div>
+                                )}
 
                                 {snapshotError && (
                                     <div className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
@@ -324,6 +490,173 @@ const ApplicationMetricsView: React.FC = () => {
                                 {activeTab === 'overview' && (
                                     <div className="space-y-3">
                                         <div className="panel-soft accent-border rounded-2xl p-3 sm:p-4">
+                                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                                <div>
+                                                    <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                                                        Backend metrics series
+                                                    </div>
+                                                    <div className="mt-1 text-xs text-zinc-500">
+                                                        {appMetricsSeries?.range
+                                                            ? `${formatIso(appMetricsSeries.range.from)} → ${formatIso(appMetricsSeries.range.to)} · step ${appMetricsSeries.range.step_seconds}s`
+                                                            : 'Loads from /applications/:id/metrics/series'}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => refreshAppMetricsSeries()}
+                                                    className="rounded-full border border-zinc-800 bg-zinc-950/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 hover:border-zinc-700 disabled:text-zinc-600"
+                                                    disabled={appMetricsSeriesLoading}
+                                                >
+                                                    {appMetricsSeriesLoading ? 'Loading…' : 'Refresh'}
+                                                </button>
+                                            </div>
+
+                                            {appMetricsSeriesError && (
+                                                <div className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                                                    {appMetricsSeriesError}
+                                                </div>
+                                            )}
+
+                                            {!appMetricsSeries ? (
+                                                <div className="mt-3 text-xs text-zinc-500">No metrics loaded yet.</div>
+                                            ) : (
+                                                <>
+                                                    <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                                                        <KpiCard label="Status" value={latestBackendStatus ?? '—'} hint="Series: status" />
+                                                        <KpiCard label="CPU" value={latestCpuPercent === null ? '—' : `${formatNumber(latestCpuPercent, 1)}%`} />
+                                                        <KpiCard label="Memory" value={latestMemoryMb === null ? '—' : `${formatNumber(latestMemoryMb, 0)} MB`} />
+                                                        <KpiCard label="Memory %" value={latestMemoryPercent === null ? '—' : `${formatNumber(latestMemoryPercent, 1)}%`} />
+                                                        <KpiCard label="Threads" value={latestThreads === null ? '—' : String(Math.round(latestThreads))} />
+                                                        <KpiCard label="Uptime" value={latestUptimeSeconds === null ? '—' : `${formatNumber(latestUptimeSeconds, 0)}s`} />
+                                                        <KpiCard label="Restarts" value={latestRestartCount === null ? '—' : String(Math.round(latestRestartCount))} />
+                                                        <KpiCard label="Samples" value={String(backendChartData.length)} hint="Combined numeric series" />
+                                                    </div>
+
+                                                    <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                                                        <div className="panel accent-border rounded-2xl p-3 sm:p-4">
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                                                                    CPU %
+                                                                </div>
+                                                                <div className="text-[11px] text-zinc-500">
+                                                                    {backendHasCpu ? 'series: cpu_percent' : 'no data'}
+                                                                </div>
+                                                            </div>
+                                                            {!backendHasCpu ? (
+                                                                <ChartPlaceholder label="No CPU samples." />
+                                                            ) : (
+                                                                <div className="h-[220px] pt-4">
+                                                                    <ResponsiveContainer width="100%" height="100%">
+                                                                        <AreaChart data={backendChartData} margin={{ top: 10, right: 18, bottom: 0, left: 0 }}>
+                                                                            <defs>
+                                                                                <linearGradient id="cpuGradient" x1="0" y1="0" x2="0" y2="1">
+                                                                                    <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.6} />
+                                                                                    <stop offset="95%" stopColor="#60a5fa" stopOpacity={0.05} />
+                                                                                </linearGradient>
+                                                                            </defs>
+                                                                            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                                                                            <XAxis dataKey="time" tick={{ fill: '#a1a1aa', fontSize: 12 }} tickLine={false} stroke="#3f3f46" />
+                                                                            <YAxis
+                                                                                tick={{ fill: '#e5e7eb', fontSize: 12, fontWeight: 600 }}
+                                                                                tickLine={false}
+                                                                                stroke="#3f3f46"
+                                                                                width={60}
+                                                                                domain={[0, 100]}
+                                                                                tickFormatter={(value: number) => `${value.toFixed(0)}%`}
+                                                                            />
+                                                                            <Tooltip
+                                                                                content={({ active, payload }: TooltipProps<number, string>) => {
+                                                                                    if (!active || !payload?.length) return null;
+                                                                                    const entry = payload[0]?.payload as BackendChartPoint | undefined;
+                                                                                    return (
+                                                                                        <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-3 shadow-lg">
+                                                                                            <div className="text-xs text-zinc-400">{entry?.fullTimestamp ?? '—'}</div>
+                                                                                            <div className="mt-1 text-sm text-zinc-100">
+                                                                                                CPU <span className="font-mono">{entry?.cpu_percent?.toFixed(1) ?? '—'}%</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    );
+                                                                                }}
+                                                                            />
+                                                                            <Area
+                                                                                type="monotone"
+                                                                                dataKey="cpu_percent"
+                                                                                stroke="#60a5fa"
+                                                                                fill="url(#cpuGradient)"
+                                                                                strokeWidth={2}
+                                                                                connectNulls={false}
+                                                                                animationDuration={250}
+                                                                            />
+                                                                        </AreaChart>
+                                                                    </ResponsiveContainer>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="panel accent-border rounded-2xl p-3 sm:p-4">
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                                                                    Memory (MB)
+                                                                </div>
+                                                                <div className="text-[11px] text-zinc-500">
+                                                                    {backendHasMemory ? 'series: memory_mb' : 'no data'}
+                                                                </div>
+                                                            </div>
+                                                            {!backendHasMemory ? (
+                                                                <ChartPlaceholder label="No memory samples." />
+                                                            ) : (
+                                                                <div className="h-[220px] pt-4">
+                                                                    <ResponsiveContainer width="100%" height="100%">
+                                                                        <AreaChart data={backendChartData} margin={{ top: 10, right: 18, bottom: 0, left: 0 }}>
+                                                                            <defs>
+                                                                                <linearGradient id="memGradient" x1="0" y1="0" x2="0" y2="1">
+                                                                                    <stop offset="5%" stopColor="#fb7185" stopOpacity={0.55} />
+                                                                                    <stop offset="95%" stopColor="#fb7185" stopOpacity={0.05} />
+                                                                                </linearGradient>
+                                                                            </defs>
+                                                                            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                                                                            <XAxis dataKey="time" tick={{ fill: '#a1a1aa', fontSize: 12 }} tickLine={false} stroke="#3f3f46" />
+                                                                            <YAxis
+                                                                                tick={{ fill: '#e5e7eb', fontSize: 12, fontWeight: 600 }}
+                                                                                tickLine={false}
+                                                                                stroke="#3f3f46"
+                                                                                width={70}
+                                                                                tickFormatter={(value: number) => `${value.toFixed(0)} MB`}
+                                                                            />
+                                                                            <Tooltip
+                                                                                content={({ active, payload }: TooltipProps<number, string>) => {
+                                                                                    if (!active || !payload?.length) return null;
+                                                                                    const entry = payload[0]?.payload as BackendChartPoint | undefined;
+                                                                                    return (
+                                                                                        <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-3 shadow-lg">
+                                                                                            <div className="text-xs text-zinc-400">{entry?.fullTimestamp ?? '—'}</div>
+                                                                                            <div className="mt-1 text-sm text-zinc-100">
+                                                                                                Memory <span className="font-mono">{entry?.memory_mb?.toFixed(0) ?? '—'} MB</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    );
+                                                                                }}
+                                                                            />
+                                                                            <Area
+                                                                                type="monotone"
+                                                                                dataKey="memory_mb"
+                                                                                stroke="#fb7185"
+                                                                                fill="url(#memGradient)"
+                                                                                strokeWidth={2}
+                                                                                connectNulls={false}
+                                                                                animationDuration={250}
+                                                                            />
+                                                                        </AreaChart>
+                                                                    </ResponsiveContainer>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        <div className="panel-soft accent-border rounded-2xl p-3 sm:p-4">
                                             <div className="flex items-center justify-between gap-3">
                                                 <div className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
                                                     Process snapshot
@@ -335,7 +668,7 @@ const ApplicationMetricsView: React.FC = () => {
                                                         onChange={event => setSnapshotLimit(Number(event.target.value))}
                                                         className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-2 py-1 text-xs text-zinc-200"
                                                     >
-                                                        {[50, 100, 250, 500, 1000].map(size => (
+                                                        {[50, 100].map(size => (
                                                             <option key={size} value={size}>
                                                                 {size}
                                                             </option>
@@ -489,7 +822,7 @@ const ApplicationMetricsView: React.FC = () => {
                                                         onChange={event => setSnapshotLimit(Number(event.target.value))}
                                                         className="rounded-full border border-zinc-800 bg-zinc-950/40 px-3 py-1.5 text-[11px] font-semibold text-zinc-200"
                                                     >
-                                                        {[50, 100, 250, 500, 1000].map(size => (
+                                                        {[50, 100].map(size => (
                                                             <option key={size} value={size}>
                                                                 snapshot {size}
                                                             </option>

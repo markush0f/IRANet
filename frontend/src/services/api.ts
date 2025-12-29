@@ -6,6 +6,8 @@ import type {
     UsersSummary,
     RemoteUser,
     MetricSample,
+    ApplicationMetricSeriesResponse,
+    ApplicationRuntimeResponse,
     SystemDiskResponse,
     DiskProcessesResponse,
     DiskTotalResponse,
@@ -75,7 +77,8 @@ export const getProcessesSnapshot = async (
     limit = 10,
     signal?: AbortSignal
 ): Promise<ProcessesSnapshot> => {
-    const url = `${getBaseUrl()}/processes/snapshot?limit=${encodeURIComponent(limit)}`;
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+    const url = `${getBaseUrl()}/processes/snapshot?limit=${encodeURIComponent(safeLimit)}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -381,6 +384,97 @@ export const getMetricSeries = async ({
     }
 
     return data as MetricSample[];
+};
+
+export interface ApplicationMetricSeriesRequest {
+    applicationId: string;
+    tsFrom?: string;
+    tsTo?: string;
+    stepSeconds?: number;
+    signal?: AbortSignal;
+}
+
+const normalizeApplicationMetricPoint = (entry: unknown): [string, number | string | null] | null => {
+    if (!Array.isArray(entry) || entry.length < 2) return null;
+    const ts = entry[0];
+    const value = entry[1];
+    if (typeof ts !== 'string') return null;
+    if (typeof value === 'number') return [ts, value];
+    if (typeof value === 'string') return [ts, value];
+    if (value === null) return [ts, null];
+    return null;
+};
+
+export const getApplicationMetricSeries = async ({
+    applicationId,
+    tsFrom,
+    tsTo,
+    stepSeconds,
+    signal,
+}: ApplicationMetricSeriesRequest): Promise<ApplicationMetricSeriesResponse> => {
+    const params = new URLSearchParams();
+    if (tsFrom) params.set('ts_from', tsFrom);
+    if (tsTo) params.set('ts_to', tsTo);
+    if (typeof stepSeconds === 'number' && Number.isFinite(stepSeconds)) {
+        params.set('step_seconds', String(stepSeconds));
+    }
+
+    const url = `${getBaseUrl()}/applications/${encodeURIComponent(applicationId)}/metrics/series?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while fetching application metrics series`);
+    }
+
+    const data = (await response.json()) as unknown;
+    if (!data || typeof data !== 'object') {
+        return {
+            application_id: applicationId,
+            range: { from: tsFrom ?? '', to: tsTo ?? '', step_seconds: stepSeconds ?? 0, max_range_seconds: 0 },
+            series: {},
+        };
+    }
+
+    const seriesRaw = (data as any).series;
+    const normalizedSeries: Record<string, [string, number | string | null][]> = {};
+    if (seriesRaw && typeof seriesRaw === 'object') {
+        for (const [key, value] of Object.entries(seriesRaw as Record<string, unknown>)) {
+            if (!Array.isArray(value)) continue;
+            normalizedSeries[key] = value
+                .map(normalizeApplicationMetricPoint)
+                .filter((point): point is [string, number | string | null] => Boolean(point));
+        }
+    }
+
+    const rangeRaw = (data as any).range;
+    const range = rangeRaw && typeof rangeRaw === 'object'
+        ? {
+            from: typeof (rangeRaw as any).from === 'string' ? (rangeRaw as any).from : (tsFrom ?? ''),
+            to: typeof (rangeRaw as any).to === 'string' ? (rangeRaw as any).to : (tsTo ?? ''),
+            step_seconds: Number((rangeRaw as any).step_seconds ?? stepSeconds ?? 0),
+            max_range_seconds: Number((rangeRaw as any).max_range_seconds ?? 0),
+        }
+        : { from: tsFrom ?? '', to: tsTo ?? '', step_seconds: stepSeconds ?? 0, max_range_seconds: 0 };
+
+    return {
+        application_id: typeof (data as any).application_id === 'string' ? (data as any).application_id : applicationId,
+        range,
+        series: normalizedSeries,
+    };
+};
+
+export const getApplicationRuntime = async (
+    applicationId: string,
+    signal?: AbortSignal
+): Promise<ApplicationRuntimeResponse> => {
+    const url = `${getBaseUrl()}/applications/${encodeURIComponent(applicationId)}/runtime`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while fetching application runtime`);
+    }
+
+    return response.json() as Promise<ApplicationRuntimeResponse>;
 };
 
 export interface CreateApplicationPayload {
