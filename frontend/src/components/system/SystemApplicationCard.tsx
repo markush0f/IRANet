@@ -8,7 +8,9 @@ interface SystemApplicationCardProps {
     onOpen: (application: SystemApplication) => void;
     registeredApp?: RemoteApplicationRecord | null;
     registeredLoading?: boolean;
+    registeredDeletingId?: string | null;
     onDeleteRegistered?: (applicationId: string) => void;
+    onEditRegistered?: (application: RemoteApplicationRecord) => void;
 }
 
 const SystemApplicationCard: React.FC<SystemApplicationCardProps> = ({
@@ -16,9 +18,12 @@ const SystemApplicationCard: React.FC<SystemApplicationCardProps> = ({
     onOpen,
     registeredApp,
     registeredLoading,
+    registeredDeletingId,
     onDeleteRegistered,
+    onEditRegistered,
 }) => {
     const isRegistered = Boolean(registeredApp?.id);
+    const isDeleting = Boolean(registeredApp?.id && registeredDeletingId === registeredApp.id);
     return (
         <article className="flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-950/60 to-zinc-950/20 p-4 backdrop-blur-xl hover:border-zinc-700 transition-colors">
             <div className="flex gap-3">
@@ -52,14 +57,26 @@ const SystemApplicationCard: React.FC<SystemApplicationCardProps> = ({
                             <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-200">
                                 Downloaded
                             </span>
+                            {onEditRegistered && (
+                                <button
+                                    type="button"
+                                    onClick={() => onEditRegistered(registeredApp!)}
+                                    className="rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-indigo-200 transition hover:border-indigo-500/70"
+                                    title="Edit application"
+                                    disabled={isDeleting}
+                                >
+                                    Edit
+                                </button>
+                            )}
                             {onDeleteRegistered && (
                                 <button
                                     type="button"
                                     onClick={() => onDeleteRegistered(registeredApp!.id)}
-                                    className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-200 transition hover:border-rose-500/70"
+                                    disabled={isDeleting}
+                                    className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-200 transition hover:border-rose-500/70 disabled:opacity-50"
                                     title="Delete application"
                                 >
-                                    Delete
+                                    {isDeleting ? 'Deleting…' : 'Delete'}
                                 </button>
                             )}
                         </>

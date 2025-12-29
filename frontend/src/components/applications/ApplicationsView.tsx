@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Database, Server, Satellite, Shield, Activity } from 'lucide-react';
-import { createApplication, deleteApplication, getApplicationsList, type RemoteApplicationRecord } from '../../services/api';
+import { createApplication, deleteApplication, getApplicationsList, updateApplication, type RemoteApplicationRecord } from '../../services/api';
 import { toast } from 'react-hot-toast';
+import ConfirmDeleteModal from '../common/ConfirmDeleteModal';
+import EditApplicationModal from '../common/EditApplicationModal';
 
 type Application = {
     id: string;
@@ -46,6 +48,9 @@ const ApplicationsView: React.FC = () => {
     });
     const [saving, setSaving] = useState(false);
     const [deletingAppId, setDeletingAppId] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<Application | null>(null);
+    const [editingTarget, setEditingTarget] = useState<Application | null>(null);
+    const [editingSaving, setEditingSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loadingList, setLoadingList] = useState(false);
     const [listError, setListError] = useState<string | null>(null);
@@ -175,17 +180,32 @@ const ApplicationsView: React.FC = () => {
         }
     };
 
-    const handleDelete = async (app: Application) => {
-        const confirmed = window.confirm(`Delete application "${app.name}"? This cannot be undone.`);
-        if (!confirmed) return;
+    const handleEditSave = async (name: string) => {
+        if (!editingTarget) return;
+        setEditingSaving(true);
+        try {
+            const updated = await updateApplication(editingTarget.id, { name });
+            setApplications(prev => prev.map(app => (app.id === editingTarget.id ? { ...app, name: updated.name } : app)));
+            toast.success('Application updated', { duration: 3000 });
+            setEditingTarget(null);
+        } catch (err) {
+            console.error('Error updating application', err);
+            toast.error('The application could not be updated.', { duration: 4000 });
+        } finally {
+            setEditingSaving(false);
+        }
+    };
 
-        setDeletingAppId(app.id);
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
+        setDeletingAppId(deleteTarget.id);
         setListError(null);
         try {
-            await deleteApplication(app.id);
-            setApplications(prev => prev.filter(entry => entry.id !== app.id));
-            setLogs(prev => prev.filter(entry => entry.applicationId !== app.id));
+            await deleteApplication(deleteTarget.id);
+            setApplications(prev => prev.filter(entry => entry.id !== deleteTarget.id));
+            setLogs(prev => prev.filter(entry => entry.applicationId !== deleteTarget.id));
             toast.success('Application deleted', { duration: 3000 });
+            setDeleteTarget(null);
         } catch (err) {
             console.error('Error deleting application', err);
             toast.error('The application could not be deleted.', { duration: 4000 });
@@ -291,14 +311,23 @@ const ApplicationsView: React.FC = () => {
                                                 ))}
                                             </td>
                                             <td className="px-4 py-3 text-right">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDelete(app)}
-                                                    disabled={deletingAppId === app.id}
-                                                    className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-200 hover:border-rose-500/70 disabled:opacity-50"
-                                                >
-                                                    {deletingAppId === app.id ? 'Deleting…' : 'Delete'}
-                                                </button>
+                                                <div className="inline-flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditingTarget(app)}
+                                                        className="rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-indigo-200 hover:border-indigo-500/70 disabled:opacity-50"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setDeleteTarget(app)}
+                                                        disabled={deletingAppId === app.id}
+                                                        className="rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-200 hover:border-rose-500/70 disabled:opacity-50"
+                                                    >
+                                                        {deletingAppId === app.id ? 'Deleting…' : 'Delete'}
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     )})}
@@ -400,6 +429,45 @@ const ApplicationsView: React.FC = () => {
                     </form>
                 </div>
             )}
+
+            <ConfirmDeleteModal
+                isOpen={Boolean(deleteTarget)}
+                title={deleteTarget ? `Delete "${deleteTarget.name}"?` : 'Delete application?'}
+                details={deleteTarget ? (
+                    <div className="space-y-1">
+                        <div>
+                            <span className="text-zinc-500">ID: </span>
+                            <span className="font-mono text-zinc-200">{deleteTarget.id}</span>
+                        </div>
+                        {deleteTarget.description && (
+                            <div className="text-zinc-400 font-mono break-all">{deleteTarget.description}</div>
+                        )}
+                    </div>
+                ) : null}
+                busy={Boolean(deleteTarget && deletingAppId === deleteTarget.id)}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={handleDelete}
+            />
+
+            <EditApplicationModal
+                isOpen={Boolean(editingTarget)}
+                title={editingTarget ? `Edit "${editingTarget.name}"` : 'Edit application'}
+                initialName={editingTarget?.name ?? ''}
+                busy={editingSaving}
+                details={editingTarget ? (
+                    <div className="space-y-1">
+                        <div>
+                            <span className="text-zinc-500">ID: </span>
+                            <span className="font-mono text-zinc-200">{editingTarget.id}</span>
+                        </div>
+                        {editingTarget.description && (
+                            <div className="text-zinc-400 font-mono break-all">{editingTarget.description}</div>
+                        )}
+                    </div>
+                ) : null}
+                onClose={() => setEditingTarget(null)}
+                onSave={handleEditSave}
+            />
         </div>
     );
 };

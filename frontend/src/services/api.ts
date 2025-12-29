@@ -514,6 +514,38 @@ export const deleteApplication = async (applicationId: string, signal?: AbortSig
     }
 };
 
+export interface UpdateApplicationRequest {
+    name: string;
+}
+
+export interface UpdateApplicationResponse {
+    id: string;
+    name: string;
+}
+
+export const updateApplication = async (
+    applicationId: string,
+    payload: UpdateApplicationRequest,
+    signal?: AbortSignal
+): Promise<UpdateApplicationResponse> => {
+    const url = `${getBaseUrl()}/applications/${encodeURIComponent(applicationId)}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        signal,
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while updating application`);
+    }
+
+    return response.json() as Promise<UpdateApplicationResponse>;
+};
+
 export interface RemoteApplicationRecord {
     id: string;
     kind: string;

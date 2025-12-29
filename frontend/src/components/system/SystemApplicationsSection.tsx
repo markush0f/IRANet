@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { SystemApplication } from '../../types';
 import { useSystemApplicationsSection } from '../../hooks/useSystemApplicationsSection';
 import SystemApplicationCard from './SystemApplicationCard';
 import SystemApplicationModal from './SystemApplicationModal';
+import ConfirmDeleteModal from '../common/ConfirmDeleteModal';
+import type { RemoteApplicationRecord } from '../../services/api';
+import EditApplicationModal from '../common/EditApplicationModal';
 
 interface SystemApplicationsSectionProps {
     applications: SystemApplication[];
 }
 
 const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ applications }) => {
+    const [deleteTarget, setDeleteTarget] = useState<RemoteApplicationRecord | null>(null);
+    const [editTarget, setEditTarget] = useState<RemoteApplicationRecord | null>(null);
+    const [editSaving, setEditSaving] = useState(false);
     const {
         isModalOpen,
         discoveryCwd,
@@ -40,7 +46,9 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
         modalDisplayCwd,
         registeredApplicationsByCwd,
         registeredLoading,
+        registeredDeletingId,
         deleteRegisteredApplication,
+        updateRegisteredApplicationName,
     } = useSystemApplicationsSection();
 
     return (
@@ -61,7 +69,12 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                             onOpen={openModal}
                             registeredApp={registeredApplicationsByCwd.get(application.cwd.trim()) ?? null}
                             registeredLoading={registeredLoading}
-                            onDeleteRegistered={deleteRegisteredApplication}
+                            registeredDeletingId={registeredDeletingId}
+                            onDeleteRegistered={(applicationId) => {
+                                const app = Array.from(registeredApplicationsByCwd.values()).find(entry => entry.id === applicationId) ?? null;
+                                setDeleteTarget(app);
+                            }}
+                            onEditRegistered={(app) => setEditTarget(app)}
                         />
                     ))}
                 </div>
@@ -95,6 +108,57 @@ const SystemApplicationsSection: React.FC<SystemApplicationsSectionProps> = ({ a
                 onToggleTechnicalDetails={() => setTechnicalDetailsOpen(open => !open)}
                 onRetryFetch={handleRetryFetch}
                 onSaveApplication={handleSaveApplication}
+            />
+
+            <ConfirmDeleteModal
+                isOpen={Boolean(deleteTarget)}
+                title={deleteTarget ? `Delete "${deleteTarget.name || deleteTarget.identifier}"?` : 'Delete application?'}
+                details={deleteTarget ? (
+                    <div className="space-y-1">
+                        <div>
+                            <span className="text-zinc-500">ID: </span>
+                            <span className="font-mono text-zinc-200">{deleteTarget.id}</span>
+                        </div>
+                        {deleteTarget.workdir && (
+                            <div className="text-zinc-400 font-mono break-all">{deleteTarget.workdir}</div>
+                        )}
+                    </div>
+                ) : null}
+                busy={Boolean(deleteTarget && registeredDeletingId === deleteTarget.id)}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (!deleteTarget) return;
+                    void deleteRegisteredApplication(deleteTarget.id).then(() => {
+                        setDeleteTarget(null);
+                    });
+                }}
+            />
+
+            <EditApplicationModal
+                isOpen={Boolean(editTarget)}
+                title={editTarget ? `Edit "${editTarget.name || editTarget.identifier}"` : 'Edit application'}
+                initialName={editTarget?.name ?? ''}
+                busy={editSaving}
+                details={editTarget ? (
+                    <div className="space-y-1">
+                        <div>
+                            <span className="text-zinc-500">ID: </span>
+                            <span className="font-mono text-zinc-200">{editTarget.id}</span>
+                        </div>
+                        {editTarget.workdir && (
+                            <div className="text-zinc-400 font-mono break-all">{editTarget.workdir}</div>
+                        )}
+                    </div>
+                ) : null}
+                onClose={() => setEditTarget(null)}
+                onSave={(name) => {
+                    if (!editTarget) return;
+                    setEditSaving(true);
+                    void updateRegisteredApplicationName(editTarget.id, name).finally(() => {
+                        setEditSaving(false);
+                        setEditTarget(null);
+                    });
+                }}
             />
         </>
     );

@@ -6,6 +6,7 @@ import {
     deleteApplication,
     getApplicationDiscoveryDetails,
     getApplicationsList,
+    updateApplication,
     type RemoteApplicationRecord,
 } from '../services/api';
 
@@ -25,6 +26,7 @@ export const useSystemApplicationsSection = () => {
 
     const [registeredApplications, setRegisteredApplications] = useState<RemoteApplicationRecord[]>([]);
     const [registeredLoading, setRegisteredLoading] = useState(false);
+    const [registeredDeletingId, setRegisteredDeletingId] = useState<string | null>(null);
 
     const refreshRegisteredApplications = useCallback(async (signal?: AbortSignal) => {
         setRegisteredLoading(true);
@@ -60,9 +62,7 @@ export const useSystemApplicationsSection = () => {
     }, [registeredApplications]);
 
     const deleteRegisteredApplication = useCallback(async (applicationId: string) => {
-        const confirmed = window.confirm('Delete this application? This cannot be undone.');
-        if (!confirmed) return;
-
+        setRegisteredDeletingId(applicationId);
         try {
             await deleteApplication(applicationId);
             toast.success('Application deleted', { duration: 3000 });
@@ -70,6 +70,19 @@ export const useSystemApplicationsSection = () => {
         } catch (err) {
             console.error('Error deleting registered application', err);
             toast.error('The application could not be deleted.', { duration: 4000 });
+        } finally {
+            setRegisteredDeletingId(null);
+        }
+    }, [refreshRegisteredApplications]);
+
+    const updateRegisteredApplicationName = useCallback(async (applicationId: string, name: string) => {
+        try {
+            await updateApplication(applicationId, { name });
+            toast.success('Application updated', { duration: 3000 });
+            await refreshRegisteredApplications();
+        } catch (err) {
+            console.error('Error updating registered application', err);
+            toast.error('The application could not be updated.', { duration: 4000 });
         }
     }, [refreshRegisteredApplications]);
 
@@ -266,7 +279,9 @@ export const useSystemApplicationsSection = () => {
 
         registeredApplicationsByCwd,
         registeredLoading,
+        registeredDeletingId,
         refreshRegisteredApplications,
         deleteRegisteredApplication,
+        updateRegisteredApplicationName,
     };
 };
