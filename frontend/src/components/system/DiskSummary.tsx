@@ -23,14 +23,14 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
     formatBytes,
 }) => {
     return (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_1fr]">
                 <div>
                     <div className="text-[10px] uppercase tracking-wider text-zinc-500">
                         Total usage
                     </div>
 
-                    <div className="mt-2 h-32">
+                    <div className="mt-2 h-20">
                         {totalLoading ? (
                             <div className="flex h-full items-center justify-center text-xs text-zinc-500">
                                 Loading chart…
@@ -54,8 +54,8 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
                                             },
                                         ]}
                                         dataKey="value"
-                                        innerRadius={42}
-                                        outerRadius={62}
+                                        innerRadius={28}
+                                        outerRadius={40}
                                         paddingAngle={2}
                                         stroke="none"
                                     >
@@ -72,19 +72,16 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
                     </div>
 
                     {totalInfo && (
-                        <div className="mt-2 space-y-1 text-xs text-zinc-400">
-                            <div className="flex justify-between">
-                                <span>Used</span>
-                                <span className="text-zinc-200">{totalInfo.used_percent.toFixed(2)}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Total</span>
-                                <span className="text-zinc-200">{formatBytes(totalInfo.total_bytes)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Free</span>
-                                <span className="text-zinc-200">{formatBytes(totalInfo.free_bytes)}</span>
-                            </div>
+                        <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-zinc-400">
+                            <span className="rounded-full border border-zinc-800 bg-zinc-950/40 px-2.5 py-1">
+                                Used <span className="text-zinc-200 font-semibold">{totalInfo.used_percent.toFixed(1)}%</span>
+                            </span>
+                            <span className="rounded-full border border-zinc-800 bg-zinc-950/40 px-2.5 py-1">
+                                Total <span className="text-zinc-200 font-semibold">{formatBytes(totalInfo.total_bytes)}</span>
+                            </span>
+                            <span className="rounded-full border border-zinc-800 bg-zinc-950/40 px-2.5 py-1">
+                                Free <span className="text-zinc-200 font-semibold">{formatBytes(totalInfo.free_bytes)}</span>
+                            </span>
                         </div>
                     )}
                 </div>
@@ -95,30 +92,30 @@ const DiskSummary: React.FC<DiskSummaryProps> = ({
                     </div>
 
                     <div className="mt-2 flex flex-wrap gap-2">
-                        <div className="bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-center">
+                        <div className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1 text-center">
                             <div className="text-[9px] text-zinc-500 uppercase">Total</div>
-                            <div className="text-lg font-semibold text-zinc-100">
+                            <div className="text-base font-semibold text-zinc-100">
                                 {summary.total}
                             </div>
                         </div>
 
-                        <div className="bg-emerald-950 border border-emerald-900 rounded-md px-3 py-1.5 text-center">
+                        <div className="bg-emerald-950 border border-emerald-900 rounded-md px-2.5 py-1 text-center">
                             <div className="text-[9px] text-emerald-400 uppercase">OK</div>
-                            <div className="text-lg font-semibold text-emerald-300">
+                            <div className="text-base font-semibold text-emerald-300">
                                 {summary.ok}
                             </div>
                         </div>
 
-                        <div className="bg-amber-950 border border-amber-900 rounded-md px-3 py-1.5 text-center">
+                        <div className="bg-amber-950 border border-amber-900 rounded-md px-2.5 py-1 text-center">
                             <div className="text-[9px] text-amber-400 uppercase">Warn</div>
-                            <div className="text-lg font-semibold text-amber-300">
+                            <div className="text-base font-semibold text-amber-300">
                                 {summary.warning}
                             </div>
                         </div>
 
-                        <div className="bg-red-950 border border-red-900 rounded-md px-3 py-1.5 text-center">
+                        <div className="bg-red-950 border border-red-900 rounded-md px-2.5 py-1 text-center">
                             <div className="text-[9px] text-red-400 uppercase">Crit</div>
-                            <div className="text-lg font-semibold text-red-300">
+                            <div className="text-base font-semibold text-red-300">
                                 {summary.critical}
                             </div>
                         </div>

@@ -38,7 +38,7 @@ const SystemDiskView = () => {
     }
 
     return (
-        <div className="w-full h-full min-h-0 overflow-hidden bg-zinc-950 px-4 sm:px-6 pt-2 pb-4 sm:pt-3 sm:pb-6 text-sm flex flex-col gap-6">
+        <div className="w-full h-full min-h-0 overflow-hidden bg-zinc-950 px-4 sm:px-6 pt-2 pb-3 sm:pt-3 sm:pb-4 text-sm flex flex-col gap-3">
                 <DiskSummary
                     summary={summary}
                     totalInfo={totalInfo}
