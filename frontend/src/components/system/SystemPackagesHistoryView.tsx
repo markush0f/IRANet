@@ -40,6 +40,7 @@ const SystemPackagesHistoryView: React.FC = () => {
     const [historySortDir, setHistorySortDir] = useState<SortDir>('desc');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [historyQuery, setHistoryQuery] = useState('');
 
     const isSearching = Boolean(query.trim());
     const totalPages = Math.max(1, Math.ceil(packagesTotal / pageSize));
@@ -172,6 +173,27 @@ const SystemPackagesHistoryView: React.FC = () => {
         }
         setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
     };
+
+    const filteredHistoryItems = useMemo(() => {
+        const needle = historyQuery.trim().toLowerCase();
+        if (!needle) return historyItems;
+
+        return historyItems.filter(event => {
+            const haystack = [
+                event.action,
+                event.package,
+                ...(event.packages ?? []),
+                event.command,
+                event.timestamp,
+                event.date,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            return haystack.includes(needle);
+        });
+    }, [historyItems, historyQuery]);
 
     return (
         <div className="w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm flex flex-col gap-6">
@@ -317,10 +339,12 @@ const SystemPackagesHistoryView: React.FC = () => {
                         sortDir={historySortDir}
                         dateFrom={dateFrom}
                         dateTo={dateTo}
+                        query={historyQuery}
                         onActionChange={setHistoryAction}
                         onSortDirChange={setHistorySortDir}
                         onDateFromChange={setDateFrom}
                         onDateToChange={setDateTo}
+                        onQueryChange={setHistoryQuery}
                     />
 
                     <div className="panel accent-border rounded-2xl p-4 sm:p-5 shadow-lg flex-1 min-h-0 overflow-hidden">
@@ -331,13 +355,13 @@ const SystemPackagesHistoryView: React.FC = () => {
                             </div>
                         ) : historyError ? (
                             <div className="text-sm text-amber-400">{historyError}</div>
-                        ) : historyItems.length === 0 ? (
+                        ) : filteredHistoryItems.length === 0 ? (
                             <div className="text-xs text-zinc-400 leading-relaxed">
                                 No events for the selected filters.
                             </div>
                         ) : (
                             <div className="h-full overflow-y-auto pr-1 scrollbar-strong">
-                                <HistoryTimeline events={historyItems} emptyMessage="No events for the selected filters." />
+                                <HistoryTimeline events={filteredHistoryItems} emptyMessage="No events for the selected filters." />
                             </div>
                         )}
                     </div>
