@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
 from app.models.requests.create_application_request import CreateApplicationRequest
+from app.models.requests.update_application_request import UpdateApplicationRequest
 from app.services.applications.applications import ApplicationsService
 from app.services.applications.applications_system_service import (
     ApplicationsSystemService,
@@ -157,6 +159,37 @@ async def create_application(
         "id": str(application_id),
         "status": "created",
     }
+
+@router.patch("/{application_id}")
+async def update_application(
+    application_id: UUID,
+    data: UpdateApplicationRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    service = ApplicationsService(session)
+    application = await service.update_application(
+        application_id=application_id,
+        data=data,
+    )
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    return {
+        "id": application.id,
+        "name": application.name,
+    }
+
+
+@router.delete("/{application_id}", status_code=204)
+async def delete_application(
+    application_id: UUID,
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    service = ApplicationsService(session)
+    deleted = await service.delete_application(application_id=application_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return Response(status_code=204)
 
 
 @router.get("/all/list/")
