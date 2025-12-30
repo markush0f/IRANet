@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from app.repositories.extensions import ExtensionsRepository
 from app.extensions.ai_chat.tools.registry import tool_class
 from app.services.extensions.extensions_registry import INSTALLER, UNINSTALLER
@@ -9,6 +11,30 @@ class ExtensionsService:
     def __init__(self, session):
         self._repository = ExtensionsRepository(session)
         self._logger = get_logger(__name__)
+
+    def _list_extension_folder_names(self) -> list[str]:
+        extensions_dir = Path(__file__).resolve().parents[2] / "extensions"
+        if not extensions_dir.exists():
+            return []
+
+        extension_ids: list[str] = []
+        for path in extensions_dir.iterdir():
+            name = path.name
+            if not path.is_dir():
+                continue
+            if name.startswith(".") or name.startswith("_") or name == "__pycache__":
+                continue
+            extension_ids.append(name)
+
+        extension_ids.sort()
+        return extension_ids
+
+    async def sync_extensions_from_folders(self) -> dict[str, list[str]]:
+        extension_ids = self._list_extension_folder_names()
+        return await self._repository.ensure_many(
+            extension_ids=extension_ids,
+            enabled_default=False,
+        )
 
     async def extension_is_enabled(self, *, extension_id: str) -> bool:
         return await self._repository.is_enabled(extension_id)

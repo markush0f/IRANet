@@ -80,13 +80,14 @@ CREATE TABLE
     extensions (
         id TEXT PRIMARY KEY,
         enabled BOOLEAN NOT NULL DEFAULT false,
+        description TEXT NOT NULL DEFAULT '',
         created_at TIMESTAMP NOT NULL DEFAULT now ()
     );
 
 INSERT INTO
-    extensions (id, enabled)
+    extensions (id, enabled, description)
 VALUES
-    ('ai_chat', False);
+    ('ai_chat', False, 'Extensión de chat con IA');
 
 CREATE TABLE
     IF NOT EXISTS application_metrics (

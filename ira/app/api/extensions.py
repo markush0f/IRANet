@@ -18,6 +18,14 @@ async def get_extensions(
     return await service.get_all_extensions()
 
 
+@router.post("/sync")
+async def sync_extensions_from_folders(
+    session: AsyncSession = Depends(get_session),
+):
+    service = ExtensionsService(session)
+    return await service.sync_extensions_from_folders()
+
+
 @router.put("/{extension_id}/enable")
 async def enable_extension(
     extension_id: str,
