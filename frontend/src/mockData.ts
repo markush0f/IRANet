@@ -2,7 +2,6 @@ import type {
     Service,
     LogEntry,
     SystemInfo,
-    SystemApplication,
     SystemDiskResponse,
     DiskProcessesResponse,
 } from './types';
@@ -389,18 +388,3 @@ export const MOCK_DISK_PROCESSES: DiskProcessesResponse = {
         },
     ],
 };
-
-export const MOCK_SYSTEM_APPLICATIONS: SystemApplication[] = [
-    {
-        cwd: '/mnt/c/Users/abram/AppData/Local/Programs/Microsoft VS Code',
-        commands: ['node'],
-    },
-    {
-        cwd: '/home/markus/projects/IRANet/ira',
-        commands: ['node', 'python', 'python3', 'uvicorn'],
-    },
-    {
-        cwd: '/home/markus/projects/IRANet/frontend',
-        commands: ['node'],
-    },
-];

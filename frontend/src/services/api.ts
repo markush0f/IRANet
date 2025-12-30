@@ -18,6 +18,7 @@ import type {
     DatabaseClassification,
     LogEvent,
     ExtensionRecord,
+    SystemApplication,
 } from '../types';
 
 export const getBaseUrl = (): string => {
@@ -129,6 +130,35 @@ export const getApplicationDiscoveryDetails = async (
     }
 
     return (await response.json()) as ApplicationDiscoveryDetails;
+};
+
+export const getApplicationDiscoveryBasicGrouped = async (
+    minEtimesSeconds = 15,
+    signal?: AbortSignal
+): Promise<SystemApplication[]> => {
+    const params = new URLSearchParams();
+    params.set('min_etimes_seconds', String(minEtimesSeconds));
+
+    const url = `${getBaseUrl()}/applications/discover/basic/grouped?${params.toString()}`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while fetching grouped application discovery`);
+    }
+
+    const data = (await response.json()) as unknown;
+    if (!Array.isArray(data)) return [];
+
+    return data
+        .filter((entry): entry is { cwd: unknown; commands: unknown; name?: unknown } => Boolean(entry) && typeof entry === 'object')
+        .map((entry) => ({
+            name: typeof (entry as any).name === 'string' ? (entry as any).name : undefined,
+            cwd: typeof (entry as any).cwd === 'string' ? (entry as any).cwd : '',
+            commands: Array.isArray((entry as any).commands)
+                ? (entry as any).commands.filter((cmd: unknown): cmd is string => typeof cmd === 'string')
+                : [],
+        }))
+        .filter((entry) => Boolean(entry.cwd));
 };
 
 export const getSystemUsers = async (signal?: AbortSignal): Promise<RemoteUser[]> => {
