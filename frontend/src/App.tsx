@@ -23,6 +23,7 @@ import SystemPackagesHistoryView from './components/system/SystemPackagesHistory
 import SystemDatabasesView from './components/system/SystemDatabasesView';
 import ExtensionsView from './components/extensions/ExtensionsView';
 import ChatbotView from './components/chatbot/ChatbotView';
+import IraTermView from './components/iraterm/IraTermView';
 import { Toaster } from 'react-hot-toast';
 import { useServices } from './hooks/useServices';
 import { useLogsModal } from './hooks/useLogsModal';
@@ -53,6 +54,7 @@ const ACCENT_BY_VIEW: Record<string, string> = {
   logs: '168 85 247',
   extensions: '16 185 129',
   chatbot: '59 130 246',
+  iraterm: '99 102 241',
 };
 
 function App() {
@@ -66,10 +68,12 @@ function App() {
 
   const currentServiceName = services.find(s => s.id === currentServiceId)?.name || 'Unknown Service';
   const isChatbotEnabled = extensions.some(extension => extension.id === 'ai_chat' && extension.enabled);
+  const isIraTermEnabled = extensions.some(extension => extension.id === 'iraterm' && extension.enabled);
   const isOverflowHiddenView =
     currentView === 'system-packages' ||
     currentView === 'packages-history' ||
-    currentView === 'application-metrics';
+    currentView === 'application-metrics' ||
+    currentView === 'iraterm';
 
   const refreshExtensions = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -101,6 +105,7 @@ function App() {
         isMobileOpen={isSidebarOpen}
         onMobileClose={() => setIsSidebarOpen(false)}
         showChatbot={isChatbotEnabled}
+        showIraTerm={isIraTermEnabled}
       />
 
       {isSidebarOpen && (
@@ -175,6 +180,8 @@ function App() {
             <ExtensionsView onExtensionsUpdated={refreshExtensions} />
           ) : currentView === 'chatbot' && isChatbotEnabled ? (
             <ChatbotView />
+          ) : currentView === 'iraterm' && isIraTermEnabled ? (
+            <IraTermView />
           ) : currentView === 'system-packages' ? (
             <SystemPackagesView />
           ) : currentView === 'packages-history' ? (

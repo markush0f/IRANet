@@ -14,6 +14,7 @@ interface SidebarProps {
     isMobileOpen?: boolean;
     onMobileClose?: () => void;
     showChatbot?: boolean;
+    showIraTerm?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -22,6 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     isMobileOpen = false,
     onMobileClose,
     showChatbot = false,
+    showIraTerm = false,
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [servicesOpen, setServicesOpen] = useState(true);
@@ -258,6 +260,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             )
         },
         {
+            id: 'iraterm',
+            label: 'IRATerm',
+            icon: (
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3M13 15h3M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            )
+        },
+        {
             id: 'settings',
             label: 'Settings',
             icon: (
@@ -269,9 +280,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         }
     ];
 
-    const visibleNavItems = showChatbot
-        ? navItems
-        : navItems.filter(item => item.id !== 'chatbot');
+    const visibleNavItems = navItems.filter(item => {
+        if (!showChatbot && item.id === 'chatbot') return false;
+        if (!showIraTerm && item.id === 'iraterm') return false;
+        return true;
+    });
 
     return (
         <div
