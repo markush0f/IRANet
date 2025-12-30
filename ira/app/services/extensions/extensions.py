@@ -2,7 +2,11 @@ from pathlib import Path
 
 from app.repositories.extensions import ExtensionsRepository
 from app.extensions.ai_chat.tools.registry import tool_class
-from app.services.extensions.extensions_registry import INSTALLER, UNINSTALLER
+from app.services.extensions.extensions_registry import (
+    INSTALLER,
+    UNINSTALLER,
+    refresh_registries,
+)
 from app.core.logger import get_logger
 
 
@@ -31,10 +35,12 @@ class ExtensionsService:
 
     async def sync_extensions_from_folders(self) -> dict[str, list[str]]:
         extension_ids = self._list_extension_folder_names()
-        return await self._repository.ensure_many(
+        result = await self._repository.ensure_many(
             extension_ids=extension_ids,
             enabled_default=False,
         )
+        refresh_registries()
+        return result
 
     async def extension_is_enabled(self, *, extension_id: str) -> bool:
         return await self._repository.is_enabled(extension_id)
