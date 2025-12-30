@@ -1,6 +1,9 @@
+from pathlib import Path
 from fastapi import APIRouter, Depends
 from app.core.database import get_session
 from app.core.logger import get_logger
+from app.models.dto.extension_status_dto import ExtensionStatusDTO
+from app.services.extensions.extension_status_service import ExtensionStatusService
 from app.services.extensions.extensions import ExtensionsService
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -42,3 +45,15 @@ async def disable_extension(
 ):
     service = ExtensionsService(session)
     return await service.disable_extension(extension_id=extension_id)
+
+
+@router.get(
+    "/{extension_id}/status",
+    response_model=ExtensionStatusDTO,
+)
+async def get_extension_status(
+    extension_id: str,
+    # service: ExtensionStatusService = Depends(get_extension_status_service),
+) -> ExtensionStatusDTO:
+    service = ExtensionStatusService()
+    return service.get_status(extension_id)
