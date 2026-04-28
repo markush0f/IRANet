@@ -1,9 +1,0 @@
-/system/cpu
-
-/system/memory
-
-/processes/header
-
-/processes/table
-
-/system/resources
