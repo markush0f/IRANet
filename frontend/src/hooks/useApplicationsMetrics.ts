@@ -74,7 +74,7 @@ const sortApplications = (items: RemoteApplicationRecord[]) => {
     });
 };
 
-export const useApplicationsMetrics = () => {
+export const useApplicationsMetrics = (serverId?: string | null) => {
     const [applications, setApplications] = useState<RemoteApplicationRecord[]>([]);
     const [appsLoading, setAppsLoading] = useState(true);
     const [appsError, setAppsError] = useState<string | null>(null);
@@ -217,7 +217,7 @@ export const useApplicationsMetrics = () => {
         setAppsLoading(true);
         setAppsError(null);
         try {
-            const apps = await getApplicationsList(signal);
+            const apps = await getApplicationsList(serverId, signal);
             setApplications(apps);
             setSelectedAppId(current => {
                 if (current && apps.some(app => app.id === current)) {
@@ -235,7 +235,7 @@ export const useApplicationsMetrics = () => {
         } finally {
             setAppsLoading(false);
         }
-    }, []);
+    }, [serverId]);
 
     useEffect(() => {
         const controller = new AbortController();

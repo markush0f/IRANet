@@ -4,7 +4,7 @@ import type { AlertRecord } from '../services/alertsService';
 
 const DEFAULT_PAGE_SIZE = 20;
 
-export const useAlerts = (initialPage = 1, initialPageSize = DEFAULT_PAGE_SIZE) => {
+export const useAlerts = (serverId?: string, initialPage = 1, initialPageSize = DEFAULT_PAGE_SIZE) => {
     const [alerts, setAlerts] = useState<AlertRecord[]>([]);
     const [page, setPage] = useState(initialPage);
     const [pageSize] = useState(initialPageSize);
@@ -25,7 +25,7 @@ export const useAlerts = (initialPage = 1, initialPageSize = DEFAULT_PAGE_SIZE) 
             setLoading(true);
         }
 
-        fetchAlerts(targetPage, pageSize, controller.signal)
+        fetchAlerts(targetPage, pageSize, controller.signal, serverId)
             .then(({ alerts: data, total: count }) => {
                 setTotal(count);
                 setAlerts(prev => (append ? [...prev, ...data] : data));
@@ -48,16 +48,16 @@ export const useAlerts = (initialPage = 1, initialPageSize = DEFAULT_PAGE_SIZE) 
                     controllerRef.current = null;
                 }
             });
-    }, [pageSize]);
+    }, [pageSize, serverId]);
 
     useEffect(() => {
         loadPage(initialPage, false);
         return () => controllerRef.current?.abort();
-    }, [initialPage, loadPage]);
+    }, [initialPage, loadPage, serverId]);
 
     const refresh = useCallback(() => {
         loadPage(initialPage, false);
-    }, [initialPage, loadPage]);
+    }, [initialPage, loadPage, serverId]);
 
     const hasMore = alerts.length < total;
 
