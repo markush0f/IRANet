@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Badge, Card, Flex, Text, Title } from '@tremor/react';
-import { getPacketLossEvents, getSystemInfo, type PacketLossEvent } from '../../services/api';
+import { getPacketLossEvents, type PacketLossEvent } from '../../services/api';
+import { useServer } from '../../contexts/ServerContext';
 
 const DEFAULT_LOOKBACK_MS = 60 * 60 * 1000;
 
@@ -52,45 +53,12 @@ const getSeverityStyles = (maxPercent: number) => {
 };
 
 const PacketLossEventsView: React.FC = () => {
-    const [hostname, setHostname] = useState<string | null>(null);
-    const [loadingHost, setLoadingHost] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { selectedServer } = useServer();
     const [events, setEvents] = useState<PacketLossEvent[]>([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [manualStart, setManualStart] = useState(() => createLocalDatetimeValue(new Date(Date.now() - DEFAULT_LOOKBACK_MS)));
     const [manualEnd, setManualEnd] = useState(() => createLocalDatetimeValue(new Date()));
-
-    useEffect(() => {
-        const controller = new AbortController();
-
-        const fetchSystemInfo = async () => {
-            try {
-                setError(null);
-                setLoadingHost(true);
-                const data = await getSystemInfo(controller.signal);
-                setHostname(data.hostname);
-            } catch (err) {
-                const aborted =
-                    err instanceof DOMException && err.name === 'AbortError' ||
-                    (typeof err === 'object' && err !== null && 'name' in err && (err as any).name === 'AbortError');
-
-                if (aborted) {
-                    return;
-                }
-
-                console.error('Error loading system info for packet loss view', err);
-                setError('System hostname could not be loaded.');
-            } finally {
-                setLoadingHost(false);
-            }
-        };
-
-        fetchSystemInfo();
-
-        return () => controller.abort();
-    }, []);
-
-    const hostToUse = hostname || '';
 
     const summary = useMemo(() => {
         if (!events.length) {
@@ -102,8 +70,8 @@ const PacketLossEventsView: React.FC = () => {
     }, [events]);
 
     const handleFetch = async () => {
-        if (!hostToUse) {
-            setError('Host information is not available yet.');
+        if (!selectedServer) {
+            setError('Please select a server first.');
             return;
         }
 
@@ -125,7 +93,7 @@ const PacketLossEventsView: React.FC = () => {
 
         try {
             const data = await getPacketLossEvents({
-                host: hostToUse,
+                serverId: selectedServer.id,
                 fromTs,
                 toTs,
             });
@@ -146,7 +114,7 @@ const PacketLossEventsView: React.FC = () => {
                         <Text className="text-xs uppercase tracking-wide text-zinc-500">Internet</Text>
                         <Title className="text-2xl sm:text-3xl text-zinc-100">Packet loss events</Title>
                         <Text className="text-xs text-zinc-400 leading-relaxed max-w-3xl">
-                            Query packet loss events over a time range for the selected host.
+                            Query packet loss events over a time range for the selected server.
                             Review duration, max, and average to identify degradation spikes.
                         </Text>
                     </div>
@@ -155,11 +123,11 @@ const PacketLossEventsView: React.FC = () => {
                     </Badge>
                 </Flex>
 
-                {loadingHost && (
-                    <Text className="text-xs text-zinc-500 leading-relaxed">
-                        Loading…
+                <Flex justifyContent="between" className="gap-4 flex-wrap">
+                    <Text className="text-xs text-zinc-400 leading-relaxed">
+                        {selectedServer ? `Server: ${selectedServer.name}` : 'No server selected.'}
                     </Text>
-                )}
+                </Flex>
 
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-3 sm:p-4 shadow-xl flex-1 min-h-0 flex flex-col gap-2">
                     <div className="grid gap-2 md:grid-cols-3">
@@ -224,34 +192,34 @@ const PacketLossEventsView: React.FC = () => {
                             {events.map((event, index) => (
                                 <div
                                     key={`${event.start}-${event.end}-${index}`}
-	                                    className="rounded-xl border border-zinc-800 bg-zinc-950 p-3"
-	                                >
-	                                    <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-	                                        <div className="space-y-1">
-	                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-	                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-	                                                    Start
-	                                                </span>
-	                                                <span className="font-mono text-sm font-semibold text-zinc-100">
-	                                                    {formatTimestamp(event.start)}
-	                                                </span>
-	                                                <span className="text-zinc-600">→</span>
-	                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-	                                                    End
-	                                                </span>
-	                                                <span className="font-mono text-sm font-semibold text-zinc-100">
-	                                                    {formatTimestamp(event.end)}
-	                                                </span>
-	                                            </div>
-	                                            <div className="flex flex-wrap items-center gap-2">
-	                                                <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[11px] font-semibold text-zinc-200">
-	                                                    Duration <span className="font-mono">{formatDuration(event.duration_seconds)}</span>
-	                                                </span>
-	                                            </div>
-	                                        </div>
-	                                        <div className="flex items-center gap-3">
-	                                            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getSeverityStyles(event.max_percent)}`}>
-	                                                Max {event.max_percent.toFixed(0)}%
+                                    className="rounded-xl border border-zinc-800 bg-zinc-950 p-3"
+                                >
+                                    <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                                        <div className="space-y-1">
+                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                                                    Start
+                                                </span>
+                                                <span className="font-mono text-sm font-semibold text-zinc-100">
+                                                    {formatTimestamp(event.start)}
+                                                </span>
+                                                <span className="text-zinc-600">→</span>
+                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+                                                    End
+                                                </span>
+                                                <span className="font-mono text-sm font-semibold text-zinc-100">
+                                                    {formatTimestamp(event.end)}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[11px] font-semibold text-zinc-200">
+                                                    Duration <span className="font-mono">{formatDuration(event.duration_seconds)}</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getSeverityStyles(event.max_percent)}`}>
+                                                Max {event.max_percent.toFixed(0)}%
                                             </span>
                                             <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs font-semibold text-zinc-300">
                                                 Avg {event.avg_percent.toFixed(0)}%
