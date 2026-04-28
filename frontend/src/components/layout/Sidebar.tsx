@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useServer } from '../../contexts/ServerContext';
 
 interface NavItem {
     id: string;
@@ -25,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     showChatbot = false,
     showIraTerm = false,
 }) => {
+    const { servers, selectedServerId, selectServer, loading } = useServer();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [servicesOpen, setServicesOpen] = useState(true);
     const [metricsOpen, setMetricsOpen] = useState(true);
@@ -336,6 +338,31 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </button>
                 </div>
             </div>
+
+            {/* Server Selector */}
+            {!isCollapsed && (
+                <div className="border-b border-zinc-800/80 px-3 py-3">
+                    <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-2 px-1">Server</div>
+                    {loading ? (
+                        <div className="text-xs text-zinc-500 px-1">Loading servers…</div>
+                    ) : servers.length === 0 ? (
+                        <div className="text-xs text-zinc-500 px-1">No servers found.</div>
+                    ) : (
+                        <select
+                            value={selectedServerId}
+                            onChange={event => selectServer(event.target.value)}
+                            className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2 py-1.5 text-xs text-zinc-200 focus:border-indigo-500 focus:outline-none"
+                        >
+                            <option value="">Select a server…</option>
+                            {servers.map(server => (
+                                <option key={server.id} value={server.id}>
+                                    {server.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            )}
 
             {/* Navigation */}
             <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
