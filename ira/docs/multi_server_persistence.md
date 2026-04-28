@@ -524,3 +524,132 @@ El cambio minimo con mas impacto es:
 4. exponer consultas filtradas por `server_id`
 
 Con eso queda resuelta la base de la persistencia multi-servidor. La parte de operaciones remotas en vivo puede tratarse en una segunda fase, ya sobre una base consistente.
+
+## Panel de Administracion y Despliegue Remoto
+
+Si tu aplicacion tiene acceso terminal a los servidores (por ejemplo via SSH), puedes integrar el despliegue de IRA como parte de tu flujo existente de gestion de servidores.
+
+### Flujo de integracion
+
+```
+Tu App (panel admin)              IRANet                    Servidor objetivo
+        |                             |                             |
+        |  POST /servers             |                             |
+        |  {id: "web-1", ...}       |                             |
+        |--------------------------->|                             |
+        |                             |                             |
+        |  GET /servers/web-1/       |                             |
+        |  install-command            |                             |
+        |  ?database_dsn=...         |                             |
+        |--------------------------->|                             |
+        |  {command: "curl..."}      |                             |
+        |<---------------------------|                             |
+        |                             |                             |
+        |  ejecuta command via SSH    |---------------------------->|
+        |                             |    curl ... | bash         |
+        |                             |                             |  (clona repo)
+        |                             |                             |  (instala deps)
+        |                             |                             |  (crea servicio systemd)
+        |                             |                             |  (arranca ira-agent)
+        |                             |                             |
+        |                             |  upsert(server_id=web-1)    |
+        |                             |<----------------------------|
+        |                             |  (heartbeat cada 5s)        |
+        |                             |<----------------------------|
+        |  GET /servers              |                             |
+        |  (ver estado)              |                             |
+        |--------------------------->|                             |
+```
+
+### Paso a paso
+
+1. **Registrar servidor en IRANet** (opcional pero recomendado)
+
+   Tu app llama a IRANet para pre-registrar el servidor:
+
+   ```python
+   import requests
+
+   resp = requests.post("http://iranet:8000/servers", json={
+       "id": "prod-web-1",
+       "hostname": "web-1.prod.internal",
+       "display_name": "Web Server EU #1",
+       "ip_address": "10.0.0.5"
+   })
+   ```
+
+2. **Obtener comando de instalacion**
+
+   Tu app pide a IRANet el comando de instalacion personalizado:
+
+   ```python
+   resp = requests.get(
+       "http://iranet:8000/servers/prod-web-1/install-command",
+       params={
+           "repo_url": "https://github.com/miusuario/IRANet",
+           "branch": "main",
+           "database_dsn": "postgresql+asyncpg://ira:pass@iranet-db:5432/ira"
+       }
+   )
+   data = resp.json()
+   # data["command"] = comando para ejecutar en el servidor
+   ```
+
+3. **Ejecutar en el servidor via SSH**
+
+   Tu app ejecuta el comando en el servidor objetivo:
+
+   ```python
+   ssh_client.exec_command(data["command"])
+   ```
+
+   O si usas Paramiko:
+
+   ```python
+   stdin, stdout, stderr = ssh.exec_command(data["command"])
+   print(stdout.read().decode())
+   ```
+
+4. **Verificar instalacion**
+
+   El agente aparece en IRANet automaticamente:
+
+   ```python
+   resp = requests.get("http://iranet:8000/servers/prod-web-1")
+   server = resp.json()
+   # server["status"] == "online" cuando el primer heartbeat llega
+   ```
+
+### El script de instalacion (`install.sh`)
+
+El script `install.sh` en la raiz del proyecto:
+
+- Acepta `--server-id`, `--database-dsn`, `--repo` como parametros
+- Detecta automaticamente si usar Docker o Python nativo
+- Crea un servicio systemd `ira-agent`
+- Instala y arranca el servicio
+- El agente se registra solo via el heartbeat del `metrics_scheduler`
+
+### Endpoints del panel admin
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| POST | `/servers` | Pre-registrar un servidor |
+| GET | `/servers` | Listar todos los servidores |
+| GET | `/servers/{id}` | Ver un servidor |
+| GET | `/servers/{id}/install-command` | Generar comando de instalacion |
+| PATCH | `/servers/{id}` | Actualizar display_name o status |
+| DELETE | `/servers/{id}` | Eliminar servidor |
+
+### Comando de instalacion generado
+
+Un ejemplo del comando que devuelve `GET /servers/{id}/install-command`:
+
+```bash
+curl -sL https://github.com/miusuario/IRANet/raw/main/install.sh | bash -s -- \
+  --server-id prod-web-1 \
+  --database-dsn postgresql+asyncpg://ira:pass@iranet-db:5432/ira \
+  --repo https://github.com/miusuario/IRANet
+```
+
+Este comando se ejecuta en el servidor destino via SSH. Todo lo demas es automatico.
