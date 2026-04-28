@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -21,6 +21,12 @@ class CreateServerRequest(BaseModel):
 class UpdateServerRequest(BaseModel):
     display_name: str | None = None
     status: str | None = None
+
+
+class InstallCommandResponse(BaseModel):
+    server_id: str
+    command: str
+    instructions: str
 
 
 @router.get("")
@@ -105,3 +111,62 @@ async def delete_server(
     deleted = await repo.delete(server_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Server not found")
+
+
+@router.get("/{server_id}/install-command", response_model=InstallCommandResponse)
+async def get_install_command(
+    server_id: str,
+    repo_url: str = Query(
+        default="https://github.com/markush0f/IRANet",
+        description="Git repo URL to clone IRA from",
+    ),
+    branch: str = Query(
+        default="feature/multi-server-persistence",
+        description="Git branch to install",
+    ),
+    database_dsn: str = Query(
+        ...,
+        description="PostgreSQL connection string for this server to use",
+    ),
+):
+    """
+    Generate the command to install the IRA agent on this server.
+
+    The returned command is meant to be executed on the target server
+    via SSH/terminal from your admin panel.
+
+    Example usage from your panel:
+        output = requests.get(f"http://iranet:8000/servers/{server_id}/install-command", params={
+            "repo_url": "https://github.com/myuser/IRANet",
+            "branch": "main",
+            "database_dsn": "postgresql+asyncpg://ira:pass@iranet-db:5432/ira"
+        })
+        ssh_client.exec_command(output["command"])
+    """
+    install_script_url = f"{repo_url}/raw/{branch}/install.sh"
+
+    command = (
+        f"curl -sL {install_script_url} | bash -s -- "
+        f"--server-id {server_id} "
+        f"--database-dsn {database_dsn} "
+        f"--repo {repo_url}"
+    )
+
+    instructions = (
+        f"Paste and run this command on server '{server_id}' via SSH:\n\n"
+        f"    {command}\n\n"
+        f"The agent will:\n"
+        f"  1. Clone IRA from {repo_url} (branch {branch})\n"
+        f"  2. Install dependencies (Docker or Python)\n"
+        f"  3. Create a systemd service 'ira-agent'\n"
+        f"  4. Start the service and register with IRA\n\n"
+        f"After installation, check status with:\n"
+        f"    sudo systemctl status ira-agent\n\n"
+        f"The server will appear in IRA within 10 seconds via heartbeat."
+    )
+
+    return InstallCommandResponse(
+        server_id=server_id,
+        command=command,
+        instructions=instructions,
+    )
