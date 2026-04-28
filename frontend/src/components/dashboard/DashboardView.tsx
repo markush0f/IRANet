@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout/legacy';
 import type { Layout } from 'react-grid-layout';
 import type { Service } from '../../types';
-import { getSystemInfo } from '../../services/api';
+import { useServer } from '../../contexts/ServerContext';
 import { useMetricSeriesPanel } from '../../hooks/useMetricSeriesPanel';
 import ChartCanvas from '../system/RechartsMetricPanel/ChartCanvas';
 import type { ChartType } from '../system/RechartsMetricPanel/ChartTypeSelector';
@@ -112,11 +112,11 @@ const createDefaultLayouts = (): Layouts => ({
 });
 
 interface MetricPreviewCardProps extends MetricPreviewConfig {
-    hostname?: string | null;
+    serverId?: string | null;
 }
 
 const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
-    hostname,
+    serverId,
     id,
     title,
     unit,
@@ -129,7 +129,7 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
         manualSummary,
         latestValue,
         summaryLabel,
-    } = useMetricSeriesPanel({ hostname, metric: id });
+    } = useMetricSeriesPanel({ serverId, metric: id });
 
     const chartData = useMemo(() => {
         return samples.map(sample => ({
@@ -186,43 +186,8 @@ const MetricPreviewCard: React.FC<MetricPreviewCardProps> = ({
 };
 
 const DashboardView: React.FC<DashboardViewProps> = () => {
-    const [hostname, setHostname] = useState<string | null>(null);
-    const [loadingHost, setLoadingHost] = useState(true);
-    const [hostError, setHostError] = useState<string | null>(null);
-    const [overrideHost, setOverrideHost] = useState('');
+    const { selectedServer } = useServer();
     const [layouts, setLayouts] = useState<Layouts>(() => createDefaultLayouts());
-
-    useEffect(() => {
-        const controller = new AbortController();
-
-        const fetchSystemInfo = async () => {
-            try {
-                setHostError(null);
-                setLoadingHost(true);
-                const data = await getSystemInfo(controller.signal);
-                setHostname(data.hostname);
-            } catch (err) {
-                const aborted =
-                    err instanceof DOMException && err.name === 'AbortError' ||
-                    (typeof err === 'object' && err !== null && 'name' in err && (err as any).name === 'AbortError');
-
-                if (aborted) {
-                    return;
-                }
-
-                console.error('Error loading system info for dashboard', err);
-                setHostError('System hostname could not be loaded.');
-            } finally {
-                setLoadingHost(false);
-            }
-        };
-
-        fetchSystemInfo();
-
-        return () => controller.abort();
-    }, []);
-
-    const hostToUse = overrideHost.trim() || hostname;
 
     return (
         <main className="w-full px-4 sm:px-6 lg:px-8 pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-10 text-sm">
@@ -232,32 +197,11 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                         <h2 className="text-2xl font-semibold text-zinc-100">Charts panel</h2>
                         <p className="text-xs text-zinc-400 leading-relaxed">Drag and resize cards; the grid auto-adjusts.</p>
                     </div>
-                    <div className="flex flex-wrap items-end gap-4">
-                        <div className="flex flex-col gap-1">
-                            <p className="text-xs uppercase tracking-wide text-zinc-500">Host override</p>
-                            <input
-                                id="dashboard-host-input"
-                                type="text"
-                                placeholder="DESKTOP-B5V272O"
-                                className="w-full sm:w-56 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus:border-indigo-500 focus:outline-none"
-                                value={overrideHost}
-                                onChange={event => setOverrideHost(event.target.value)}
-                            />
-                        </div>
-                    </div>
                 </div>
 
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                    {loadingHost && 'Loading host information…'}
-                    {!loadingHost && hostname && `Detected host: ${hostname}`}
-                    {!loadingHost && !hostname && 'No default hostname detected.'}
+                    {selectedServer ? `Server: ${selectedServer.name}` : 'No server selected. Choose a server from the sidebar.'}
                 </p>
-
-                {hostError && (
-                    <div className="rounded-xl border border-red-600/60 bg-red-950/60 px-4 py-2 text-sm text-red-300">
-                        {hostError}
-                    </div>
-                )}
 
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-3">
                     <ResponsiveGridLayout
@@ -275,7 +219,7 @@ const DashboardView: React.FC<DashboardViewProps> = () => {
                         {METRIC_PANELS.map(panel => (
                             <div key={panel.id}>
                                 <MetricPreviewCard
-                                    hostname={hostToUse || undefined}
+                                    serverId={selectedServer?.id ?? null}
                                     {...panel}
                                 />
                             </div>

@@ -2,14 +2,14 @@ import React from 'react';
 import { useMetricSeriesPanel } from '../../hooks/useMetricSeriesPanel';
 
 interface MetricSeriesPanelProps {
-    hostname?: string | null;
+    serverId?: string | null;
     metric: string;
     seriesLabel: string;
     valueFormatter?: (value: number) => string;
 }
 
 const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
-    hostname,
+    serverId,
     metric,
     seriesLabel,
     valueFormatter,
@@ -34,7 +34,7 @@ const MetricSeriesPanel: React.FC<MetricSeriesPanelProps> = ({
         stopLive,
         startLive,
         handleManualFetch,
-    } = useMetricSeriesPanel({ hostname, metric });
+    } = useMetricSeriesPanel({ serverId, metric });
 
     const valueToDisplay = (value: number) => (valueFormatter ? valueFormatter(value) : value.toFixed(2));
     const latestValueLabel = latestValue !== null ? valueToDisplay(latestValue) : null;
