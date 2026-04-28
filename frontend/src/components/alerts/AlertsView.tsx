@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAlerts } from '../../hooks/useAlerts';
+import { useServer } from '../../contexts/ServerContext';
 import type { AlertRecord } from '../../services/alertsService';
 
 const LEVEL_STYLES: Record<string, { bg: string; border: string }> = {
@@ -39,7 +40,8 @@ const LEVEL_FILTERS = [
 ] as const;
 
 const AlertsView: React.FC = () => {
-    const { alerts, loading, loadingMore, error, total, refresh, hasMore, loadMore } = useAlerts();
+    const { selectedServerId } = useServer();
+    const { alerts, loading, loadingMore, error, total, refresh, hasMore, loadMore } = useAlerts(selectedServerId ?? undefined);
     const [levelFilter, setLevelFilter] = useState<typeof LEVEL_FILTERS[number]['value']>('all');
 
     const filteredAlerts = useMemo(() => {

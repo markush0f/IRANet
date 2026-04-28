@@ -12,6 +12,7 @@ import {
     YAxis,
 } from 'recharts';
 import { useApplicationsMetrics } from '../../hooks/useApplicationsMetrics';
+import { useServer } from '../../contexts/ServerContext';
 
 const formatMiB = (kb?: number | null) => {
     if (kb === null || kb === undefined) return '—';
@@ -132,6 +133,7 @@ type BackendChartPoint = {
 } & Record<BackendMetricKey, number | null>;
 
 const ApplicationMetricsView: React.FC = () => {
+    const { selectedServerId } = useServer();
     const {
         applications,
         appsLoading,
@@ -191,7 +193,7 @@ const ApplicationMetricsView: React.FC = () => {
         logTimeline,
         rescanLoading,
         rescanLogs,
-    } = useApplicationsMetrics();
+    } = useApplicationsMetrics(selectedServerId ?? undefined);
 
     const memorySeries = useMemo(() => {
         return liveSamples.map(sample => ({
