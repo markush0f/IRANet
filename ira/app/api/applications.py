@@ -2,6 +2,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.core.config import get_server_id
 from app.core.database import get_session
 from app.models.requests.create_application_request import CreateApplicationRequest
 from app.models.requests.update_application_request import UpdateApplicationRequest
@@ -141,7 +142,7 @@ async def create_application(
     log paths to it.
 
     Characteristics:
-    - Idempotent by application identifier
+    - Idempotent by application identifier + server_id
     - If the application already exists, its ID is returned
     - Log paths are automatically associated
 
@@ -153,7 +154,10 @@ async def create_application(
     - Creation status
     """
     service = ApplicationsService(session)
-    application_id = await service.create_application(data=data)
+    application_id = await service.create_application(
+        data=data,
+        server_id=get_server_id(),
+    )
 
     return {
         "id": str(application_id),
@@ -195,6 +199,7 @@ async def delete_application(
 @router.get("/all/list/")
 async def applications_list(
     session: AsyncSession = Depends(get_session),
+    server_id: str | None = Query(None),
 ):
     """
     List all registered applications.
@@ -205,17 +210,19 @@ async def applications_list(
     Characteristics:
     - Includes disabled applications
     - Intended for administrative or overview dashboards
+    - If server_id is provided, filters by server
 
     Returns:
     - A list of all applications
     """
     service = ApplicationsService(session)
-    return await service.applications_lists()
+    return await service.applications_lists(server_id=server_id)
 
 
 @router.get("/list/logs")
 async def applications_list_with_path_logs(
     session: AsyncSession = Depends(get_session),
+    server_id: str | None = Query(None),
 ):
     """
     List applications that have associated log paths.
@@ -230,9 +237,10 @@ async def applications_list_with_path_logs(
     Characteristics:
     - Filters out applications without logs
     - Frontend-ready response format
+    - If server_id is provided, filters by server
 
     Returns:
     - A list of applications with their log paths
     """
     service = ApplicationsService(session)
-    return await service.applications_list_with_path_logs()
+    return await service.applications_list_with_path_logs(server_id=server_id)

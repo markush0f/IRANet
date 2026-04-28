@@ -1,13 +1,29 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ======================
+-- SERVERS
+-- ======================
+CREATE TABLE
+    IF NOT EXISTS servers (
+        id TEXT PRIMARY KEY,
+        hostname TEXT NOT NULL,
+        display_name TEXT,
+        status TEXT NOT NULL DEFAULT 'online',
+        last_seen_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
+    );
+
+CREATE INDEX IF NOT EXISTS idx_servers_last_seen ON servers (last_seen_at);
+
+-- ======================
 -- APPLICATIONS (FIRST)
 -- ======================
 CREATE TABLE
     IF NOT EXISTS applications (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
+        server_id TEXT NOT NULL,
         kind TEXT NOT NULL,
-        identifier TEXT NOT NULL UNIQUE,
+        identifier TEXT NOT NULL,
         name TEXT NOT NULL,
         workdir TEXT NOT NULL,
         file_path TEXT,
@@ -18,6 +34,8 @@ CREATE TABLE
         last_seen_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
     );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_server_identifier ON applications (server_id, identifier);
 
 CREATE INDEX IF NOT EXISTS idx_applications_last_seen ON applications (last_seen_at);
 
@@ -51,12 +69,13 @@ CREATE TABLE
         ts TIMESTAMPTZ NOT NULL,
         metric TEXT NOT NULL,
         value DOUBLE PRECISION NOT NULL,
-        host TEXT NOT NULL
+        host TEXT NOT NULL,
+        server_id TEXT NOT NULL
     );
 
-CREATE INDEX IF NOT EXISTS idx_metrics_points_metric_ts ON metrics_points (metric, ts);
+CREATE INDEX IF NOT EXISTS idx_metrics_points_server_metric_ts ON metrics_points (server_id, metric, ts);
 
-CREATE INDEX IF NOT EXISTS idx_metrics_points_ts ON metrics_points (ts);
+CREATE INDEX IF NOT EXISTS idx_metrics_points_server_ts ON metrics_points (server_id, ts);
 
 -- ======================
 -- SYSTEM ALERTS
@@ -65,6 +84,7 @@ CREATE TABLE
     IF NOT EXISTS system_alerts (
         id UUID PRIMARY KEY,
         host TEXT NOT NULL,
+        server_id TEXT NOT NULL,
         metric TEXT NOT NULL,
         level TEXT NOT NULL,
         value DOUBLE PRECISION NOT NULL,
@@ -75,6 +95,8 @@ CREATE TABLE
         last_seen_at TIMESTAMPTZ NOT NULL,
         resolved_at TIMESTAMPTZ
     );
+
+CREATE INDEX IF NOT EXISTS idx_system_alerts_server_last_seen ON system_alerts (server_id, last_seen_at);
 
 CREATE TABLE
     extensions (

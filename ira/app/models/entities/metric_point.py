@@ -13,6 +13,7 @@ class MetricPoint(SQLModel, table=True):
     metric: str
     value: float
     host: str
+    server_id: str
 
 
 from enum import Enum

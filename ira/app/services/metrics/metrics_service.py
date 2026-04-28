@@ -23,6 +23,7 @@ class SystemMetricsService:
         self,
         ts: datetime,
         host: str,
+        server_id: str,
     ) -> List[MetricPointDTO]:
         cpu = get_cpu_global_top_percent()
 
@@ -32,24 +33,28 @@ class SystemMetricsService:
                 "metric": "cpu.total",
                 "value": 100 - cpu["id"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "cpu.user",
                 "value": cpu["us"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "cpu.system",
                 "value": cpu["sy"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "cpu.idle",
                 "value": cpu["id"],
                 "host": host,
+                "server_id": server_id,
             },
         ]
 
@@ -57,6 +62,7 @@ class SystemMetricsService:
         self,
         ts: datetime,
         host: str,
+        server_id: str,
     ) -> List[MetricPointDTO]:
         mem = read_memory_and_swap_status()["memory"]
 
@@ -66,18 +72,21 @@ class SystemMetricsService:
                 "metric": "memory.used_kb",
                 "value": mem["used_kb"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "memory.free_kb",
                 "value": mem["free_kb"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "memory.available_percent",
                 "value": mem["available_percent"],
                 "host": host,
+                "server_id": server_id,
             },
         ]
 
@@ -85,6 +94,7 @@ class SystemMetricsService:
         self,
         ts: datetime,
         host: str,
+        server_id: str,
     ) -> List[MetricPointDTO]:
         load = load_average()
 
@@ -94,18 +104,21 @@ class SystemMetricsService:
                 "metric": "load.1m",
                 "value": load["load_1m"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "load.5m",
                 "value": load["load_5m"],
                 "host": host,
+                "server_id": server_id,
             },
             {
                 "ts": ts,
                 "metric": "load.15m",
                 "value": load["load_15m"],
                 "host": host,
+                "server_id": server_id,
             },
         ]
 
@@ -113,17 +126,19 @@ class SystemMetricsService:
         self,
         *,
         host: str,
+        server_id: str,
     ) -> List[MetricPointDTO]:
         ts = datetime.now(timezone.utc)
 
         rows: List[MetricPointDTO] = []
-        rows.extend(self._build_cpu_metrics(ts, host))
-        rows.extend(self._build_memory_metrics(ts, host))
-        rows.extend(self._build_load_metrics(ts, host))
+        rows.extend(self._build_cpu_metrics(ts, host, server_id))
+        rows.extend(self._build_memory_metrics(ts, host, server_id))
+        rows.extend(self._build_load_metrics(ts, host, server_id))
         rows.extend(
             await self.internet_metrics_service.build_internet_metrics(
                 ts=ts,
                 host=host,
+                server_id=server_id,
             )
         )
 
@@ -133,6 +148,7 @@ class SystemMetricsService:
                 metric=row["metric"],
                 value=row["value"],
                 host=row["host"],
+                server_id=row["server_id"],
             )
             for row in rows
         ]
@@ -145,7 +161,7 @@ class SystemMetricsService:
         self,
         *,
         metric: str,
-        host: str,
+        server_id: str,
         ts_from: datetime,
         ts_to: datetime,
     ) -> List[Dict]:
@@ -154,7 +170,7 @@ class SystemMetricsService:
 
         rows = await self._repo.list_series(
             metric=metric,
-            host=host,
+            server_id=server_id,
             ts_from=ts_from,
             ts_to=ts_to,
         )

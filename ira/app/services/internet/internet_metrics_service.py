@@ -20,6 +20,7 @@ class InternetMetricsService:
         *,
         ts: datetime,
         host: str,
+        server_id: str,
     ) -> List[MetricPointDTO]:
         rows: List[MetricPointDTO] = []
 
@@ -32,30 +33,35 @@ class InternetMetricsService:
                     "metric": "net.latency.avg_ms",
                     "value": latency["latency_avg_ms"],
                     "host": host,
+                    "server_id": server_id,
                 },
                 {
                     "ts": ts,
                     "metric": "net.latency.min_ms",
                     "value": latency["latency_min_ms"],
                     "host": host,
+                    "server_id": server_id,
                 },
                 {
                     "ts": ts,
                     "metric": "net.latency.max_ms",
                     "value": latency["latency_max_ms"],
                     "host": host,
+                    "server_id": server_id,
                 },
                 {
                     "ts": ts,
                     "metric": "net.jitter.ms",
                     "value": latency["jitter_ms"],
                     "host": host,
+                    "server_id": server_id,
                 },
                 {
                     "ts": ts,
                     "metric": "net.packet_loss.percent",
                     "value": latency["packet_loss_percent"],
                     "host": host,
+                    "server_id": server_id,
                 },
             ]
         )
@@ -69,6 +75,7 @@ class InternetMetricsService:
                     "metric": f"net.{interface}.rx.bytes",
                     "value": data["rx_bytes"],
                     "host": host,
+                    "server_id": server_id,
                 }
             )
             rows.append(
@@ -77,6 +84,7 @@ class InternetMetricsService:
                     "metric": f"net.{interface}.tx.bytes",
                     "value": data["tx_bytes"],
                     "host": host,
+                    "server_id": server_id,
                 }
             )
 
@@ -85,11 +93,11 @@ class InternetMetricsService:
     async def get_summary(
         self,
         *,
-        host: str,
+        server_id: str,
         interface: str,
     ) -> Dict:
         """
-        Return the current Internet status summary for a host.
+        Return the current Internet status summary for a server.
 
         This summary represents the latest available state of the network,
         not historical data. It retrieves the most recent metric point for
@@ -97,7 +105,7 @@ class InternetMetricsService:
         (Mbps) from the last two counter points of the selected interface.
 
         Parameters:
-            host (str): Host identifier.
+            server_id (str): Server identifier.
             interface (str): Network interface name (e.g. eth0).
 
         Returns:
@@ -105,23 +113,23 @@ class InternetMetricsService:
                   packet loss, traffic rates and timestamp.
         """
         latency = await self.metrics_point_repository.get_last_metric(
-            host=host,
+            server_id=server_id,
             metric=MetricName.NET_LATENCY_AVG.value,
         )
         jitter = await self.metrics_point_repository.get_last_metric(
-            host=host,
+            server_id=server_id,
             metric=MetricName.NET_JITTER.value,
         )
         packet_loss = await self.metrics_point_repository.get_last_metric(
-            host=host,
+            server_id=server_id,
             metric=MetricName.NET_PACKET_LOSS.value,
         )
 
         rx_points = await self.metrics_point_repository.get_limit_metrics(
-            host=host, metric=f"net.{interface}.rx.bytes", limit=2
+            server_id=server_id, metric=f"net.{interface}.rx.bytes", limit=2
         )
         tx_points = await self.metrics_point_repository.get_limit_metrics(
-            host=host, metric=f"net.{interface}.tx.bytes", limit=2
+            server_id=server_id, metric=f"net.{interface}.tx.bytes", limit=2
         )
 
         rx_mbps = self._calculate_mbps(rx_points)

@@ -13,12 +13,12 @@ class InternetEventsService:
     async def get_packet_loss_events(
         self,
         *,
-        host: str,
+        server_id: str,
         ts_from: datetime,
         ts_to: datetime,
     ) -> List[Dict]:
         """
-        Return packet loss events for a host within a given time range.
+        Return packet loss events for a server within a given time range.
 
         This method delegates the detection and aggregation of packet loss
         events to the metrics repository. It acts as a domain-level entry
@@ -26,7 +26,7 @@ class InternetEventsService:
         details to upper layers.
 
         Parameters:
-            host (str): Host identifier.
+            server_id (str): Server identifier.
             ts_from (datetime): Start of the time range (inclusive).
             ts_to (datetime): End of the time range (inclusive).
 
@@ -34,7 +34,7 @@ class InternetEventsService:
             List[Dict]: A list of packet loss events with aggregated data.
         """
         return await self._repository.list_packet_loss_events(
-            host=host,
+            server_id=server_id,
             ts_from=ts_from,
             ts_to=ts_to,
         )

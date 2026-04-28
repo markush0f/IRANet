@@ -13,7 +13,7 @@ router = APIRouter(prefix="/internet", tags=["internet"])
 
 @router.get("/packet-loss/events")
 async def packet_loss_events(
-    host: str = Query(...),
+    server_id: str = Query(...),
     ts_from: datetime = Query(...),
     ts_to: datetime = Query(...),
     session: AsyncSession = Depends(get_session),
@@ -22,7 +22,7 @@ async def packet_loss_events(
     service = InternetEventsService(repository)
 
     return await service.get_packet_loss_events(
-        host=host,
+        server_id=server_id,
         ts_from=ts_from,
         ts_to=ts_to,
     )

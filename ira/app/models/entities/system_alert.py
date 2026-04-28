@@ -12,6 +12,7 @@ class SystemAlert(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
     host: str
+    server_id: str
     metric: str
     level: str
 

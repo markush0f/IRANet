@@ -5,6 +5,7 @@ from datetime import datetime
 
 from sqlmodel import select
 
+from app.core.config import get_server_id
 from app.core.database import AsyncSessionLocal
 from app.core.logger import get_logger
 from app.models.dto.application_metrics_create_dto import ApplicationMetricsCreateDTO
@@ -19,7 +20,8 @@ logger = get_logger(__name__)
 
 
 async def application_metrics_scheduler() -> None:
-    logger.info("starting application metrics scheduler")
+    server_id = get_server_id()
+    logger.info("starting application metrics scheduler for server %s", server_id)
 
     while True:
         try:
@@ -30,13 +32,10 @@ async def application_metrics_scheduler() -> None:
 
                 statement = select(Application).where(
                     Application.enabled.is_(True),
+                    Application.server_id == server_id,
                 )
 
                 applications = (await session.exec(statement)).all()
-                # logger.info(
-                #     "application metrics scheduler: %d enabled applications found",
-                #     len(applications),
-                # )
                 metrics_batch: list[ApplicationMetricsCreateDTO] = []
 
                 for application in applications:
@@ -66,8 +65,9 @@ async def application_metrics_scheduler() -> None:
 
                     except Exception:
                         logger.exception(
-                            "failed collecting metrics for application %s",
+                            "failed collecting metrics for application %s on server %s",
                             application.identifier,
+                            server_id,
                         )
 
                 await service.store_metrics_bulk(
@@ -76,6 +76,6 @@ async def application_metrics_scheduler() -> None:
                 )
 
         except Exception:
-            logger.exception("application metrics scheduler tick failed")
+            logger.exception("application metrics scheduler tick failed for server %s", server_id)
 
         await asyncio.sleep(COLLECT_INTERVAL_SECONDS)

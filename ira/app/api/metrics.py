@@ -14,10 +14,10 @@ async def metric_series(
     metric: str,
     ts_from: datetime = Query(...),
     ts_to: datetime = Query(...),
-    host: str = Query(...),
+    server_id: str = Query(...),
     session: AsyncSession = Depends(get_session),
 ):
     service = SystemMetricsService(session)
     return await service.get_metric_series(
-        metric=metric, ts_from=ts_from, ts_to=ts_to, host=host
+        metric=metric, server_id=server_id, ts_from=ts_from, ts_to=ts_to
     )

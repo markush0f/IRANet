@@ -17,6 +17,7 @@ from app.api.system_packages import router as system_packages_router
 from app.api.services_clasification import router as services_clasification_router
 from app.api.applications_metrics import router as applications_metrics_router
 from app.api.extensions import router as extensions_router
+from app.api.servers import router as servers_router
 from app.core.application_metrics_scheduler import application_metrics_scheduler
 from app.core.config import load_config
 from app.core.logger import get_logger
@@ -89,6 +90,7 @@ app.include_router(system_packages_router)
 app.include_router(services_clasification_router)
 app.include_router(applications_metrics_router)
 app.include_router(extensions_router)
+app.include_router(servers_router)
 
 config = load_config()
 

@@ -18,23 +18,30 @@ class ApplicationRepository:
     async def get_by_identifier(
         self,
         identifier: str,
+        server_id: str,
     ) -> Optional[Application]:
         result = await self._session.exec(
-            select(Application).where(Application.identifier == identifier)
+            select(Application).where(
+                Application.identifier == identifier,
+                Application.server_id == server_id,
+            )
         )
         return result.first()
 
     async def list_all(
         self,
+        server_id: str | None = None,
     ) -> Sequence[Application]:
-        result = await self._session.exec(
-            select(Application).order_by(Application.created_at.desc())  # type: ignore
-        )
+        stmt = select(Application).order_by(Application.created_at.desc())
+        if server_id is not None:
+            stmt = stmt.where(Application.server_id == server_id)
+        result = await self._session.exec(stmt)
         return result.all()
 
     async def create(
         self,
         *,
+        server_id: str,
         kind: str,
         identifier: str,
         name: str,
@@ -45,6 +52,7 @@ class ApplicationRepository:
         status: str = "running",
     ) -> Application:
         app = Application(
+            server_id=server_id,
             kind=kind,
             identifier=identifier,
             name=name,
@@ -86,14 +94,16 @@ class ApplicationRepository:
 
     async def applications_with_path_logs(
         self,
+        server_id: str | None = None,
     ) -> Sequence[Application]:
         stmt = (
             select(Application)
             .where(
                 exists()
-                .where(ApplicationLogPath.application_id == Application.id) 
+                .where(ApplicationLogPath.application_id == Application.id)
             )
         )
-
+        if server_id is not None:
+            stmt = stmt.where(Application.server_id == server_id)
         result = await self._session.exec(stmt)
         return result.all()

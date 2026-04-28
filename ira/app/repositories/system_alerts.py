@@ -17,19 +17,19 @@ class SystemAlertRepository:
         *,
         limit: int,
         offset: int,
+        server_id: str | None = None,
     ) -> Tuple[Sequence[SystemAlert], int]:
-        result = await self._session.exec(
-            select(SystemAlert)
-            .order_by(SystemAlert.last_seen_at.desc())  # type: ignore
-            .offset(offset)
-            .limit(limit)
-        )
-
+        stmt = select(SystemAlert)
+        if server_id is not None:
+            stmt = stmt.where(SystemAlert.server_id == server_id)
+        stmt = stmt.order_by(SystemAlert.last_seen_at.desc()).offset(offset).limit(limit)
+        result = await self._session.exec(stmt)
         alerts = result.all()
 
-        total_result = await self._session.exec(
-            select(func.count()).select_from(SystemAlert)
-        )
+        count_stmt = select(func.count()).select_from(SystemAlert)
+        if server_id is not None:
+            count_stmt = count_stmt.where(SystemAlert.server_id == server_id)
+        total_result = await self._session.exec(count_stmt)
         total = total_result.one()
 
         return alerts, total
@@ -38,6 +38,7 @@ class SystemAlertRepository:
         self,
         *,
         host: str,
+        server_id: str,
         metric: str,
         level: str,
         value: float,
@@ -48,6 +49,7 @@ class SystemAlertRepository:
 
         alert = SystemAlert(
             host=host,
+            server_id=server_id,
             metric=metric,
             level=level,
             value=value,

@@ -52,3 +52,10 @@ def get_database_dsn() -> str:
         )
 
     return dsn
+
+
+def get_server_id() -> str:
+    server_id = os.getenv("IRA_SERVER_ID")
+    if not server_id:
+        raise RuntimeError("IRA_SERVER_ID environment variable is not set")
+    return server_id

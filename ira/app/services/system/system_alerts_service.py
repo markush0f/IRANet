@@ -28,12 +28,13 @@ class SystemAlertsService:
         *,
         alert: str,
         host: str,
+        server_id: str,
         alert_type: str,
         value: float,
         threshold: float,
     ) -> None:
         now = time.time()
-        key = f"{host}:{alert_type}"
+        key = f"{server_id}:{alert_type}"
 
         last_ts = self._last_alert_ts.get(key, 0)
         if now - last_ts < self._COOLDOWN_SECONDS:
@@ -50,6 +51,7 @@ class SystemAlertsService:
             "level": "critical",
             "type": alert_type,
             "host": host,
+            "server_id": server_id,
             "message": alert,
             "value": value,
             "threshold": threshold,
@@ -59,6 +61,7 @@ class SystemAlertsService:
         await self._save_critical_alert(
             alert=alert,
             host=host,
+            server_id=server_id,
             alert_type=alert_type,
             value=value,
             threshold=threshold,
@@ -67,9 +70,9 @@ class SystemAlertsService:
         await ws_manager.broadcast("alerts", payload)
 
         logger.info(
-            "Broadcasted critical alert %s for %s: %s",
+            "Broadcasted critical alert %s for server %s: %s",
             alert_type,
-            host,
+            server_id,
             alert,
         )
 
@@ -78,6 +81,7 @@ class SystemAlertsService:
         *,
         alert: str,
         host: str,
+        server_id: str,
         alert_type: str,
         value: float,
         threshold: float,
@@ -85,6 +89,7 @@ class SystemAlertsService:
         try:
             await self.alerts_repository.insert_critical(
                 host=host,
+                server_id=server_id,
                 metric=alert_type,
                 level="critical",
                 value=value,
@@ -93,9 +98,9 @@ class SystemAlertsService:
             )
         except Exception:
             logger.exception(
-                "Failed to persist alert %s for %s",
+                "Failed to persist alert %s for server %s",
                 alert_type,
-                host,
+                server_id,
             )
 
     async def evaluate_alerts(
@@ -106,10 +111,11 @@ class SystemAlertsService:
         load_1m: float,
         cpu_cores: int,
         host: str,
+        server_id: str,
     ) -> None:
         logger.debug(
-            "Evaluating metrics for %s: cpu_total=%.2f memory_available=%.2f load_1m=%.2f cores=%d",
-            host,
+            "Evaluating metrics for server %s: cpu_total=%.2f memory_available=%.2f load_1m=%.2f cores=%d",
+            server_id,
             cpu_total,
             memory_available_percent,
             load_1m,
@@ -120,6 +126,7 @@ class SystemAlertsService:
             await self.notify_critical_alert(
                 alert=f"CPU usage critical: {cpu_total:.2f}%",
                 host=host,
+                server_id=server_id,
                 alert_type="cpu.total",
                 value=cpu_total,
                 threshold=self.CPU_CRITICAL,
@@ -129,6 +136,7 @@ class SystemAlertsService:
             await self.notify_critical_alert(
                 alert=f"Low available memory: {memory_available_percent:.2f}%",
                 host=host,
+                server_id=server_id,
                 alert_type="memory.available.percent",
                 value=memory_available_percent,
                 threshold=self.MEMORY_AVAILABLE_CRITICAL,
@@ -139,6 +147,7 @@ class SystemAlertsService:
             await self.notify_critical_alert(
                 alert=f"Load average too high: {load_1m:.2f} (cores: {cpu_cores})",
                 host=host,
+                server_id=server_id,
                 alert_type="load.1m",
                 value=load_1m,
                 threshold=load_threshold,
@@ -149,12 +158,14 @@ class SystemAlertsService:
         *,
         page: int,
         page_size: int,
+        server_id: str | None = None,
     ) -> Dict[str, Any]:
         offset = (page - 1) * page_size
 
         alerts, total = await self.alerts_repository.get_system_alerts(
             limit=page_size,
             offset=offset,
+            server_id=server_id,
         )
 
         return {

@@ -11,8 +11,9 @@ class Application(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
+    server_id: str
     kind: str
-    identifier: str = Field(unique=True)
+    identifier: str
     name: str
 
     workdir: str

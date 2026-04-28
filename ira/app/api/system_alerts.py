@@ -23,6 +23,7 @@ async def alerts_ws(websocket: WebSocket) -> None:
 async def list_alerts(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=250),
+    server_id: str | None = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
     """
@@ -30,4 +31,6 @@ async def list_alerts(
     """
 
     service = SystemAlertsService(session)
-    return await service.get_system_alerts_paginated(page=page, page_size=page_size)
+    return await service.get_system_alerts_paginated(
+        page=page, page_size=page_size, server_id=server_id
+    )

@@ -27,17 +27,22 @@ class ApplicationsService:
         return f"process:{workdir}"
 
     async def create_application(
-    self,
-    *,
+        self,
+        *,
         data: CreateApplicationRequest,
+        server_id: str,
     ) -> UUID:
         identifier = self.build_application_identifier(data.cwd)
 
-        existing = await self.applications_repository.get_by_identifier(identifier)
+        existing = await self.applications_repository.get_by_identifier(
+            identifier=identifier,
+            server_id=server_id,
+        )
         if existing:
             return existing.id
 
         application = await self.applications_repository.create(
+            server_id=server_id,
             kind="process",
             identifier=identifier,
             name=data.name,
@@ -57,11 +62,11 @@ class ApplicationsService:
             )
 
         return application.id
-    
 
 
-    async def list_applications(self) -> Sequence[Application]:
-        return await self.applications_repository.list_all()
+
+    async def list_applications(self, server_id: str | None = None) -> Sequence[Application]:
+        return await self.applications_repository.list_all(server_id=server_id)
 
     async def delete_application(
         self,
@@ -112,8 +117,9 @@ class ApplicationsService:
 
     async def applications_lists(
         self,
+        server_id: str | None = None,
     ) -> Sequence[ApplicationsLogsDTO]:
-        applications = await self.applications_repository.list_all()
+        applications = await self.applications_repository.list_all(server_id=server_id)
         result: List[ApplicationsLogsDTO] = []
 
         for application in applications:
@@ -140,8 +146,9 @@ class ApplicationsService:
 
     async def applications_list_with_path_logs(
         self,
+        server_id: str | None = None,
     ) -> Sequence[ApplicationsLogsDTO]:
-        applications = await self.applications_repository.applications_with_path_logs()
+        applications = await self.applications_repository.applications_with_path_logs(server_id=server_id)
         result: List[ApplicationsLogsDTO] = []
 
         for application in applications:
