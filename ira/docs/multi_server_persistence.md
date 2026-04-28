@@ -622,13 +622,25 @@ Tu App (panel admin)              IRANet                    Servidor objetivo
 
 ### El script de instalacion (`install.sh`)
 
-El script `install.sh` en la raiz del proyecto:
+El script `install.sh` en la raiz del proyecto acepta tres metodos de instalacion:
 
-- Acepta `--server-id`, `--database-dsn`, `--repo` como parametros
-- Detecta automaticamente si usar Docker o Python nativo
-- Crea un servicio systemd `ira-agent`
-- Instala y arranca el servicio
-- El agente se registra solo via el heartbeat del `metrics_scheduler`
+| Metodo | Descripcion | Requiere |
+|--------|-------------|----------|
+| `pull` | Descarga imagen Docker pre-construida (default) | Docker |
+| `build` | Clona repo y construye imagen Docker | Docker + build tools |
+| `python` | Clona repo e instala deps Python directamente | Python, no Docker |
+
+Parametros principales:
+
+```
+--server-id      Identificador unico del servidor
+--database-dsn   Connection string de PostgreSQL
+--method         pull|build|python (default: pull)
+--image          Imagen Docker para metodo pull
+                  (default: ghcr.io/markush0f/iranet/ira-agent:latest)
+--repo           Repo git para metodos build/python
+--branch         Rama git (default: main)
+```
 
 ### Endpoints del panel admin
 
@@ -641,15 +653,39 @@ El script `install.sh` en la raiz del proyecto:
 | PATCH | `/servers/{id}` | Actualizar display_name o status |
 | DELETE | `/servers/{id}` | Eliminar servidor |
 
+El endpoint `GET /servers/{id}/install-command` acepta:
+
+| Parametro | Default | Descripcion |
+|-----------|---------|-------------|
+| `database_dsn` | (required) | Connection string PostgreSQL |
+| `method` | `pull` | `pull`, `build` o `python` |
+| `image` | `ghcr.io/markush0f/iranet/ira-agent:latest` | Imagen Docker para metodo pull |
+| `repo_url` | `https://github.com/markush0f/IRANet` | Repo git para metodos build/python |
+| `branch` | `main` | Rama git |
+
 ### Comando de instalacion generado
 
 Un ejemplo del comando que devuelve `GET /servers/{id}/install-command`:
 
 ```bash
+# Metodo pull (default, mas rapido)
 curl -sL https://github.com/miusuario/IRANet/raw/main/install.sh | bash -s -- \
   --server-id prod-web-1 \
   --database-dsn postgresql+asyncpg://ira:pass@iranet-db:5432/ira \
-  --repo https://github.com/miusuario/IRANet
+  --method pull \
+  --image ghcr.io/miusuario/iranet/ira-agent:latest
+
+# Metodo build (construye imagen locally)
+curl -sL https://github.com/miusuario/IRANet/raw/main/install.sh | bash -s -- \
+  --server-id prod-web-1 \
+  --database-dsn postgresql+asyncpg://ira:pass@iranet-db:5432/ira \
+  --method build
+
+# Metodo python (sin Docker)
+curl -sL https://github.com/miusuario/IRANet/raw/main/install.sh | bash -s -- \
+  --server-id prod-web-1 \
+  --database-dsn postgresql+asyncpg://ira:pass@iranet-db:5432/ira \
+  --method python
 ```
 
 Este comando se ejecuta en el servidor destino via SSH. Todo lo demas es automatico.
