@@ -340,3 +340,14 @@ export interface DiskTotalResponse {
     used_percent: number;
     partitions_count: number;
 }
+
+export interface Server {
+    id: string;
+    hostname: string;
+    display_name: string | null;
+    ip_address: string | null;
+    ira_version: string | null;
+    status: string;
+    last_seen_at: string;
+    created_at: string;
+}

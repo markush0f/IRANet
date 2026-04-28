@@ -375,7 +375,7 @@ export const getHumanUsers = async (signal?: AbortSignal): Promise<RemoteUser[]>
 
 export interface MetricSeriesRequest {
     metric: string;
-    host?: string;
+    serverId?: string;
     fromTs?: string;
     toTs?: string;
     signal?: AbortSignal;
@@ -383,14 +383,14 @@ export interface MetricSeriesRequest {
 
 export const getMetricSeries = async ({
     metric,
-    host,
+    serverId,
     fromTs,
     toTs,
     signal,
 }: MetricSeriesRequest): Promise<MetricSample[]> => {
     const params = new URLSearchParams();
     params.set('metric', metric);
-    if (host) params.set('host', host);
+    if (serverId) params.set('server_id', serverId);
     if (fromTs) {
         params.set('from_ts', fromTs);
         params.set('ts_from', fromTs);
@@ -592,8 +592,14 @@ export interface RemoteApplicationRecord {
     log_paths?: string[] | null;
 }
 
-export const getApplicationsList = async (signal?: AbortSignal): Promise<RemoteApplicationRecord[]> => {
-    const url = `${getBaseUrl()}/applications/all/list`;
+export const getApplicationsList = async (
+    serverId?: string,
+    signal?: AbortSignal
+): Promise<RemoteApplicationRecord[]> => {
+    const params = new URLSearchParams();
+    if (serverId) params.set('server_id', serverId);
+    const query = params.toString();
+    const url = `${getBaseUrl()}/applications/all/list${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -610,8 +616,14 @@ export const getApplicationsList = async (signal?: AbortSignal): Promise<RemoteA
     return [];
 };
 
-export const getApplicationsLogsList = async (signal?: AbortSignal): Promise<RemoteApplicationRecord[]> => {
-    const url = `${getBaseUrl()}/applications/list/logs`;
+export const getApplicationsLogsList = async (
+    serverId?: string,
+    signal?: AbortSignal
+): Promise<RemoteApplicationRecord[]> => {
+    const params = new URLSearchParams();
+    if (serverId) params.set('server_id', serverId);
+    const query = params.toString();
+    const url = `${getBaseUrl()}/applications/list/logs${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -642,6 +654,21 @@ export const getExtensions = async (signal?: AbortSignal): Promise<ExtensionReco
     }
     if (data && typeof data === 'object' && Array.isArray((data as any).extensions)) {
         return (data as any).extensions as ExtensionRecord[];
+    }
+    return [];
+};
+
+export const getServers = async (signal?: AbortSignal): Promise<import('../types').Server[]> => {
+    const url = `${getBaseUrl()}/servers`;
+    const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} al obtener servidores`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data)) {
+        return data as import('../types').Server[];
     }
     return [];
 };
@@ -962,20 +989,20 @@ export interface PacketLossEvent {
 }
 
 interface PacketLossEventsRequest {
-    host: string;
+    serverId: string;
     fromTs?: string;
     toTs?: string;
     signal?: AbortSignal;
 }
 
 export const getPacketLossEvents = async ({
-    host,
+    serverId,
     fromTs,
     toTs,
     signal,
 }: PacketLossEventsRequest): Promise<PacketLossEvent[]> => {
     const params = new URLSearchParams();
-    params.set('host', host);
+    params.set('server_id', serverId);
     if (fromTs) params.set('ts_from', fromTs);
     if (toTs) params.set('ts_to', toTs);
 

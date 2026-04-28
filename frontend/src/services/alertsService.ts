@@ -146,11 +146,13 @@ const normalizeAlertsResponse = (
 export const fetchAlerts = async (
     page = 1,
     pageSize = 50,
+    serverId?: string,
     signal?: AbortSignal
 ): Promise<AlertsResponse> => {
     const url = new URL(`${getBaseUrl()}/alerts`);
     url.searchParams.set('page', String(page));
     url.searchParams.set('page_size', String(pageSize));
+    if (serverId) url.searchParams.set('server_id', serverId);
 
     const response = await fetch(url.toString(), {
         signal,
