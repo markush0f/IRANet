@@ -8,7 +8,7 @@ import SummaryStats from './SummaryStats';
 import { useMetricSeriesPanel } from '../../../hooks/useMetricSeriesPanel';
 
 interface RechartsMetricPanelProps {
-    hostname?: string | null;
+    serverId?: string | null;
     metric: string;
     seriesLabel: string;
     valueFormatter?: (value: number) => string;
@@ -19,7 +19,7 @@ interface RechartsMetricPanelProps {
 }
 
 const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
-    hostname,
+    serverId,
     metric,
     seriesLabel,
     valueFormatter,
@@ -47,7 +47,7 @@ const RechartsMetricPanel: React.FC<RechartsMetricPanelProps> = ({
         stopLive,
         startLive,
         handleManualFetch,
-    } = useMetricSeriesPanel({ hostname, metric });
+    } = useMetricSeriesPanel({ serverId, metric });
 
     const applyTransform = (value: number) => (valueTransform ? valueTransform(value) : value);
     const valueToDisplay = (value: number) => (valueFormatter ? valueFormatter(value) : value.toFixed(2));
