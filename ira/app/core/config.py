@@ -1,5 +1,7 @@
+import hashlib
 import json
 import os
+import socket
 from pathlib import Path
 from typing import Any, Dict
 
@@ -10,6 +12,41 @@ from app.core.logger import get_logger
 
 logger = get_logger(__name__)
 load_dotenv(override=True)
+
+
+def _get_local_hostname() -> str:
+    return socket.gethostname()
+
+
+def _get_local_ip() -> str | None:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return None
+
+
+def get_server_id() -> str:
+    server_id = os.getenv("IRA_SERVER_ID")
+    if server_id:
+        return server_id
+    hostname = _get_local_hostname()
+    return hashlib.sha256(hostname.encode()).hexdigest()[:32]
+
+
+def get_server_hostname() -> str:
+    return _get_local_hostname()
+
+
+def get_server_ip() -> str | None:
+    return _get_local_ip()
+
+
+def get_server_display_name() -> str | None:
+    return os.getenv("IRA_SERVER_NAME")
 
 
 def load_config() -> Dict[str, Any]:
@@ -52,10 +89,3 @@ def get_database_dsn() -> str:
         )
 
     return dsn
-
-
-def get_server_id() -> str:
-    server_id = os.getenv("IRA_SERVER_ID")
-    if not server_id:
-        raise RuntimeError("IRA_SERVER_ID environment variable is not set")
-    return server_id

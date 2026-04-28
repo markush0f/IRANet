@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import os
-import socket
 
 
-from app.core.config import get_server_id
+from app.core.config import get_server_id, get_server_hostname, get_server_ip, get_server_display_name
 from app.core.database import AsyncSessionLocal
 from app.core.logger import get_logger
 from app.repositories.servers import ServerRepository
@@ -19,21 +18,10 @@ IRA_VERSION = "0.1.0"
 logger = get_logger(__name__)
 
 
-def _get_local_ip() -> str | None:
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return None
-
-
 async def metrics_scheduler() -> None:
     server_id = get_server_id()
-    host = socket.gethostname()
-    ip_address = _get_local_ip()
+    host = get_server_hostname()
+    ip_address = get_server_ip()
     cpu_cores = os.cpu_count() or 1
 
     logger.info("starting metrics scheduler for server %s (host %s)", server_id, host)
@@ -43,6 +31,7 @@ async def metrics_scheduler() -> None:
         await server_repo.upsert(
             server_id=server_id,
             hostname=host,
+            display_name=get_server_display_name(),
             ip_address=ip_address,
             ira_version=IRA_VERSION,
         )
