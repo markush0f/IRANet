@@ -8,6 +8,8 @@ CREATE TABLE
         id TEXT PRIMARY KEY,
         hostname TEXT NOT NULL,
         display_name TEXT,
+        ip_address TEXT,
+        ira_version TEXT,
         status TEXT NOT NULL DEFAULT 'online',
         last_seen_at TIMESTAMPTZ NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now ()

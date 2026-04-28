@@ -11,6 +11,8 @@ class Server(SQLModel, table=True):
     id: str = Field(primary_key=True)
     hostname: str
     display_name: Optional[str] = None
+    ip_address: Optional[str] = None
+    ira_version: Optional[str] = None
     status: str = "online"
     last_seen_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), nullable=False),

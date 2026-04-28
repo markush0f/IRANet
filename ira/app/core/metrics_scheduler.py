@@ -14,19 +14,38 @@ from app.services.system.system_alerts_service import SystemAlertsService
 
 COLLECT_INTERVAL_SECONDS = 5
 
+IRA_VERSION = "0.1.0"
+
 logger = get_logger(__name__)
+
+
+def _get_local_ip() -> str | None:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return None
 
 
 async def metrics_scheduler() -> None:
     server_id = get_server_id()
     host = socket.gethostname()
+    ip_address = _get_local_ip()
     cpu_cores = os.cpu_count() or 1
 
     logger.info("starting metrics scheduler for server %s (host %s)", server_id, host)
 
     async with AsyncSessionLocal() as session:
         server_repo = ServerRepository(session)
-        await server_repo.upsert(server_id=server_id, hostname=host)
+        await server_repo.upsert(
+            server_id=server_id,
+            hostname=host,
+            ip_address=ip_address,
+            ira_version=IRA_VERSION,
+        )
 
     while True:
         try:
@@ -59,7 +78,11 @@ async def metrics_scheduler() -> None:
                 )
 
                 server_repo = ServerRepository(session)
-                await server_repo.update_heartbeat(server_id)
+                await server_repo.update_heartbeat(
+                    server_id,
+                    ip_address=ip_address,
+                    ira_version=IRA_VERSION,
+                )
 
         except Exception:
             logger.exception("metric collection failed for server %s", server_id)
