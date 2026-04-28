@@ -25,6 +25,7 @@ class UpdateServerRequest(BaseModel):
 
 class InstallCommandResponse(BaseModel):
     server_id: str
+    method: str
     command: str
     instructions: str
 
@@ -116,17 +117,25 @@ async def delete_server(
 @router.get("/{server_id}/install-command", response_model=InstallCommandResponse)
 async def get_install_command(
     server_id: str,
-    repo_url: str = Query(
-        default="https://github.com/markush0f/IRANet",
-        description="Git repo URL to clone IRA from",
-    ),
-    branch: str = Query(
-        default="feature/multi-server-persistence",
-        description="Git branch to install",
-    ),
     database_dsn: str = Query(
         ...,
         description="PostgreSQL connection string for this server to use",
+    ),
+    method: str = Query(
+        default="pull",
+        description="Installation method: pull (Docker image), build (Docker from source), python (no Docker)",
+    ),
+    image: str = Query(
+        default="ghcr.io/markush0f/iranet/ira-agent:latest",
+        description="Docker image URL for pull method",
+    ),
+    repo_url: str = Query(
+        default="https://github.com/markush0f/IRANet",
+        description="Git repo URL for build/python methods",
+    ),
+    branch: str = Query(
+        default="main",
+        description="Git branch to install",
     ),
 ):
     """
@@ -135,38 +144,71 @@ async def get_install_command(
     The returned command is meant to be executed on the target server
     via SSH/terminal from your admin panel.
 
+    Methods:
+    - pull:    Downloads a pre-built Docker image (fastest, needs Docker)
+    - build:  Clones repo and builds Docker image (needs Docker + build tools)
+    - python: Installs Python dependencies directly (no Docker required)
+
     Example usage from your panel:
-        output = requests.get(f"http://iranet:8000/servers/{server_id}/install-command", params={
-            "repo_url": "https://github.com/myuser/IRANet",
-            "branch": "main",
-            "database_dsn": "postgresql+asyncpg://ira:pass@iranet-db:5432/ira"
-        })
-        ssh_client.exec_command(output["command"])
+        resp = requests.get(
+            f"http://iranet:8000/servers/{server_id}/install-command",
+            params={
+                "database_dsn": "postgresql+asyncpg://ira:pass@iranet-db:5432/ira",
+                "method": "pull",
+            }
+        )
+        ssh.exec_command(resp.json()["command"])
     """
+    if method not in ("pull", "build", "python"):
+        raise HTTPException(
+            status_code=400,
+            detail="method must be one of: pull, build, python"
+        )
+
     install_script_url = f"{repo_url}/raw/{branch}/install.sh"
 
-    command = (
-        f"curl -sL {install_script_url} | bash -s -- "
-        f"--server-id {server_id} "
-        f"--database-dsn {database_dsn} "
-        f"--repo {repo_url}"
-    )
+    cmd_parts = [
+        f"curl -sL {install_script_url} | bash -s --",
+        f"--server-id {server_id}",
+        f"--database-dsn {database_dsn}",
+    ]
+
+    if method == "pull":
+        cmd_parts.append(f"--method pull")
+        cmd_parts.append(f"--image {image}")
+    elif method == "build":
+        cmd_parts.append(f"--method build")
+        cmd_parts.append(f"--repo {repo_url}")
+        cmd_parts.append(f"--branch {branch}")
+    else:
+        cmd_parts.append(f"--method python")
+        cmd_parts.append(f"--repo {repo_url}")
+        cmd_parts.append(f"--branch {branch}")
+
+    command = " ".join(cmd_parts)
+
+    method_descriptions = {
+        "pull": f"Downloads pre-built image `{image}` (fastest)",
+        "build": f"Clones {repo_url} branch {branch} and builds Docker image",
+        "python": f"Clones {repo_url} branch {branch} and installs Python deps directly (no Docker)",
+    }
 
     instructions = (
-        f"Paste and run this command on server '{server_id}' via SSH:\n\n"
+        f"Run this command on server '{server_id}' via SSH:\n\n"
         f"    {command}\n\n"
+        f"Method: {method_descriptions[method]}\n\n"
         f"The agent will:\n"
-        f"  1. Clone IRA from {repo_url} (branch {branch})\n"
-        f"  2. Install dependencies (Docker or Python)\n"
-        f"  3. Create a systemd service 'ira-agent'\n"
-        f"  4. Start the service and register with IRA\n\n"
-        f"After installation, check status with:\n"
+        f"  1. {'Pull Docker image' if method == 'pull' else 'Clone IRA from ' + repo_url}\n"
+        f"  2. {'Start container' if method == 'pull' else 'Install and start service'}\n"
+        f"  3. Register with IRA automatically\n\n"
+        f"Check status:\n"
         f"    sudo systemctl status ira-agent\n\n"
-        f"The server will appear in IRA within 10 seconds via heartbeat."
+        f"Server appears in IRA within 10 seconds via heartbeat."
     )
 
     return InstallCommandResponse(
         server_id=server_id,
+        method=method,
         command=command,
         instructions=instructions,
     )
