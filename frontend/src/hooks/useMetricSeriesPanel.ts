@@ -25,11 +25,11 @@ const sortSamples = (items: MetricSample[]) => {
 };
 
 interface UseMetricSeriesPanelArgs {
-    hostname?: string | null;
+    serverId?: string | null;
     metric: string;
 }
 
-export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelArgs) => {
+export const useMetricSeriesPanel = ({ serverId, metric }: UseMetricSeriesPanelArgs) => {
     const [samples, setSamples] = useState<MetricSample[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [mode, setMode] = useState<'manual' | 'live'>('manual');
@@ -55,8 +55,8 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
     }, []);
 
     const fetchLiveTick = useCallback(async () => {
-        const host = hostname?.trim();
-        if (!host) {
+        const sid = serverId?.trim();
+        if (!sid) {
             return;
         }
 
@@ -65,7 +65,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
         try {
             const data = await getMetricSeries({
                 metric,
-                host,
+                serverId: sid,
                 fromTs,
                 toTs,
             });
@@ -101,12 +101,12 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
             console.error(`Error updating ${metric} live metrics`, err);
             setError('Live metrics could not be updated.');
         }
-    }, [hostname, metric]);
+    }, [serverId, metric]);
 
     const startLive = useCallback(async () => {
-        const host = hostname?.trim();
-        if (!host) {
-            setError('You need a valid hostname to start live metrics.');
+        const sid = serverId?.trim();
+        if (!sid) {
+            setError('You need a valid server selected to start live metrics.');
             return;
         }
 
@@ -120,7 +120,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
         try {
             const data = await getMetricSeries({
                 metric,
-                host,
+                serverId: sid,
                 fromTs: fromTs || undefined,
                 toTs,
             });
@@ -139,12 +139,12 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
         } finally {
             setLiveLoading(false);
         }
-    }, [fetchLiveTick, hostname, liveStart, stopLive, metric]);
+    }, [fetchLiveTick, serverId, liveStart, stopLive, metric]);
 
     const handleManualFetch = useCallback(async () => {
-        const host = hostname?.trim();
-        if (!host) {
-            setError('You need a valid hostname to load manual metrics.');
+        const sid = serverId?.trim();
+        if (!sid) {
+            setError('You need a valid server selected to load manual metrics.');
             return;
         }
 
@@ -171,7 +171,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
         try {
             const data = await getMetricSeries({
                 metric,
-                host,
+                serverId: sid,
                 fromTs,
                 toTs,
             });
@@ -185,7 +185,7 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
         } finally {
             setLoading(false);
         }
-    }, [manualStart, manualEnd, hostname, stopLive, metric]);
+    }, [manualStart, manualEnd, serverId, stopLive, metric]);
 
     useEffect(() => stopLive, [stopLive]);
 
@@ -198,12 +198,12 @@ export const useMetricSeriesPanel = ({ hostname, metric }: UseMetricSeriesPanelA
     }, [metric, stopLive]);
 
     useEffect(() => {
-        if (!hostname?.trim() || initialLiveRunRef.current) {
+        if (!serverId?.trim() || initialLiveRunRef.current) {
             return;
         }
         initialLiveRunRef.current = true;
         startLive();
-    }, [hostname, startLive]);
+    }, [serverId, startLive]);
 
     const manualSummary = useMemo(() => {
         const values = samples.map(sample => sample.value);
