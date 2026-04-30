@@ -10,7 +10,7 @@ const formatCreated = (created: string) => {
 };
 
 const DockerView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [containers, setContainers] = useState<DockerContainer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ const DockerView: React.FC = () => {
         const fetchContainers = async () => {
             try {
                 setError(null);
-                const data = await getDockerContainers(selectedServerId, controller.signal);
+                const data = await getDockerContainers(selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setContainers(data);
             } catch (e) {
                 if (
@@ -43,7 +43,7 @@ const DockerView: React.FC = () => {
         fetchContainers();
 
         return () => controller.abort();
-    }, [selectedServerId]);
+    }, [selectedServer?.agent_base_url, selectedServerId]);
 
     const runningContainers = containers.filter(
         (c) => c.state === 'running' || c.status === 'running'

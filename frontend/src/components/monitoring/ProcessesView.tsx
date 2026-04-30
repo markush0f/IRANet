@@ -26,7 +26,7 @@ const getStateDisplay = (stateCode: string, stateLabel: string) => {
 };
 
 const ProcessesView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [snapshot, setSnapshot] = useState<ProcessesSnapshot | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ const ProcessesView: React.FC = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getProcessesSnapshot(limit, selectedServerId, controller.signal);
+                const data = await getProcessesSnapshot(limit, selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setSnapshot(data);
             } catch (e: any) {
                 if (e?.name !== 'AbortError') {
@@ -56,7 +56,7 @@ const ProcessesView: React.FC = () => {
 
         loadSnapshot();
         return () => controller.abort();
-    }, [limit, selectedServerId]);
+    }, [limit, selectedServer?.agent_base_url, selectedServerId]);
 
     const processes = snapshot?.processes ?? [];
 

@@ -18,7 +18,7 @@ const formatBytes = (bytes: number) => {
 };
 
 export const useSystemDiskView = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [diskInfo, setDiskInfo] = useState<SystemDiskResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export const useSystemDiskView = () => {
         const fetchDiskInfo = async () => {
             try {
                 setError(null);
-                const data = await getSystemDisk(selectedServerId, controller.signal);
+                const data = await getSystemDisk(selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setDiskInfo(data);
             } catch (err) {
                 const aborted =
@@ -58,7 +58,7 @@ export const useSystemDiskView = () => {
         fetchDiskInfo();
 
         return () => controller.abort();
-    }, [selectedServerId]);
+    }, [selectedServer?.agent_base_url, selectedServerId]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -66,7 +66,7 @@ export const useSystemDiskView = () => {
         const fetchDiskTotal = async () => {
             try {
                 setTotalError(null);
-                const data = await getSystemDiskTotal(selectedServerId, controller.signal);
+                const data = await getSystemDiskTotal(selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setTotalInfo(data);
             } catch (err) {
                 const aborted =
@@ -88,7 +88,7 @@ export const useSystemDiskView = () => {
         fetchDiskTotal();
 
         return () => controller.abort();
-    }, [selectedServerId]);
+    }, [selectedServer?.agent_base_url, selectedServerId]);
 
     const toggleMountpoint = (mountpoint: string) => {
         setExpandedMountpoints(prev => {
@@ -112,7 +112,7 @@ export const useSystemDiskView = () => {
         try {
             setProcessesError(prev => ({ ...prev, [mountpoint]: null }));
             setProcessesLoading(prev => ({ ...prev, [mountpoint]: true }));
-            const data = await getDiskProcesses(mountpoint, 10, selectedServerId, controller.signal);
+            const data = await getDiskProcesses(mountpoint, 10, selectedServerId, controller.signal, selectedServer?.agent_base_url);
             setProcessesByMountpoint(prev => ({ ...prev, [mountpoint]: data }));
         } catch (err) {
             const aborted =

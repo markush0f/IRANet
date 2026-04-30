@@ -17,7 +17,7 @@ const formatBootTime = (timestamp: number) => {
 };
 
 const SystemInfoView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [info, setInfo] = useState<SystemInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ const SystemInfoView: React.FC = () => {
         const fetchSystemInfo = async () => {
             try {
                 setError(null);
-                const data = await getSystemInfo(selectedServerId, controller.signal);
+                const data = await getSystemInfo(selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setInfo(data);
             } catch (e) {
                 // Ignorar aborts provocados por React StrictMode / desmontaje
@@ -50,7 +50,7 @@ const SystemInfoView: React.FC = () => {
         fetchSystemInfo();
 
         return () => controller.abort();
-    }, [selectedServerId]);
+    }, [selectedServer?.agent_base_url, selectedServerId]);
 
     if (loading || !info) {
         return (

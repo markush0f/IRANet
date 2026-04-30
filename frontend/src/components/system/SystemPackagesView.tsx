@@ -9,7 +9,7 @@ type SortDir = 'asc' | 'desc';
 const PAGE_SIZES = [10, 20, 50, 100];
 
 const SystemPackagesView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [data, setData] = useState<SystemPackagesResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -33,6 +33,7 @@ const SystemPackagesView: React.FC = () => {
                     sortBy,
                     sortDir,
                     serverId: selectedServerId,
+                    baseUrl: selectedServer?.agent_base_url,
                     signal: controller.signal,
                 });
                 setData(response);
@@ -53,7 +54,7 @@ const SystemPackagesView: React.FC = () => {
         fetchPackages();
 
         return () => controller.abort();
-    }, [page, pageSize, query, selectedServerId, sortBy, sortDir]);
+    }, [page, pageSize, query, selectedServer?.agent_base_url, selectedServerId, sortBy, sortDir]);
 
     const total = data?.total ?? 0;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));

@@ -22,7 +22,7 @@ const formatNullable = (value?: string | number | null) => {
 };
 
 const SystemServicesView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [services, setServices] = useState<SystemdServiceSimple[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +36,7 @@ const SystemServicesView: React.FC = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getSystemdServicesSimple(limit, selectedServerId, controller.signal);
+                const data = await getSystemdServicesSimple(limit, selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setServices(data);
             } catch (e) {
                 if (
@@ -55,7 +55,7 @@ const SystemServicesView: React.FC = () => {
         fetchServices();
 
         return () => controller.abort();
-    }, [limit, selectedServerId]);
+    }, [limit, selectedServer?.agent_base_url, selectedServerId]);
 
     const activeCount = services.filter((service) => service.active_state === 'active').length;
     const filteredServices = services.filter((service) => {
