@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { DockerContainer } from '../../types';
+import { useServer } from '../../contexts/ServerContext';
 import { getDockerContainers } from '../../services/api';
 
 const formatCreated = (created: string) => {
@@ -9,6 +10,7 @@ const formatCreated = (created: string) => {
 };
 
 const DockerView: React.FC = () => {
+    const { selectedServerId } = useServer();
     const [containers, setContainers] = useState<DockerContainer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ const DockerView: React.FC = () => {
         const fetchContainers = async () => {
             try {
                 setError(null);
-                const data = await getDockerContainers(controller.signal);
+                const data = await getDockerContainers(selectedServerId, controller.signal);
                 setContainers(data);
             } catch (e) {
                 if (
@@ -41,7 +43,7 @@ const DockerView: React.FC = () => {
         fetchContainers();
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     const runningContainers = containers.filter(
         (c) => c.state === 'running' || c.status === 'running'

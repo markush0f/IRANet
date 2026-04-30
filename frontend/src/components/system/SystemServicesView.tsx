@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { SystemdServiceSimple } from '../../types';
+import { useServer } from '../../contexts/ServerContext';
 import { getSystemdServicesSimple } from '../../services/api';
 
 const formatBytes = (value?: number | null) => {
@@ -21,6 +22,7 @@ const formatNullable = (value?: string | number | null) => {
 };
 
 const SystemServicesView: React.FC = () => {
+    const { selectedServerId } = useServer();
     const [services, setServices] = useState<SystemdServiceSimple[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ const SystemServicesView: React.FC = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getSystemdServicesSimple(limit, controller.signal);
+                const data = await getSystemdServicesSimple(limit, selectedServerId, controller.signal);
                 setServices(data);
             } catch (e) {
                 if (
@@ -53,7 +55,7 @@ const SystemServicesView: React.FC = () => {
         fetchServices();
 
         return () => controller.abort();
-    }, [limit]);
+    }, [limit, selectedServerId]);
 
     const activeCount = services.filter((service) => service.active_state === 'active').length;
     const filteredServices = services.filter((service) => {

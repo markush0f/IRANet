@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MOCK_SYSTEM_INFO } from '../../mockData';
 import type { SystemInfo } from '../../types';
 import { getSystemInfo } from '../../services/api';
+import { useServer } from '../../contexts/ServerContext';
 import InfoCard from './InfoCard';
 import InfoRow from './InfoRow';
 import SystemInfoHeader from './SystemInfoHeader';
@@ -16,6 +17,7 @@ const formatBootTime = (timestamp: number) => {
 };
 
 const SystemInfoView: React.FC = () => {
+    const { selectedServerId } = useServer();
     const [info, setInfo] = useState<SystemInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ const SystemInfoView: React.FC = () => {
         const fetchSystemInfo = async () => {
             try {
                 setError(null);
-                const data = await getSystemInfo(controller.signal);
+                const data = await getSystemInfo(selectedServerId, controller.signal);
                 setInfo(data);
             } catch (e) {
                 // Ignorar aborts provocados por React StrictMode / desmontaje
@@ -48,7 +50,7 @@ const SystemInfoView: React.FC = () => {
         fetchSystemInfo();
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     if (loading || !info) {
         return (

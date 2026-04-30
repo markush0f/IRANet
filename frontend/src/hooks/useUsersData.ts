@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useServer } from '../contexts/ServerContext';
 import type { RemoteUser, UsersSummary } from '../types';
 import {
     fallbackSummary,
@@ -13,6 +14,7 @@ const isAbortError = (error: unknown): boolean => {
 };
 
 export const useUsersData = () => {
+    const { selectedServerId } = useServer();
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState<UserFilterOption>('all');
     const [users, setUsers] = useState<RemoteUser[]>(getUsersFallbackByType('all'));
@@ -26,7 +28,7 @@ export const useUsersData = () => {
         const loadSummary = async () => {
             try {
                 setError(null);
-                const summaryData = await fetchUsersSummary(controller.signal);
+                const summaryData = await fetchUsersSummary(selectedServerId, controller.signal);
                 setSummary(summaryData);
             } catch (e) {
                 if (isAbortError(e)) return;
@@ -39,7 +41,7 @@ export const useUsersData = () => {
         loadSummary();
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -48,7 +50,7 @@ export const useUsersData = () => {
             try {
                 setError(null);
                 setLoading(true);
-                const usersData = await fetchUsersByType(typeFilter, controller.signal);
+                const usersData = await fetchUsersByType(typeFilter, selectedServerId, controller.signal);
                 setUsers(usersData);
             } catch (e) {
                 if (isAbortError(e)) return;
@@ -63,7 +65,7 @@ export const useUsersData = () => {
         loadUsers();
 
         return () => controller.abort();
-    }, [typeFilter]);
+    }, [selectedServerId, typeFilter]);
 
     const filteredUsers = useMemo(() => {
         if (!searchTerm.trim()) return users;

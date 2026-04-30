@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Database, Server, Satellite, Shield, Activity } from 'lucide-react';
 import { createApplication, deleteApplication, getApplicationsList, updateApplication, type RemoteApplicationRecord } from '../../services/api';
 import { toast } from 'react-hot-toast';
+import { useServer } from '../../contexts/ServerContext';
 import ConfirmDeleteModal from '../common/ConfirmDeleteModal';
 import EditApplicationModal from '../common/EditApplicationModal';
 
@@ -35,6 +36,7 @@ const ICON_OPTIONS = [
 const iconFromKey = (key: string) => ICON_OPTIONS.find(opt => opt.key === key)?.Icon ?? Activity;
 
 const ApplicationsView: React.FC = () => {
+    const { selectedServerId } = useServer();
     const [mode, setMode] = useState<Mode>('list');
     const [applications, setApplications] = useState<Application[]>([]);
     const [logs, setLogs] = useState<ApplicationLog[]>([]);
@@ -60,7 +62,7 @@ const ApplicationsView: React.FC = () => {
         setLoadingList(true);
         setListError(null);
 
-        getApplicationsList(controller.signal)
+        getApplicationsList(selectedServerId ?? undefined, controller.signal)
             .then(records => {
                 if (!records.length) {
                     setApplications([]);
@@ -90,7 +92,7 @@ const ApplicationsView: React.FC = () => {
             });
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     const logsByApp = useMemo(() => {
         return logs.reduce<Record<string, ApplicationLog[]>>((acc, log) => {
@@ -144,6 +146,7 @@ const ApplicationsView: React.FC = () => {
 
         try {
             const created = await createApplication({
+                serverId: selectedServerId,
                 cwd: form.cwd.trim(),
                 name: form.name.trim(),
                 log_base_paths: logPaths,

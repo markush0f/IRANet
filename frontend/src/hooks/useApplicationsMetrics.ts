@@ -269,7 +269,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
             setSnapshotLoading(true);
             setSnapshotError(null);
             try {
-                const data = await getProcessesSnapshot(snapshotLimit, signal);
+                const data = await getProcessesSnapshot(snapshotLimit, serverId ?? undefined, signal);
                 setSnapshot(data);
             } catch (err) {
                 const aborted =
@@ -282,7 +282,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
                 setSnapshotLoading(false);
             }
         },
-        [snapshotLimit]
+        [serverId, snapshotLimit]
     );
 
     const stopLive = useCallback(() => {
@@ -306,7 +306,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         if (!selectedApp?.id) return;
         const controller = new AbortController();
         try {
-            const data = await getProcessesSnapshot(snapshotLimit, controller.signal);
+            const data = await getProcessesSnapshot(snapshotLimit, serverId ?? undefined, controller.signal);
             setSnapshot(data);
 
             const pid = appRuntime?.pid ?? selectedApp.pid;
@@ -321,7 +321,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         } finally {
             controller.abort();
         }
-    }, [appendLiveSample, appRuntime?.pid, selectedApp?.id, selectedApp?.pid, snapshotLimit]);
+    }, [appendLiveSample, appRuntime?.pid, selectedApp?.id, selectedApp?.pid, serverId, snapshotLimit]);
 
     const refreshAppMetricsSeries = useCallback(async (signal?: AbortSignal) => {
         const applicationId = selectedApp?.id;
@@ -391,7 +391,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         setDiscoveryLoading(true);
         setDiscoveryError(null);
 
-        getApplicationDiscoveryDetails(selectedApp.workdir, 15, controller.signal)
+        getApplicationDiscoveryDetails(selectedApp.workdir, 15, serverId ?? undefined, controller.signal)
             .then(data => {
                 setDiscovery(data);
             })
@@ -406,7 +406,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
             .finally(() => setDiscoveryLoading(false));
 
         return () => controller.abort();
-    }, [selectedApp?.workdir]);
+    }, [selectedApp?.workdir, serverId]);
 
     useEffect(() => {
         if (!selectedApp?.id) {

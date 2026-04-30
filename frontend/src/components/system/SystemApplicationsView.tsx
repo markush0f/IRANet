@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useServer } from '../../contexts/ServerContext';
 import type { SystemApplication } from '../../types';
 import { getApplicationDiscoveryBasicGrouped } from '../../services/api';
 import SystemApplicationsSection from './SystemApplicationsSection';
@@ -6,6 +7,7 @@ import SystemApplicationsSection from './SystemApplicationsSection';
 const MIN_ETIMES_SECONDS = 15;
 
 const SystemApplicationsView: React.FC = () => {
+    const { selectedServerId } = useServer();
     const [applications, setApplications] = useState<SystemApplication[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +16,7 @@ const SystemApplicationsView: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
-            const discovered = await getApplicationDiscoveryBasicGrouped(MIN_ETIMES_SECONDS, signal);
+            const discovered = await getApplicationDiscoveryBasicGrouped(MIN_ETIMES_SECONDS, selectedServerId, signal);
             setApplications(discovered);
         } catch (e) {
             const aborted =
@@ -26,7 +28,7 @@ const SystemApplicationsView: React.FC = () => {
         } finally {
             setTimeout(() => setLoading(false), 250);
         }
-    }, []);
+    }, [selectedServerId]);
 
     useEffect(() => {
         const controller = new AbortController();

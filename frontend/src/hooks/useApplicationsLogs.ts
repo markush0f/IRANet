@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useServer } from '../contexts/ServerContext';
 import {
     getApplicationLogFiles,
     getApplicationsLogsList,
@@ -11,6 +12,7 @@ import type { LogEvent } from '../types';
 export type LiveStatus = 'idle' | 'connecting' | 'connected' | 'closed' | 'error';
 
 export const useApplicationsLogs = () => {
+    const { selectedServerId } = useServer();
     const [applications, setApplications] = useState<RemoteApplicationRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export const useApplicationsLogs = () => {
         setLoading(true);
         setError(null);
 
-        getApplicationsLogsList(controller.signal)
+        getApplicationsLogsList(selectedServerId ?? undefined, controller.signal)
             .then(data => {
                 setApplications(data);
             })
@@ -49,7 +51,7 @@ export const useApplicationsLogs = () => {
             });
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     const filteredApplications = useMemo(() => {
         return applications.filter(app => (app.log_paths ?? []).length > 0);

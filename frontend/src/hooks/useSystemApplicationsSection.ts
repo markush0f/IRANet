@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useServer } from '../contexts/ServerContext';
 import type { ApplicationDiscoveryDetails, SystemApplication } from '../types';
 import {
     createApplication,
@@ -11,6 +12,7 @@ import {
 } from '../services/api';
 
 export const useSystemApplicationsSection = () => {
+    const { selectedServerId } = useServer();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState<SystemApplication | null>(null);
     const [discoveryCwd, setDiscoveryCwd] = useState('');
@@ -31,7 +33,7 @@ export const useSystemApplicationsSection = () => {
     const refreshRegisteredApplications = useCallback(async (signal?: AbortSignal) => {
         setRegisteredLoading(true);
         try {
-            const apps = await getApplicationsList(signal);
+            const apps = await getApplicationsList(selectedServerId ?? undefined, signal);
             setRegisteredApplications(apps);
         } catch (err) {
             const aborted =
@@ -43,7 +45,7 @@ export const useSystemApplicationsSection = () => {
         } finally {
             setRegisteredLoading(false);
         }
-    }, []);
+    }, [selectedServerId]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -135,6 +137,7 @@ export const useSystemApplicationsSection = () => {
 
         try {
             await createApplication({
+                serverId: selectedServerId,
                 cwd,
                 name,
                 log_base_paths: cleanedBasePaths,
@@ -148,7 +151,7 @@ export const useSystemApplicationsSection = () => {
         } finally {
             setSavingApplication(false);
         }
-    }, [applicationName, closeModal, discoveryCwd, logBasePaths]);
+    }, [applicationName, closeModal, discoveryCwd, logBasePaths, selectedServerId]);
 
     const handleRetryFetch = useCallback(() => {
         if (!discoveryCwd) {
@@ -181,7 +184,7 @@ export const useSystemApplicationsSection = () => {
 
         const controller = new AbortController();
 
-        getApplicationDiscoveryDetails(discoveryCwd, 15, controller.signal)
+        getApplicationDiscoveryDetails(discoveryCwd, 15, selectedServerId, controller.signal)
             .then(data => {
                 setDiscoveryDetails(data);
                 setLogBasePaths(data.paths?.log_base_paths ?? []);
@@ -204,7 +207,7 @@ export const useSystemApplicationsSection = () => {
         return () => {
             controller.abort();
         };
-    }, [discoveryCwd, fetchKey, isModalOpen]);
+    }, [discoveryCwd, fetchKey, isModalOpen, selectedServerId]);
 
     useEffect(() => {
         if (!isModalOpen) {

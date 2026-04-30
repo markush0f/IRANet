@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DiskProcessesResponse, DiskTotalResponse, SystemDiskResponse } from '../types';
+import { useServer } from '../contexts/ServerContext';
 import { getDiskProcesses, getSystemDisk, getSystemDiskTotal } from '../services/api';
 import { MOCK_SYSTEM_DISK } from '../mockData';
 
@@ -17,6 +18,7 @@ const formatBytes = (bytes: number) => {
 };
 
 export const useSystemDiskView = () => {
+    const { selectedServerId } = useServer();
     const [diskInfo, setDiskInfo] = useState<SystemDiskResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export const useSystemDiskView = () => {
         const fetchDiskInfo = async () => {
             try {
                 setError(null);
-                const data = await getSystemDisk(controller.signal);
+                const data = await getSystemDisk(selectedServerId, controller.signal);
                 setDiskInfo(data);
             } catch (err) {
                 const aborted =
@@ -56,7 +58,7 @@ export const useSystemDiskView = () => {
         fetchDiskInfo();
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -64,7 +66,7 @@ export const useSystemDiskView = () => {
         const fetchDiskTotal = async () => {
             try {
                 setTotalError(null);
-                const data = await getSystemDiskTotal(controller.signal);
+                const data = await getSystemDiskTotal(selectedServerId, controller.signal);
                 setTotalInfo(data);
             } catch (err) {
                 const aborted =
@@ -86,7 +88,7 @@ export const useSystemDiskView = () => {
         fetchDiskTotal();
 
         return () => controller.abort();
-    }, []);
+    }, [selectedServerId]);
 
     const toggleMountpoint = (mountpoint: string) => {
         setExpandedMountpoints(prev => {
@@ -110,7 +112,7 @@ export const useSystemDiskView = () => {
         try {
             setProcessesError(prev => ({ ...prev, [mountpoint]: null }));
             setProcessesLoading(prev => ({ ...prev, [mountpoint]: true }));
-            const data = await getDiskProcesses(mountpoint, 10, controller.signal);
+            const data = await getDiskProcesses(mountpoint, 10, selectedServerId, controller.signal);
             setProcessesByMountpoint(prev => ({ ...prev, [mountpoint]: data }));
         } catch (err) {
             const aborted =
