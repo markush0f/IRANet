@@ -19,7 +19,7 @@ from app.api.applications_metrics import router as applications_metrics_router
 from app.api.extensions import router as extensions_router
 from app.api.servers import router as servers_router
 from app.core.application_metrics_scheduler import application_metrics_scheduler
-from app.core.config import load_config
+from app.core.config import is_agent_role, load_config
 from app.core.logger import get_logger
 from app.core.metrics_scheduler import metrics_scheduler
 from app.core.database import engine, get_session
@@ -34,9 +34,15 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Start background metrics scheduler
-    system_metrics_task = asyncio.create_task(metrics_scheduler())
-    application_metrics_task = asyncio.create_task(application_metrics_scheduler())
+    system_metrics_task = None
+    application_metrics_task = None
+
+    if is_agent_role():
+        system_metrics_task = asyncio.create_task(metrics_scheduler())
+        application_metrics_task = asyncio.create_task(application_metrics_scheduler())
+        logger.info("running in agent mode")
+    else:
+        logger.info("running in control-plane mode")
 
     # Laod enabled extensions from database at startup
     async for session in get_session():
@@ -52,9 +58,10 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        # Stop background tasks and close database engine
-        system_metrics_task.cancel()
-        application_metrics_task.cancel()
+        if system_metrics_task is not None:
+            system_metrics_task.cancel()
+        if application_metrics_task is not None:
+            application_metrics_task.cancel()
         await engine.dispose()
 
 
