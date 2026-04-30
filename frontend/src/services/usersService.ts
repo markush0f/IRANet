@@ -33,18 +33,18 @@ const filterFallbackUsers = (type: UserFilterOption): RemoteUser[] => {
     return fallbackUsers.filter(user => user.type === type);
 };
 
-export const fetchUsersSummary = async (serverId?: string | null, signal?: AbortSignal): Promise<UsersSummary> => {
-    return getUsersSummary(serverId, signal);
+export const fetchUsersSummary = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<UsersSummary> => {
+    return getUsersSummary(serverId, signal, baseUrl);
 };
 
-export const fetchUsersByType = async (type: UserFilterOption, serverId?: string | null, signal?: AbortSignal): Promise<RemoteUser[]> => {
+export const fetchUsersByType = async (type: UserFilterOption, serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<RemoteUser[]> => {
     switch (type) {
         case 'human':
-            return getHumanUsers(serverId, signal);
+            return getHumanUsers(serverId, signal, baseUrl);
         case 'system':
-            return getSystemUsers(serverId, signal);
+            return getSystemUsers(serverId, signal, baseUrl);
         default:
-            return getUsersList(serverId, signal);
+            return getUsersList(serverId, signal, baseUrl);
     }
 };
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useServer } from '../../contexts/ServerContext';
 import type { SystemPackage, SystemPackageHistoryEvent } from '../../types';
 import { getInstalledPackages, getPackageHistory, getPackageInstalledAt } from '../../services/api';
 import PackageSearchInput from './packages/PackageSearchInput';
@@ -15,6 +16,7 @@ type HistoryActionFilter = 'all' | 'install' | 'upgrade' | 'remove';
 const PAGE_SIZES = [10, 20, 50, 100];
 
 const SystemPackagesHistoryView: React.FC = () => {
+    const { selectedServerId, selectedServer } = useServer();
     const [activeTab, setActiveTab] = useState<'installed' | 'history'>('installed');
 
     const [packages, setPackages] = useState<SystemPackage[]>([]);
@@ -58,6 +60,8 @@ const SystemPackagesHistoryView: React.FC = () => {
                     query,
                     sortBy,
                     sortDir,
+                    serverId: selectedServerId,
+                    baseUrl: selectedServer?.agent_base_url,
                     signal: controller.signal,
                 });
                 setPackages(response.items ?? []);
@@ -79,7 +83,7 @@ const SystemPackagesHistoryView: React.FC = () => {
         fetchPackages();
 
         return () => controller.abort();
-    }, [page, pageSize, query, sortBy, sortDir]);
+    }, [page, pageSize, query, selectedServer?.agent_base_url, selectedServerId, sortBy, sortDir]);
 
     useEffect(() => {
         if (!selectedPackage) {
@@ -92,8 +96,14 @@ const SystemPackagesHistoryView: React.FC = () => {
                 setDetailLoading(true);
                 setDetailError(null);
                 const [installed, history] = await Promise.all([
-                    getPackageInstalledAt(selectedPackage.name, controller.signal),
-                    getPackageHistory({ packageName: selectedPackage.name, sortDir: 'desc', signal: controller.signal }),
+                    getPackageInstalledAt(selectedPackage.name, selectedServerId, controller.signal, selectedServer?.agent_base_url),
+                    getPackageHistory({
+                        packageName: selectedPackage.name,
+                        sortDir: 'desc',
+                        serverId: selectedServerId,
+                        baseUrl: selectedServer?.agent_base_url,
+                        signal: controller.signal,
+                    }),
                 ]);
                 setInstalledAt(installed.installed_at ?? null);
                 setDetailHistory(history.items ?? []);
@@ -114,7 +124,7 @@ const SystemPackagesHistoryView: React.FC = () => {
         fetchDetails();
 
         return () => controller.abort();
-    }, [selectedPackage]);
+    }, [selectedPackage, selectedServer?.agent_base_url, selectedServerId]);
 
     useEffect(() => {
         if (activeTab !== 'history') {
@@ -131,6 +141,8 @@ const SystemPackagesHistoryView: React.FC = () => {
                     dateFrom: dateFrom || undefined,
                     dateTo: dateTo || undefined,
                     sortDir: historySortDir,
+                    serverId: selectedServerId,
+                    baseUrl: selectedServer?.agent_base_url,
                     signal: controller.signal,
                 });
                 setHistoryItems(response.items ?? []);
@@ -151,7 +163,7 @@ const SystemPackagesHistoryView: React.FC = () => {
         fetchHistory();
 
         return () => controller.abort();
-    }, [activeTab, historyAction, historySortDir, dateFrom, dateTo]);
+    }, [activeTab, dateFrom, dateTo, historyAction, historySortDir, selectedServer?.agent_base_url, selectedServerId]);
 
     const pageLabel = useMemo(() => {
         if (!packagesTotal) return '0 resultados';

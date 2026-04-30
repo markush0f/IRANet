@@ -14,7 +14,7 @@ const isAbortError = (error: unknown): boolean => {
 };
 
 export const useUsersData = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState<UserFilterOption>('all');
     const [users, setUsers] = useState<RemoteUser[]>(getUsersFallbackByType('all'));
@@ -28,7 +28,7 @@ export const useUsersData = () => {
         const loadSummary = async () => {
             try {
                 setError(null);
-                const summaryData = await fetchUsersSummary(selectedServerId, controller.signal);
+                const summaryData = await fetchUsersSummary(selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setSummary(summaryData);
             } catch (e) {
                 if (isAbortError(e)) return;
@@ -41,7 +41,7 @@ export const useUsersData = () => {
         loadSummary();
 
         return () => controller.abort();
-    }, [selectedServerId]);
+    }, [selectedServer?.agent_base_url, selectedServerId]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -50,7 +50,7 @@ export const useUsersData = () => {
             try {
                 setError(null);
                 setLoading(true);
-                const usersData = await fetchUsersByType(typeFilter, selectedServerId, controller.signal);
+                const usersData = await fetchUsersByType(typeFilter, selectedServerId, controller.signal, selectedServer?.agent_base_url);
                 setUsers(usersData);
             } catch (e) {
                 if (isAbortError(e)) return;
@@ -65,7 +65,7 @@ export const useUsersData = () => {
         loadUsers();
 
         return () => controller.abort();
-    }, [selectedServerId, typeFilter]);
+    }, [selectedServer?.agent_base_url, selectedServerId, typeFilter]);
 
     const filteredUsers = useMemo(() => {
         if (!searchTerm.trim()) return users;
