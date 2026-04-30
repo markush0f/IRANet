@@ -6,6 +6,7 @@ from app.core.config import get_server_id
 from app.core.database import get_session
 from app.models.requests.create_application_request import CreateApplicationRequest
 from app.models.requests.update_application_request import UpdateApplicationRequest
+from app.services.remote_agent_service import RemoteAgentService
 from app.services.applications.applications import ApplicationsService
 from app.services.applications.applications_system_service import (
     ApplicationsSystemService,
@@ -16,13 +17,14 @@ router = APIRouter(prefix="/applications", tags=["applications"])
 
 
 @router.get("/discover")
-def discover(
+async def discover(
     session: AsyncSession = Depends(get_session),
     min_etimes_seconds: int = Query(
         15,
         ge=1,
         description="Minimum uptime in seconds for a process to be considered an application",
     ),
+    server_id: str | None = Query(None),
 ):
     """
     Discover running applications on the host system.
@@ -42,18 +44,28 @@ def discover(
     Returns:
     - A list of discovered application candidates
     """
+    remote = RemoteAgentService(session)
+    target_server_id = remote.require_live_server_id(server_id)
+    if remote.should_proxy(target_server_id):
+        return await remote.get_json(
+            server_id=target_server_id,
+            path="/applications/discover",
+            params={"min_etimes_seconds": min_etimes_seconds},
+        )
+    remote.validate_local_scope(server_id)
     service = ApplicationsSystemService(session)
     return service.discover_applications(min_etimes_seconds=min_etimes_seconds)
 
 
 @router.get("/discover/basic/grouped")
-def discover_basic_grouped(
+async def discover_basic_grouped(
     session: AsyncSession = Depends(get_session),
     min_etimes_seconds: int = Query(
         15,
         ge=1,
         description="Minimum uptime in seconds for a process to be considered an application",
     ),
+    server_id: str | None = Query(None),
 ):
     """
     Discover running applications with minimal grouped information.
@@ -76,12 +88,21 @@ def discover_basic_grouped(
     Returns:
     - A grouped list of discovered application candidates
     """
+    remote = RemoteAgentService(session)
+    target_server_id = remote.require_live_server_id(server_id)
+    if remote.should_proxy(target_server_id):
+        return await remote.get_json(
+            server_id=target_server_id,
+            path="/applications/discover/basic/grouped",
+            params={"min_etimes_seconds": min_etimes_seconds},
+        )
+    remote.validate_local_scope(server_id)
     service = ApplicationsSystemService(session)
     return service.discover_applications_grouped(min_etimes_seconds=min_etimes_seconds)
 
 
 @router.get("/discover/details")
-def discover_application_details_endpoint(
+async def discover_application_details_endpoint(
     session: AsyncSession = Depends(get_session),
     cwd: str = Query(
         description="Project working directory of the discovered application",
@@ -91,6 +112,7 @@ def discover_application_details_endpoint(
         ge=1,
         description="Minimum uptime in seconds for a process to be considered",
     ),
+    server_id: str | None = Query(None),
 ):
     """
     Retrieve detailed information about a discovered application.
@@ -114,6 +136,15 @@ def discover_application_details_endpoint(
     Raises:
     - 404 if no running application is found for the given cwd
     """
+    remote = RemoteAgentService(session)
+    target_server_id = remote.require_live_server_id(server_id)
+    if remote.should_proxy(target_server_id):
+        return await remote.get_json(
+            server_id=target_server_id,
+            path="/applications/discover/details",
+            params={"cwd": cwd, "min_etimes_seconds": min_etimes_seconds},
+        )
+    remote.validate_local_scope(server_id)
     service = ApplicationsSystemService(session)
     details = service.discover_application_details(
         cwd=cwd,
@@ -133,6 +164,7 @@ def discover_application_details_endpoint(
 async def create_application(
     data: CreateApplicationRequest,
     session: AsyncSession = Depends(get_session),
+    server_id: str | None = Query(None),
 ):
     """
     Create and persist a new application.
@@ -153,6 +185,15 @@ async def create_application(
     - The application ID
     - Creation status
     """
+    remote = RemoteAgentService(session)
+    target_server_id = remote.require_live_server_id(server_id)
+    if remote.should_proxy(target_server_id):
+        return await remote.post_json(
+            server_id=target_server_id,
+            path="/applications",
+            json_body=data.model_dump(mode="json"),
+        )
+    remote.validate_local_scope(server_id)
     service = ApplicationsService(session)
     application_id = await service.create_application(
         data=data,
