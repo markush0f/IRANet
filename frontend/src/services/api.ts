@@ -27,11 +27,18 @@ export const getBaseUrl = (): string => {
     return base.replace(/\/+$/, '');
 };
 
-export const getSystemInfo = async (serverId?: string | null, signal?: AbortSignal): Promise<SystemInfo> => {
+const resolveBaseUrl = (baseUrl?: string | null): string => {
+    if (baseUrl?.trim()) {
+        return baseUrl.replace(/\/+$/, '');
+    }
+    return getBaseUrl();
+};
+
+export const getSystemInfo = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<SystemInfo> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/system/info${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/info${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -50,12 +57,13 @@ export const getSystemInfo = async (serverId?: string | null, signal?: AbortSign
 export const getSystemdServicesSimple = async (
     limit = 4,
     serverId?: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<SystemdServiceSimple[]> => {
     const params = new URLSearchParams();
     params.set('limit', String(limit));
     if (serverId) params.set('server_id', serverId);
-    const url = `${getBaseUrl()}/services/systemd/simple?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/services/systemd/simple?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -69,11 +77,11 @@ export const getSystemdServicesSimple = async (
     return [];
 };
 
-export const getDockerContainers = async (serverId?: string | null, signal?: AbortSignal): Promise<DockerContainer[]> => {
+export const getDockerContainers = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<DockerContainer[]> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/services/docker/all/containers${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/services/docker/all/containers${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -87,13 +95,14 @@ export const getDockerContainers = async (serverId?: string | null, signal?: Abo
 export const getProcessesSnapshot = async (
     limit = 10,
     serverId?: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<ProcessesSnapshot> => {
     const safeLimit = Math.min(Math.max(1, limit), 100);
     const params = new URLSearchParams();
     params.set('limit', String(safeLimit));
     if (serverId) params.set('server_id', serverId);
-    const url = `${getBaseUrl()}/processes/snapshot?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/processes/snapshot?${params.toString()}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -104,11 +113,11 @@ export const getProcessesSnapshot = async (
     return data as ProcessesSnapshot;
 };
 
-export const getUsersSummary = async (serverId?: string | null, signal?: AbortSignal): Promise<UsersSummary> => {
+export const getUsersSummary = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<UsersSummary> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/users/summary${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/users/summary${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -118,11 +127,11 @@ export const getUsersSummary = async (serverId?: string | null, signal?: AbortSi
     return response.json() as Promise<UsersSummary>;
 };
 
-export const getUsersList = async (serverId?: string | null, signal?: AbortSignal): Promise<RemoteUser[]> => {
+export const getUsersList = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<RemoteUser[]> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/users${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/users${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -137,14 +146,15 @@ export const getApplicationDiscoveryDetails = async (
     cwd: string,
     minEtimesSeconds = 15,
     serverId?: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<ApplicationDiscoveryDetails> => {
     const params = new URLSearchParams();
     params.set('cwd', cwd);
     params.set('min_etimes_seconds', String(minEtimesSeconds));
     if (serverId) params.set('server_id', serverId);
 
-    const url = `${getBaseUrl()}/applications/discover/details?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/applications/discover/details?${params.toString()}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -157,13 +167,14 @@ export const getApplicationDiscoveryDetails = async (
 export const getApplicationDiscoveryBasicGrouped = async (
     minEtimesSeconds = 15,
     serverId?: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<SystemApplication[]> => {
     const params = new URLSearchParams();
     params.set('min_etimes_seconds', String(minEtimesSeconds));
     if (serverId) params.set('server_id', serverId);
 
-    const url = `${getBaseUrl()}/applications/discover/basic/grouped?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/applications/discover/basic/grouped?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -185,11 +196,11 @@ export const getApplicationDiscoveryBasicGrouped = async (
         .filter((entry) => Boolean(entry.cwd));
 };
 
-export const getSystemUsers = async (serverId?: string | null, signal?: AbortSignal): Promise<RemoteUser[]> => {
+export const getSystemUsers = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<RemoteUser[]> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/users/system${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/users/system${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -200,11 +211,11 @@ export const getSystemUsers = async (serverId?: string | null, signal?: AbortSig
     return (data.users ?? []) as RemoteUser[];
 };
 
-export const getSystemDisk = async (serverId?: string | null, signal?: AbortSignal): Promise<SystemDiskResponse> => {
+export const getSystemDisk = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<SystemDiskResponse> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/system/disk${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/disk${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -218,13 +229,14 @@ export const getDiskProcesses = async (
     mountpoint: string,
     limit = 10,
     serverId?: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<DiskProcessesResponse> => {
     const params = new URLSearchParams();
     params.set('mountpoint', mountpoint);
     params.set('limit', String(limit));
     if (serverId) params.set('server_id', serverId);
-    const url = `${getBaseUrl()}/system/disk/processes?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/disk/processes?${params.toString()}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -234,11 +246,11 @@ export const getDiskProcesses = async (
     return response.json() as Promise<DiskProcessesResponse>;
 };
 
-export const getSystemDiskTotal = async (serverId?: string | null, signal?: AbortSignal): Promise<DiskTotalResponse> => {
+export const getSystemDiskTotal = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<DiskTotalResponse> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/system/disk/total${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/disk/total${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -255,6 +267,7 @@ export interface GetSystemPackagesParams {
     sortBy?: 'name' | 'version' | 'arch';
     sortDir?: 'asc' | 'desc';
     serverId?: string | null;
+    baseUrl?: string | null;
     signal?: AbortSignal;
 }
 
@@ -265,6 +278,7 @@ export const getSystemPackages = async ({
     sortBy = 'name',
     sortDir = 'asc',
     serverId,
+    baseUrl,
     signal,
 }: GetSystemPackagesParams = {}): Promise<SystemPackagesResponse> => {
     const params = new URLSearchParams();
@@ -277,7 +291,7 @@ export const getSystemPackages = async ({
     params.set('sort_dir', sortDir);
     if (serverId) params.set('server_id', serverId);
 
-    const url = `${getBaseUrl()}/system/packages/?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/packages/?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -294,6 +308,7 @@ export interface GetInstalledPackagesParams {
     sortBy?: 'name' | 'version' | 'arch';
     sortDir?: 'asc' | 'desc';
     serverId?: string | null;
+    baseUrl?: string | null;
     signal?: AbortSignal;
 }
 
@@ -304,6 +319,7 @@ export const getInstalledPackages = async ({
     sortBy = 'name',
     sortDir = 'asc',
     serverId,
+    baseUrl,
     signal,
 }: GetInstalledPackagesParams = {}): Promise<SystemPackagesResponse> => {
     const params = new URLSearchParams();
@@ -317,7 +333,7 @@ export const getInstalledPackages = async ({
     params.set('sort_dir', sortDir);
     if (serverId) params.set('server_id', serverId);
 
-    const url = `${getBaseUrl()}/system/packages?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/packages?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -338,6 +354,7 @@ export interface GetPackageHistoryParams {
     dateTo?: string;
     sortDir?: 'asc' | 'desc';
     serverId?: string | null;
+    baseUrl?: string | null;
     signal?: AbortSignal;
 }
 
@@ -348,6 +365,7 @@ export const getPackageHistory = async ({
     dateTo,
     sortDir = 'desc',
     serverId,
+    baseUrl,
     signal,
 }: GetPackageHistoryParams = {}): Promise<SystemPackageHistoryResponse> => {
     const params = new URLSearchParams();
@@ -358,7 +376,7 @@ export const getPackageHistory = async ({
     if (sortDir) params.set('sort_dir', sortDir);
     if (serverId) params.set('server_id', serverId);
 
-    const url = `${getBaseUrl()}/system/packages/history?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/packages/history?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -375,12 +393,13 @@ export const getPackageHistory = async ({
 export const getPackageInstalledAt = async (
     packageName: string,
     serverId?: string | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<SystemPackageInstalledAtResponse> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/system/packages/history/installed-at/${encodeURIComponent(packageName)}${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/system/packages/history/installed-at/${encodeURIComponent(packageName)}${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -409,11 +428,11 @@ export const getDatabaseClassification = async (signal?: AbortSignal): Promise<D
     return [];
 };
 
-export const getHumanUsers = async (serverId?: string | null, signal?: AbortSignal): Promise<RemoteUser[]> => {
+export const getHumanUsers = async (serverId?: string | null, signal?: AbortSignal, baseUrl?: string | null): Promise<RemoteUser[]> => {
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/users/human${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/users/human${query ? `?${query}` : ''}`;
     const response = await fetch(url, { signal });
 
     if (!response.ok) {
@@ -546,9 +565,10 @@ export const getApplicationMetricSeries = async ({
 
 export const getApplicationRuntime = async (
     applicationId: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<ApplicationRuntimeResponse> => {
-    const url = `${getBaseUrl()}/applications/${encodeURIComponent(applicationId)}/runtime`;
+    const url = `${resolveBaseUrl(baseUrl)}/applications/${encodeURIComponent(applicationId)}/runtime`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -560,6 +580,7 @@ export const getApplicationRuntime = async (
 
 export interface CreateApplicationPayload {
     serverId?: string | null;
+    baseUrl?: string | null;
     cwd: string;
     name: string;
     log_base_paths?: string[];
@@ -569,11 +590,11 @@ export const createApplication = async (
     payload: CreateApplicationPayload,
     signal?: AbortSignal
 ) => {
-    const { serverId, ...body } = payload;
+    const { serverId, baseUrl, ...body } = payload;
     const params = new URLSearchParams();
     if (serverId) params.set('server_id', serverId);
     const query = params.toString();
-    const url = `${getBaseUrl()}/applications${query ? `?${query}` : ''}`;
+    const url = `${resolveBaseUrl(baseUrl)}/applications${query ? `?${query}` : ''}`;
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -920,13 +941,14 @@ export const getApplicationLogFiles = async (
     applicationId: string,
     page = 1,
     pageSize = 20,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<ApplicationLogFilesResponse> => {
     const params = new URLSearchParams();
     params.set('page', String(page));
     params.set('page_size', String(pageSize));
 
-    const url = `${getBaseUrl()}/logs/applications/${applicationId}/files?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/logs/applications/${applicationId}/files?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -987,13 +1009,14 @@ export const getApplicationLogFileHistory = async (
     applicationId: string,
     filePath: string,
     limit = 200,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<LogEvent[]> => {
     const params = new URLSearchParams();
     params.set('file_path', filePath);
     params.set('limit', String(limit));
 
-    const url = `${getBaseUrl()}/logs/applications/${applicationId}/files/history?${params.toString()}`;
+    const url = `${resolveBaseUrl(baseUrl)}/logs/applications/${applicationId}/files/history?${params.toString()}`;
     const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
 
     if (!response.ok) {
@@ -1020,9 +1043,10 @@ export const getApplicationLogFileHistory = async (
 
 export const rescanApplicationLogs = async (
     applicationId: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    baseUrl?: string | null,
 ): Promise<{ added: number }> => {
-    const url = `${getBaseUrl()}/logs/applications/${applicationId}/logs/rescan`;
+    const url = `${resolveBaseUrl(baseUrl)}/logs/applications/${applicationId}/logs/rescan`;
     const response = await fetch(url, {
         method: 'POST',
         signal,
