@@ -10,6 +10,9 @@ CREATE TABLE
         display_name TEXT,
         ip_address TEXT,
         ira_version TEXT,
+        agent_base_url TEXT,
+        environment TEXT,
+        capabilities JSONB,
         status TEXT NOT NULL DEFAULT 'online',
         last_seen_at TIMESTAMPTZ NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now ()

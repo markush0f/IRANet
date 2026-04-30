@@ -16,11 +16,17 @@ class CreateServerRequest(BaseModel):
     hostname: str
     display_name: str | None = None
     ip_address: str | None = None
+    agent_base_url: str | None = None
+    environment: str | None = None
+    capabilities: list[str] | None = None
 
 
 class UpdateServerRequest(BaseModel):
     display_name: str | None = None
     status: str | None = None
+    agent_base_url: str | None = None
+    environment: str | None = None
+    capabilities: list[str] | None = None
 
 
 class InstallCommandResponse(BaseModel):
@@ -61,6 +67,9 @@ async def create_server(
         hostname=data.hostname,
         display_name=data.display_name,
         ip_address=data.ip_address,
+        agent_base_url=data.agent_base_url,
+        environment=data.environment,
+        capabilities=data.capabilities,
     )
     return server
 
@@ -94,6 +103,9 @@ async def update_server(
         server_id=server_id,
         display_name=data.display_name,
         status=data.status,
+        agent_base_url=data.agent_base_url,
+        environment=data.environment,
+        capabilities=data.capabilities,
     )
     if not server:
         raise HTTPException(status_code=404, detail="Server not found")
