@@ -62,6 +62,17 @@ export const ServerProvider: React.FC<ServerProviderProps> = ({
         refreshServers();
     }, [refreshServers]);
 
+    useEffect(() => {
+        if (!servers.length) {
+            return;
+        }
+
+        const currentExists = servers.some(server => server.id === selectedServerId);
+        if (!currentExists) {
+            setSelectedServerId(servers[0].id);
+        }
+    }, [selectedServerId, servers]);
+
     const selectServer = useCallback((id: string) => {
         setSelectedServerId(id);
     }, []);
