@@ -13,6 +13,9 @@ from app.core.logger import get_logger
 logger = get_logger(__name__)
 load_dotenv(override=True)
 
+ROLE_AGENT = "agent"
+ROLE_CONTROL_PLANE = "control-plane"
+
 
 def _get_local_hostname() -> str:
     return socket.gethostname()
@@ -33,8 +36,35 @@ def get_server_id() -> str:
     server_id = os.getenv("IRA_SERVER_ID")
     if server_id:
         return server_id
+
+    if is_multi_server_mode():
+        raise RuntimeError(
+            "IRA_SERVER_ID is required when IRA_DATABASE_DSN is set for multiserver mode"
+        )
+
     hostname = _get_local_hostname()
     return hashlib.sha256(hostname.encode()).hexdigest()[:32]
+
+
+def get_runtime_role() -> str:
+    raw_role = os.getenv("IRA_ROLE", ROLE_AGENT).strip().lower()
+    if raw_role not in {ROLE_AGENT, ROLE_CONTROL_PLANE}:
+        raise RuntimeError(
+            "IRA_ROLE must be 'agent' or 'control-plane'"
+        )
+    return raw_role
+
+
+def is_agent_role() -> bool:
+    return get_runtime_role() == ROLE_AGENT
+
+
+def is_control_plane_role() -> bool:
+    return get_runtime_role() == ROLE_CONTROL_PLANE
+
+
+def is_multi_server_mode() -> bool:
+    return bool(os.getenv("IRA_DATABASE_DSN"))
 
 
 def get_server_hostname() -> str:
@@ -47,6 +77,38 @@ def get_server_ip() -> str | None:
 
 def get_server_display_name() -> str | None:
     return os.getenv("IRA_SERVER_NAME")
+
+
+def get_agent_base_url() -> str | None:
+    configured = os.getenv("IRA_AGENT_BASE_URL")
+    if configured:
+        return configured.rstrip("/")
+
+    ip_address = get_server_ip()
+    if not ip_address:
+        return None
+
+    port = os.getenv("IRA_AGENT_PORT", "8000").strip() or "8000"
+    return f"http://{ip_address}:{port}"
+
+
+def get_agent_shared_token() -> str | None:
+    token = os.getenv("IRA_AGENT_SHARED_TOKEN")
+    if token:
+        return token
+    return None
+
+
+def get_server_environment() -> str | None:
+    value = os.getenv("IRA_SERVER_ENVIRONMENT")
+    if value:
+        return value
+    return None
+
+
+def get_server_capabilities() -> list[str]:
+    raw = os.getenv("IRA_SERVER_CAPABILITIES", "")
+    return [value.strip() for value in raw.split(",") if value.strip()]
 
 
 def load_config() -> Dict[str, Any]:
