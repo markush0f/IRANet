@@ -36,7 +36,7 @@ const ICON_OPTIONS = [
 const iconFromKey = (key: string) => ICON_OPTIONS.find(opt => opt.key === key)?.Icon ?? Activity;
 
 const ApplicationsView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [mode, setMode] = useState<Mode>('list');
     const [applications, setApplications] = useState<Application[]>([]);
     const [logs, setLogs] = useState<ApplicationLog[]>([]);
@@ -147,6 +147,7 @@ const ApplicationsView: React.FC = () => {
         try {
             const created = await createApplication({
                 serverId: selectedServerId,
+                baseUrl: selectedServer?.agent_base_url,
                 cwd: form.cwd.trim(),
                 name: form.name.trim(),
                 log_base_paths: logPaths,

@@ -12,7 +12,7 @@ import type { LogEvent } from '../types';
 export type LiveStatus = 'idle' | 'connecting' | 'connected' | 'closed' | 'error';
 
 export const useApplicationsLogs = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const [applications, setApplications] = useState<RemoteApplicationRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -148,14 +148,14 @@ export const useApplicationsLogs = () => {
         setError(null);
         setRescanLoading(prev => ({ ...prev, [app.id]: true }));
         try {
-            await rescanApplicationLogs(app.id);
+            await rescanApplicationLogs(app.id, undefined, selectedServer?.agent_base_url);
         } catch (err) {
             console.error('Error rescanning application logs', err);
             setError('The application logs could not be rescanned.');
         } finally {
             setRescanLoading(prev => ({ ...prev, [app.id]: false }));
         }
-    }, []);
+    }, [selectedServer?.agent_base_url]);
 
     useEffect(() => {
         setLiveLines([]);
@@ -173,7 +173,7 @@ export const useApplicationsLogs = () => {
         setFilesLoading(true);
         setFilesError(null);
 
-        getApplicationLogFiles(selectedApp.id, 1, 50, controller.signal)
+        getApplicationLogFiles(selectedApp.id, 1, 50, controller.signal, selectedServer?.agent_base_url)
             .then(response => {
                 setLogFiles(response.items);
                 const fallback = response.items[0] ?? selectedApp.log_paths?.[0] ?? null;
@@ -191,7 +191,7 @@ export const useApplicationsLogs = () => {
             });
 
         return () => controller.abort();
-    }, [selectedApp?.id, selectedApp?.log_paths]);
+    }, [selectedApp?.id, selectedApp?.log_paths, selectedServer?.agent_base_url]);
 
     useEffect(() => {
         if (!selectedApp?.id || !selectedFile || !liveEnabled) {
@@ -199,7 +199,7 @@ export const useApplicationsLogs = () => {
             return;
         }
 
-        const baseUrl = getBaseUrl();
+        const baseUrl = selectedServer?.agent_base_url ?? getBaseUrl();
         const wsBase = baseUrl.startsWith('https')
             ? baseUrl.replace(/^https/, 'wss')
             : baseUrl.replace(/^http/, 'ws');
@@ -261,7 +261,7 @@ export const useApplicationsLogs = () => {
         return () => {
             socket.close();
         };
-    }, [appendLiveLine, liveEnabled, liveLevelFilter, liveSearchQuery, selectedApp?.id, selectedFile]);
+    }, [appendLiveLine, liveEnabled, liveLevelFilter, liveSearchQuery, selectedApp?.id, selectedFile, selectedServer?.agent_base_url]);
 
     useEffect(() => {
         if (!liveContainerRef.current) return;

@@ -74,7 +74,7 @@ const sortApplications = (items: RemoteApplicationRecord[]) => {
     });
 };
 
-export const useApplicationsMetrics = (serverId?: string | null) => {
+export const useApplicationsMetrics = (serverId?: string | null, serverBaseUrl?: string | null) => {
     const [applications, setApplications] = useState<RemoteApplicationRecord[]>([]);
     const [appsLoading, setAppsLoading] = useState(true);
     const [appsError, setAppsError] = useState<string | null>(null);
@@ -155,7 +155,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         setAppRuntimeError(null);
         setAppRuntimeLoadingById(prev => ({ ...prev, [applicationId]: true }));
         try {
-            const data = await getApplicationRuntime(applicationId, signal);
+            const data = await getApplicationRuntime(applicationId, signal, serverBaseUrl);
             setAppRuntime(data);
             setAppRuntimeById(prev => ({ ...prev, [applicationId]: data }));
         } catch (err) {
@@ -174,7 +174,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
                 return next;
             });
         }
-    }, [selectedApp?.id]);
+    }, [selectedApp?.id, serverBaseUrl]);
 
     const appRuntimeByIdRef = useRef(appRuntimeById);
     const appRuntimeLoadingByIdRef = useRef(appRuntimeLoadingById);
@@ -194,7 +194,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
 
         setAppRuntimeLoadingById(prev => ({ ...prev, [applicationId]: true }));
         try {
-            const data = await getApplicationRuntime(applicationId, signal);
+            const data = await getApplicationRuntime(applicationId, signal, serverBaseUrl);
             setAppRuntimeById(prev => ({ ...prev, [applicationId]: data }));
         } catch (err) {
             const aborted =
@@ -211,7 +211,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
                 return next;
             });
         }
-    }, []);
+    }, [serverBaseUrl]);
 
     const refreshApplications = useCallback(async (signal?: AbortSignal) => {
         setAppsLoading(true);
@@ -269,7 +269,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
             setSnapshotLoading(true);
             setSnapshotError(null);
             try {
-                const data = await getProcessesSnapshot(snapshotLimit, serverId ?? undefined, signal);
+                const data = await getProcessesSnapshot(snapshotLimit, serverId ?? undefined, signal, serverBaseUrl);
                 setSnapshot(data);
             } catch (err) {
                 const aborted =
@@ -282,7 +282,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
                 setSnapshotLoading(false);
             }
         },
-        [serverId, snapshotLimit]
+        [serverBaseUrl, serverId, snapshotLimit]
     );
 
     const stopLive = useCallback(() => {
@@ -306,7 +306,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         if (!selectedApp?.id) return;
         const controller = new AbortController();
         try {
-            const data = await getProcessesSnapshot(snapshotLimit, serverId ?? undefined, controller.signal);
+            const data = await getProcessesSnapshot(snapshotLimit, serverId ?? undefined, controller.signal, serverBaseUrl);
             setSnapshot(data);
 
             const pid = appRuntime?.pid ?? selectedApp.pid;
@@ -321,7 +321,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         } finally {
             controller.abort();
         }
-    }, [appendLiveSample, appRuntime?.pid, selectedApp?.id, selectedApp?.pid, serverId, snapshotLimit]);
+    }, [appendLiveSample, appRuntime?.pid, selectedApp?.id, selectedApp?.pid, serverBaseUrl, serverId, snapshotLimit]);
 
     const refreshAppMetricsSeries = useCallback(async (signal?: AbortSignal) => {
         const applicationId = selectedApp?.id;
@@ -391,7 +391,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         setDiscoveryLoading(true);
         setDiscoveryError(null);
 
-        getApplicationDiscoveryDetails(selectedApp.workdir, 15, serverId ?? undefined, controller.signal)
+        getApplicationDiscoveryDetails(selectedApp.workdir, 15, serverId ?? undefined, controller.signal, serverBaseUrl)
             .then(data => {
                 setDiscovery(data);
             })
@@ -406,7 +406,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
             .finally(() => setDiscoveryLoading(false));
 
         return () => controller.abort();
-    }, [selectedApp?.workdir, serverId]);
+    }, [selectedApp?.workdir, serverBaseUrl, serverId]);
 
     useEffect(() => {
         if (!selectedApp?.id) {
@@ -420,7 +420,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         setLogFilesLoading(true);
         setLogFilesError(null);
 
-        getApplicationLogFiles(selectedApp.id, 1, 100, controller.signal)
+        getApplicationLogFiles(selectedApp.id, 1, 100, controller.signal, serverBaseUrl)
             .then(response => {
                 setLogFiles(response.items);
                 setSelectedLogFile(current => current ?? response.items[0] ?? null);
@@ -436,7 +436,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
             .finally(() => setLogFilesLoading(false));
 
         return () => controller.abort();
-    }, [selectedApp?.id]);
+    }, [selectedApp?.id, serverBaseUrl]);
 
     useEffect(() => {
         if (!selectedApp?.id || !selectedLogFile) {
@@ -449,7 +449,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         setLogHistoryLoading(true);
         setLogHistoryError(null);
 
-        getApplicationLogFileHistory(selectedApp.id, selectedLogFile, logHistoryLimit, controller.signal)
+        getApplicationLogFileHistory(selectedApp.id, selectedLogFile, logHistoryLimit, controller.signal, serverBaseUrl)
             .then(events => setLogHistory(events))
             .catch(err => {
                 const aborted =
@@ -462,15 +462,15 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
             .finally(() => setLogHistoryLoading(false));
 
         return () => controller.abort();
-    }, [logHistoryLimit, selectedApp?.id, selectedLogFile]);
+    }, [logHistoryLimit, selectedApp?.id, selectedLogFile, serverBaseUrl]);
 
     const rescanLogs = useCallback(async () => {
         if (!selectedApp?.id) return;
         setRescanLoading(true);
         setLogFilesError(null);
         try {
-            await rescanApplicationLogs(selectedApp.id);
-            await getApplicationLogFiles(selectedApp.id, 1, 100)
+            await rescanApplicationLogs(selectedApp.id, undefined, serverBaseUrl);
+            await getApplicationLogFiles(selectedApp.id, 1, 100, undefined, serverBaseUrl)
                 .then(response => {
                     setLogFiles(response.items);
                     setSelectedLogFile(current => current ?? response.items[0] ?? null);
@@ -482,7 +482,7 @@ export const useApplicationsMetrics = (serverId?: string | null) => {
         } finally {
             setRescanLoading(false);
         }
-    }, [selectedApp?.id]);
+    }, [selectedApp?.id, serverBaseUrl]);
 
     const filteredLogHistory = useMemo(() => {
         const query = logSearch.trim().toLowerCase();

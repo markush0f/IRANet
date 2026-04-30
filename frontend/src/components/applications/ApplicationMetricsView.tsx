@@ -133,7 +133,7 @@ type BackendChartPoint = {
 } & Record<BackendMetricKey, number | null>;
 
 const ApplicationMetricsView: React.FC = () => {
-    const { selectedServerId } = useServer();
+    const { selectedServerId, selectedServer } = useServer();
     const {
         applications,
         appsLoading,
@@ -193,7 +193,7 @@ const ApplicationMetricsView: React.FC = () => {
         logTimeline,
         rescanLoading,
         rescanLogs,
-    } = useApplicationsMetrics(selectedServerId ?? undefined);
+    } = useApplicationsMetrics(selectedServerId ?? undefined, selectedServer?.agent_base_url);
 
     const memorySeries = useMemo(() => {
         return liveSamples.map(sample => ({
