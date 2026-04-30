@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.database import get_session
+from app.models.entities.application import Application
+from app.services.remote_agent_service import RemoteAgentService
 from app.services.applications.applications_metrics import ApplicationMetricsService
 
 
@@ -47,6 +49,17 @@ async def application_runtime_snapshot(
     application_id: UUID,
     session: AsyncSession = Depends(get_session),
 ):
+    remote = RemoteAgentService(session)
+    application = await session.get(Application, application_id)
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    if remote.should_proxy(application.server_id):
+        return await remote.get_json(
+            server_id=application.server_id,
+            path=f"/applications/{application_id}/runtime",
+        )
+
     service = ApplicationMetricsService(session)
     return await service.get_runtime_snapshot(application_id=application_id)
 
