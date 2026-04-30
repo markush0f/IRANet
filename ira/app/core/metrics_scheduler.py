@@ -4,7 +4,15 @@ import asyncio
 import os
 
 
-from app.core.config import get_server_id, get_server_hostname, get_server_ip, get_server_display_name
+from app.core.config import (
+    get_agent_base_url,
+    get_server_capabilities,
+    get_server_display_name,
+    get_server_environment,
+    get_server_hostname,
+    get_server_id,
+    get_server_ip,
+)
 from app.core.database import AsyncSessionLocal
 from app.core.logger import get_logger
 from app.repositories.servers import ServerRepository
@@ -22,6 +30,9 @@ async def metrics_scheduler() -> None:
     server_id = get_server_id()
     host = get_server_hostname()
     ip_address = get_server_ip()
+    agent_base_url = get_agent_base_url()
+    environment = get_server_environment()
+    capabilities = get_server_capabilities()
     cpu_cores = os.cpu_count() or 1
 
     logger.info("starting metrics scheduler for server %s (host %s)", server_id, host)
@@ -34,6 +45,9 @@ async def metrics_scheduler() -> None:
             display_name=get_server_display_name(),
             ip_address=ip_address,
             ira_version=IRA_VERSION,
+            agent_base_url=agent_base_url,
+            environment=environment,
+            capabilities=capabilities,
         )
 
     while True:
@@ -71,6 +85,9 @@ async def metrics_scheduler() -> None:
                     server_id,
                     ip_address=ip_address,
                     ira_version=IRA_VERSION,
+                    agent_base_url=agent_base_url,
+                    environment=environment,
+                    capabilities=capabilities,
                 )
 
         except Exception:
