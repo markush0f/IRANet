@@ -1,5 +1,7 @@
 # IRANet
 
+Spanish version: [`README.es.md`](./README.es.md)
+
 IRANet is a read-only observability and system introspection platform for Linux servers. It discovers what is really running on each server and exposes that information through a backend API and a web frontend.
 
 The platform is intentionally read-only: it gives visibility into servers, processes, services, packages, logs, and metrics without allowing remote execution from the IRANet UI itself.
@@ -320,6 +322,36 @@ const installResp = await fetch(`${IRANET_API}/servers/${serverId}/install-comma
 const installData = await installResp.json();
 
 await ssh.execCommand(installData.command);
+```
+
+### Quick Start In English
+
+If you already have your own server management panel, this is the shortest installation flow for a remote server:
+
+1. Create or update the server record in IRANet.
+2. Request a Docker install command from IRANet.
+3. Execute that command over SSH on the target server.
+4. Wait for the backend heartbeat.
+
+Example:
+
+```bash
+curl "http://iranet-api:8000/servers/server-01/install-command?database_dsn=postgresql%2Basyncpg%3A%2F%2Firanet%3Apass%40db.example.com%3A5432%2Firanet&backend_base_url=http%3A%2F%2F10.0.0.21%3A8000&server_name=Production%2001&environment=production&capabilities=system,processes,services,logs,packages,users,metrics"
+```
+
+IRANet returns a command like this:
+
+```bash
+curl -sL https://github.com/markush0f/IRANet/raw/main/ira/install.sh | bash -s -- --server-id server-01 --database-dsn postgresql+asyncpg://iranet:pass@db.example.com:5432/iranet --method pull --image ghcr.io/markush0f/iranet/ira-backend:latest --server-name "Production 01" --backend-base-url http://10.0.0.21:8000 --environment production --capabilities system,processes,services,logs,packages,users,metrics
+```
+
+Then execute it on the remote server through SSH from your own backend.
+
+Check status on the target server:
+
+```bash
+sudo systemctl status iranet-backend
+sudo journalctl -u iranet-backend -f
 ```
 
 ### What the installer does
