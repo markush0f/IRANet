@@ -345,9 +345,13 @@ export interface Server {
     id: string;
     hostname: string;
     display_name: string | null;
+    name: string | null;
     ip_address: string | null;
     ira_version: string | null;
     status: string;
     last_seen_at: string;
     created_at: string;
+    agent_base_url: string | null;
+    environment: string | null;
+    capabilities: string[];
 }

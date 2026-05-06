@@ -217,7 +217,7 @@ export const useApplicationsMetrics = (serverId?: string | null, serverBaseUrl?:
         setAppsLoading(true);
         setAppsError(null);
         try {
-            const apps = await getApplicationsList(serverId, signal);
+            const apps = await getApplicationsList(serverId ?? undefined, signal);
             setApplications(apps);
             setSelectedAppId(current => {
                 if (current && apps.some(app => app.id === current)) {

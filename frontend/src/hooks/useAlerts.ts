@@ -25,7 +25,7 @@ export const useAlerts = (serverId?: string, initialPage = 1, initialPageSize = 
             setLoading(true);
         }
 
-        fetchAlerts(targetPage, pageSize, controller.signal, serverId)
+        fetchAlerts(targetPage, pageSize, serverId, controller.signal)
             .then(({ alerts: data, total: count }) => {
                 setTotal(count);
                 setAlerts(prev => (append ? [...prev, ...data] : data));
