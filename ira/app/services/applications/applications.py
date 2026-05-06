@@ -1,6 +1,8 @@
 from typing import List, Sequence
 from uuid import UUID
 
+from fastapi import HTTPException
+from app.core.config import get_server_id
 from app.models.dto.application_logs_dto import ApplicationsLogsDTO
 from app.models.entities.application import Application
 from app.models.entities.application_log import ApplicationLogPath
@@ -79,6 +81,11 @@ class ApplicationsService:
         application = result.first()
         if not application:
             return False
+        if application.server_id != get_server_id():
+            raise HTTPException(
+                status_code=409,
+                detail="Application belongs to a different backend",
+            )
 
         await self._session.exec(
             delete(ApplicationMetrics).where(
@@ -108,6 +115,11 @@ class ApplicationsService:
         application = result.first()
         if not application:
             return None
+        if application.server_id != get_server_id():
+            raise HTTPException(
+                status_code=409,
+                detail="Application belongs to a different backend",
+            )
 
         application.name = data.name
         self._session.add(application)
