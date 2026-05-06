@@ -133,94 +133,96 @@ async def get_install_command(
         ...,
         description="PostgreSQL connection string for this server to use",
     ),
-    method: str = Query(
-        default="pull",
-        description="Installation method: pull (Docker image), build (Docker from source), python (no Docker)",
-    ),
     image: str = Query(
-        default="ghcr.io/markush0f/iranet/ira-agent:latest",
-        description="Docker image URL for pull method",
+        default="ghcr.io/markush0f/iranet/ira-backend:latest",
+        description="Docker image URL to install on the target server",
+    ),
+    server_name: str | None = Query(
+        default=None,
+        description="Human-readable server name to register",
+    ),
+    backend_base_url: str | None = Query(
+        default=None,
+        description="Public backend URL for this server, for example http://10.0.0.21:8000",
+    ),
+    backend_port: int = Query(
+        default=8000,
+        ge=1,
+        le=65535,
+        description="Backend listen port exposed on the target server",
+    ),
+    environment: str | None = Query(
+        default=None,
+        description="Environment label to register, for example production or staging",
+    ),
+    capabilities: str | None = Query(
+        default=None,
+        description="Comma-separated capabilities to register",
     ),
     repo_url: str = Query(
         default="https://github.com/markush0f/IRANet",
-        description="Git repo URL for build/python methods",
+        description="Git repo URL where install.sh is published",
     ),
     branch: str = Query(
         default="main",
-        description="Git branch to install",
+        description="Git branch used to fetch install.sh",
     ),
 ):
     """
-    Generate the command to install the IRA agent on this server.
+    Generate the Docker installation command for the IRANet backend on this server.
 
     The returned command is meant to be executed on the target server
     via SSH/terminal from your admin panel.
-
-    Methods:
-    - pull:    Downloads a pre-built Docker image (fastest, needs Docker)
-    - build:  Clones repo and builds Docker image (needs Docker + build tools)
-    - python: Installs Python dependencies directly (no Docker required)
 
     Example usage from your panel:
         resp = requests.get(
             f"http://iranet:8000/servers/{server_id}/install-command",
             params={
                 "database_dsn": "postgresql+asyncpg://ira:pass@iranet-db:5432/ira",
-                "method": "pull",
+                "backend_base_url": "http://10.0.0.21:8000",
             }
         )
         ssh.exec_command(resp.json()["command"])
     """
-    if method not in ("pull", "build", "python"):
-        raise HTTPException(
-            status_code=400,
-            detail="method must be one of: pull, build, python"
-        )
-
     install_script_url = f"{repo_url}/raw/{branch}/install.sh"
 
     cmd_parts = [
         f"curl -sL {install_script_url} | bash -s --",
         f"--server-id {server_id}",
         f"--database-dsn {database_dsn}",
+        f"--method pull",
+        f"--image {image}",
     ]
 
-    if method == "pull":
-        cmd_parts.append(f"--method pull")
-        cmd_parts.append(f"--image {image}")
-    elif method == "build":
-        cmd_parts.append(f"--method build")
-        cmd_parts.append(f"--repo {repo_url}")
-        cmd_parts.append(f"--branch {branch}")
-    else:
-        cmd_parts.append(f"--method python")
-        cmd_parts.append(f"--repo {repo_url}")
-        cmd_parts.append(f"--branch {branch}")
+    if server_name:
+        cmd_parts.append(f"--server-name {server_name}")
+    if backend_base_url:
+        cmd_parts.append(f"--backend-base-url {backend_base_url}")
+    if backend_port != 8000:
+        cmd_parts.append(f"--backend-port {backend_port}")
+    if environment:
+        cmd_parts.append(f"--environment {environment}")
+    if capabilities:
+        cmd_parts.append(f"--capabilities {capabilities}")
 
     command = " ".join(cmd_parts)
-
-    method_descriptions = {
-        "pull": f"Downloads pre-built image `{image}` (fastest)",
-        "build": f"Clones {repo_url} branch {branch} and builds Docker image",
-        "python": f"Clones {repo_url} branch {branch} and installs Python deps directly (no Docker)",
-    }
 
     instructions = (
         f"Run this command on server '{server_id}' via SSH:\n\n"
         f"    {command}\n\n"
-        f"Method: {method_descriptions[method]}\n\n"
-        f"The agent will:\n"
-        f"  1. {'Pull Docker image' if method == 'pull' else 'Clone IRA from ' + repo_url}\n"
-        f"  2. {'Start container' if method == 'pull' else 'Install and start service'}\n"
-        f"  3. Register with IRA automatically\n\n"
+        f"Method: pull pre-built Docker image `{image}`\n\n"
+        f"The backend will:\n"
+        f"  1. Pull the Docker image\n"
+        f"  2. Create or replace the `iranet-backend` systemd service\n"
+        f"  3. Register with IRANet automatically\n\n"
         f"Check status:\n"
-        f"    sudo systemctl status ira-agent\n\n"
-        f"Server appears in IRA within 10 seconds via heartbeat."
+        f"    sudo systemctl status iranet-backend\n\n"
+        f"Server appears in IRANet within 10 seconds via heartbeat."
     )
 
     return InstallCommandResponse(
         server_id=server_id,
-        method=method,
+        method="pull",
         command=command,
         instructions=instructions,
     )
