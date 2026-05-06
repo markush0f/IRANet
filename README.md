@@ -1,190 +1,172 @@
 # IRANet
 
-IRANet is a **read-only observability and system introspection platform** for Linux servers, designed for developers and technical teams who need real visibility into what is actually running on a host.
+IRANet is a read-only observability and system introspection platform for Linux servers. It discovers what is really running on each server and exposes that information through a backend API and a web frontend.
 
-Instead of relying on predefined services or manual configuration, IRANet **automatically inspects the system** and exposes structured information through an API and a web dashboard. The platform is intentionally **read-only**: it provides visibility without allowing remote execution or system modification.
+The platform is intentionally read-only: it gives visibility into servers, processes, services, packages, logs, and metrics without allowing remote execution from the IRANet UI itself.
 
-This repository contains both the backend and frontend components of IRANet.
+## Overview
 
----
+IRANet is designed for a deployment model with:
 
-## Deployment Model
-
-IRANet uses a single deployment model:
-
-- one frontend
-- one or more IRANet backends
 - one shared PostgreSQL database
+- one frontend
+- one IRANet backend per monitored server
 
-Each backend monitors only its own server and writes metrics, alerts, applications, and heartbeat data into the same PostgreSQL database. The frontend loads the registered server list and lets you choose which backend to view.
+Each backend monitors only its own host and writes data into the same PostgreSQL database. The frontend can then switch between servers and talk to the selected backend for live data.
 
+```text
+                    +----------------------+
+                    |      Frontend        |
+                    |   server selector    |
+                    +----------+-----------+
+                               |
+                               v
+                    +----------------------+
+                    |  Selected Backend    |
+                    |  live API requests   |
+                    +----------+-----------+
+                               |
+        +----------------------+----------------------+
+        |                                             |
+        v                                             v
++---------------+                             +---------------+
+|   Backend A   |                             |   Backend B   |
+|   server-a    |                             |   server-b    |
++-------+-------+                             +-------+-------+
+        |                                             |
+        +----------------------+----------------------+
+                               |
+                               v
+                    +----------------------+
+                    |      PostgreSQL      |
+                    |  shared persistence  |
+                    +----------------------+
 ```
-┌─────────────┐         ┌──────────────────┐
-│   Browser   │◄───────►│     Backend      │
-└─────────────┘         │  selected server │
-                        └────────┬─────────┘
-                                 │
-               ┌─────────────────┴─────────────────┐
-               │                                   │
-         ┌─────▼─────┐                       ┌─────▼─────┐
-         │ Backend 1 │                       │ Backend 2 │
-         │ server_1  │                       │ server_2  │
-         └─────┬─────┘                       └─────┬─────┘
-               │                                   │
-               └──────────────┬────────────────────┘
-                              │
-                        ┌─────▼─────┐
-                        │PostgreSQL │
-                        │ shared DB │
-                        └───────────┘
-```
 
-Each backend registers:
-- `server_id` — unique identifier for the monitored server
-- `hostname` — machine hostname for display
-- `ip_address` — detected automatically on heartbeat
+## What IRANet Collects
 
----
+IRANet can discover and expose:
 
-## What IRANet Does
+- Docker containers and services
+- systemd services
+- detected databases
+- running processes
+- long-lived applications
+- system users
+- installed packages and package history
+- system logs and application logs
+- system metrics
+- per-application runtime metrics
+- alert history
 
-IRANet automatically discovers and exposes:
+## Final Architecture
 
-* Docker services and running containers
-* systemd services, including Nginx
-* Automatically detected databases
-* Running processes and long‑living applications
-* System users
-* All installed packages on the server
-* System and application logs (with log visualization)
-* Resource metrics (CPU, memory, disk, network)
-* Calculated metrics per detected application
-
-The dashboard is accessible to any user but **no actions can be executed on the host** from the UI.
-
----
-
-## Project Status
-
-This is a **first functional version (v1)** focused on discovery, metrics, and visibility.
-
-Current work in progress includes:
-
-* Linux system‑based authentication
-* Extensions system
-* Developer mode for custom tooling and experimentation
-
----
-
-## Architecture Overview
-
-IRANet is split into two main components:
+IRANet now follows a single architecture model.
 
 ### Backend
 
-* Async API built in Python
-* Modular collectors for system, services, processes, metrics, and logs
-* PostgreSQL-backed persistence for historical data
-* Designed to run as a long‑living service on a Linux host or VPS
-* Scopes all persisted data by `server_id` and keeps the shared DB updated via heartbeat
+Each backend:
+
+- runs on exactly one server
+- monitors only that local server
+- writes all persistent data to the shared PostgreSQL database
+- registers itself in the `servers` table
+- updates heartbeat metadata periodically
+- serves live requests for its own host only
 
 ### Frontend
 
-* Modern web dashboard built with TypeScript
-* Focused on developer usability and system visibility
-* Communicates exclusively with the backend API
-* Includes a server selector dropdown in the sidebar
+The frontend:
 
----
+- boots from any reachable backend URL
+- loads the server list from PostgreSQL
+- lets the user choose which server to inspect
+- uses the selected backend URL for live views
+
+### PostgreSQL
+
+PostgreSQL is mandatory.
+
+All backends must point to the same `IRA_DATABASE_DSN`.
+
+That shared database stores:
+
+- servers
+- applications
+- application metrics
+- system metrics
+- alerts
+- extensions
+
+## Important Runtime Rules
+
+- `IRA_DATABASE_DSN` is required
+- `IRA_SERVER_ID` is required
+- each backend must have a unique `IRA_SERVER_ID`
+- each backend must point to the same PostgreSQL database
+- live endpoints only operate on the local backend's server
+- historical data is shared through PostgreSQL
 
 ## Requirements
 
-### Docker (recommended)
+### Backend
 
-* Docker Engine
-* Docker Compose v2
+- Python 3.11+
+- PostgreSQL 16+
+- Linux host
 
-### Local development
+### Frontend
 
-Backend:
+- Node.js 18+
+- npm, pnpm, or yarn
 
-* Python 3.11+
-* pip + virtualenv or Poetry
-* PostgreSQL 16+
+### Recommended deployment
 
-Frontend:
+- Docker Engine
+- Docker Compose v2
 
-* Node.js 18+
-* npm (or pnpm/yarn)
+## Docker Deployment
 
----
+The repository provides three Compose stacks:
 
-## Running the Project (Docker)
+- `docker/compose.db.yml`
+- `docker/compose.backend.yml`
+- `docker/compose.frontend.yml`
 
-### Docker stacks
-
-```bash
-cd docker
-docker compose -f compose.db.yml up -d
-```
-
-Deploy each stack where it belongs:
-
-1. `compose.db.yml`
-   Run on the central PostgreSQL host.
-2. `compose.backend.yml`
-   Run on every monitored server. This is the reusable backend stack.
-3. `compose.frontend.yml`
-   Run once on the central frontend host.
-
-Environment examples are available in `docker/`:
-
-* `.env.db.example`
-* `.env.backend.example`
-* `.env.frontend.example`
-
-Examples:
+### 1. Central PostgreSQL host
 
 ```bash
-# Central database host
 cd docker
 cp .env.db.example .env.db
 docker compose --env-file .env.db -f compose.db.yml up -d
+```
 
-# Backend on a monitored server
+### 2. One backend per monitored server
+
+```bash
 cd docker
 cp .env.backend.example .env.backend
 docker compose --env-file .env.backend -f compose.backend.yml up -d --build
+```
 
-# Single frontend host
+### 3. Single frontend host
+
+```bash
 cd docker
 cp .env.frontend.example .env.frontend
 docker compose --env-file .env.frontend -f compose.frontend.yml up -d --build
 ```
 
-Notes:
+### Notes
 
-* `compose.backend.yml` is reused on each server and connects all backends to the same PostgreSQL database.
-* The frontend is static and must point to one backend URL for bootstrap through `VITE_API_BASE_URL`.
-* After loading the server list, the frontend can switch to the selected server backend using each server's registered backend URL.
+- `compose.backend.yml` is reused on every monitored server
+- every backend uses the same PostgreSQL DSN
+- the frontend only needs one backend URL for bootstrap
+- after bootstrap, the frontend can switch to the selected server backend URL
 
-Common endpoints after startup:
+### Local all-in-one setup
 
-* Frontend: [http://localhost:3000](http://localhost:3000)
-* Backend API on each server: `http://<server-ip>:8000`
-* PostgreSQL: `5432`
-
-Stop services:
-
-```bash
-docker compose --env-file .env.db -f compose.db.yml down
-docker compose --env-file .env.backend -f compose.backend.yml down
-docker compose --env-file .env.frontend -f compose.frontend.yml down
-```
-
-### All‑in‑One (single server)
-
-To run everything on one machine, combine the three stacks:
+If you want to run everything on a single machine for development:
 
 ```bash
 cd docker
@@ -195,131 +177,229 @@ docker compose \
   up -d --build
 ```
 
-Result:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- PostgreSQL: localhost:5432
-
 Or use the helper scripts:
 
 ```bash
 cd docker
-./up.sh    # start all
-./down.sh  # stop all
+./up.sh
+./down.sh
 ```
 
-### Shared PostgreSQL
+## Backend Environment Variables
 
-`IRA_DATABASE_DSN` is mandatory. Every backend connects to the same PostgreSQL database and:
+### Required
 
-1. Registers itself in `servers`
-2. Writes metrics, alerts, and applications under its `server_id`
-3. Updates its `ip_address` every 5 seconds via heartbeat
+| Variable | Description |
+|---|---|
+| `IRA_DATABASE_DSN` | Shared PostgreSQL DSN, example `postgresql+asyncpg://user:pass@db:5432/iranet` |
+| `IRA_SERVER_ID` | Unique identifier for this backend/server |
 
-### Remote installation from your own panel
+### Optional
 
-If you already have a frontend or admin panel that manages your servers, the recommended flow is:
+| Variable | Default | Description |
+|---|---|---|
+| `IRA_SERVER_NAME` | hostname | Human-readable server name |
+| `IRA_AGENT_BASE_URL` | empty | Public backend URL for this server |
+| `IRA_AGENT_PORT` | `8000` | Backend listen port |
+| `IRA_SERVER_ENVIRONMENT` | `production` | Environment label |
+| `IRA_SERVER_CAPABILITIES` | built-in list | Comma-separated capability list |
+| `IRA_CONFIG_PATH` | `app/config/ira.config.json` | JSON config path |
 
-1. Register or update the server in IRANet.
-2. Call `GET /servers/{server_id}/install-command` with:
-   - `database_dsn`
-   - `backend_base_url`
-   - optional metadata like `server_name`, `environment`, and `capabilities`
-3. Execute the returned command on the target server via SSH from your own backend.
-4. Wait for heartbeat and confirm the server appears in `/servers`.
+## Frontend Environment Variables
 
-Example:
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_BASE_URL` | `http://localhost:8000` | Bootstrap backend URL |
+| `VITE_SERVER_ID` | empty | Initially selected server |
 
-```bash
-curl "http://iranet-api:8000/servers/server-01/install-command?database_dsn=postgresql%2Basyncpg%3A%2F%2Firanet%3Apass%40db.example.com%3A5432%2Firanet&backend_base_url=http%3A%2F%2F10.0.0.21%3A8000&server_name=Production%2001&environment=production"
-```
-
-The returned command is Docker-based and can be executed remotely with SSH.
-
----
-
-## Running the Backend (Local)
-
-### Backend
+## Running The Backend Locally
 
 ```bash
 cd ira
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
 export IRA_DATABASE_DSN="postgresql+asyncpg://user:password@localhost:5432/iranet"
 export IRA_SERVER_ID="server-01"
+export IRA_SERVER_NAME="Server 01"
+export IRA_AGENT_BASE_URL="http://127.0.0.1:8000"
+
 python3 -m app.main
 ```
 
-Optional overrides:
-
-```bash
-export IRA_SERVER_ID="my-server-id"
-export IRA_SERVER_NAME="My Server Display Name"
-```
-
-### Server Identity (how it works)
-
-| Environment variable | Default | Description |
-|---|---|---|
-| `IRA_SERVER_ID` | _(none)_ | Unique identifier for this backend |
-| `IRA_SERVER_NAME` | `hostname` | Human-readable name |
-| `IRA_DATABASE_DSN` | _(none)_ | Required PostgreSQL DSN |
-
-The backend detects its local IP by connecting to `8.8.8.8:80` (no external traffic, just routing table lookup).
-
----
-
-## Running the Frontend (Local)
+## Running The Frontend Locally
 
 ```bash
 cd frontend
 npm install
+export VITE_API_BASE_URL="http://localhost:8000"
 npm run dev
 ```
 
-Point the frontend at any reachable IRANet backend for bootstrap:
+## Installing A Backend Remotely From Your Own Panel
+
+This is the most important operational flow if you already have your own frontend or admin panel that manages servers.
+
+The intended model is:
+
+1. your panel stores server credentials and metadata
+2. your backend calls IRANet to generate an install command
+3. your backend executes that command over SSH on the target server
+4. the new backend starts, connects to PostgreSQL, and registers itself automatically
+
+### Step 1. Register or update the server record
+
+You can pre-register a server in IRANet using the `servers` API.
+
+Example body:
+
+```json
+{
+  "id": "server-01",
+  "hostname": "server-01",
+  "display_name": "Production 01",
+  "agent_base_url": "http://10.0.0.21:8000",
+  "environment": "production",
+  "capabilities": [
+    "system",
+    "processes",
+    "services",
+    "logs",
+    "packages",
+    "users",
+    "metrics"
+  ]
+}
+```
+
+### Step 2. Ask IRANet for a Docker install command
+
+Use:
+
+```text
+GET /servers/{server_id}/install-command
+```
+
+Supported query params:
+
+- `database_dsn` required
+- `image` optional
+- `server_name` optional
+- `backend_base_url` optional
+- `backend_port` optional
+- `environment` optional
+- `capabilities` optional
+- `repo_url` optional, only used to locate `install.sh`
+- `branch` optional, only used to locate `install.sh`
+
+Example:
 
 ```bash
-export VITE_API_BASE_URL=http://localhost:8000
-npm run dev
+curl "http://iranet-api:8000/servers/server-01/install-command?database_dsn=postgresql%2Basyncpg%3A%2F%2Firanet%3Apass%40db.example.com%3A5432%2Firanet&backend_base_url=http%3A%2F%2F10.0.0.21%3A8000&server_name=Production%2001&environment=production&capabilities=system,processes,services,logs,packages,users,metrics"
 ```
 
-The development server URL will be shown in the console.
+The API returns a Docker-based install command that your own backend can execute over SSH.
 
----
+### Step 3. Execute the command over SSH
 
-## Configuration
+Your frontend should not execute SSH directly. Your own backend should do that.
 
-### Backend environment variables
+Recommended flow:
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `IRA_DATABASE_DSN` | Yes | _(none)_ | `postgresql+asyncpg://...` connection string |
-| `IRA_SERVER_ID` | Yes | _(none)_ | Unique server identifier |
-| `IRA_SERVER_NAME` | No | `hostname` | Override server display name |
-| `IRA_CONFIG_PATH` | No | `app/config/ira.config.json` | Path to JSON config file |
+1. user clicks `Install IRANet`
+2. your frontend calls your backend
+3. your backend requests `/servers/{server_id}/install-command`
+4. your backend executes `response.command` over SSH on the target server
+5. your backend polls `/servers/{server_id}` until heartbeat is visible
 
-### Frontend environment variables
+Pseudo-flow:
 
-| Variable | Default | Description |
-|---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:8000` | Backend API base URL |
-| `VITE_SERVER_ID` | _(none)_ | Default server selected on load |
+```ts
+const installResp = await fetch(`${IRANET_API}/servers/${serverId}/install-command?...`);
+const installData = await installResp.json();
 
----
+await ssh.execCommand(installData.command);
+```
 
-## Security Model
+### What the installer does
 
-* Read‑only access by design
-* No remote command execution
-* No system mutation from the UI
-* No authentication in v1
+The generated command downloads `ira/install.sh`, then:
 
-It is recommended to deploy IRANet in trusted networks or behind a reverse proxy.
+- pulls the Docker image
+- creates or replaces the `iranet-backend` systemd service
+- sets all required IRANet environment variables
+- starts the backend
+- lets it register itself through heartbeat
 
----
+### Docker image used
+
+Default image:
+
+```text
+ghcr.io/markush0f/iranet/ira-backend:latest
+```
+
+### Result on the target server
+
+The remote machine ends up with a `systemd` service named:
+
+```text
+iranet-backend
+```
+
+Useful commands on the target server:
+
+```bash
+sudo systemctl status iranet-backend
+sudo journalctl -u iranet-backend -f
+```
+
+## Live vs Historical Data
+
+This distinction is important.
+
+### Live data
+
+Live endpoints must hit the selected backend directly.
+
+Examples:
+
+- system snapshot
+- running processes
+- users
+- package state
+- application discovery
+- log streaming
+- runtime process inspection
+
+### Historical data
+
+Historical data is shared through PostgreSQL.
+
+Examples:
+
+- stored metrics
+- alert history
+- registered applications
+- server inventory
+- application metrics history
+
+## Security Notes
+
+- IRANet itself is read-only
+- the IRANet UI does not execute commands on servers
+- if you install remotely from your own panel, SSH execution belongs to your own backend, not to IRANet frontend
+- deploy behind a reverse proxy or inside trusted networks
+- secure PostgreSQL access properly
+
+## Current Terminology Note
+
+Some internal names still use `agent_base_url` for historical reasons.
+
+In the current architecture, that field should be understood as:
+
+- the public backend URL of that server
 
 ## License
 
