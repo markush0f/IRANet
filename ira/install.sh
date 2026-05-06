@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# IRA Agent Installer
+# IRANet Backend Installer
 # =============================================================================
 # Usage:
 #   curl -sL https://your-iranet/install.sh | bash -s -- \
@@ -11,7 +11,12 @@
 #   --server-id      Unique identifier for this server (required)
 #   --database-dsn   PostgreSQL connection string (required)
 #   --method         Installation method: pull|build  (default: pull if Docker available)
-#   --image          Docker image to pull (default: ghcr.io/markush0f/iranet/ira-agent:latest)
+#   --image          Docker image to pull (default: ghcr.io/markush0f/iranet/ira-backend:latest)
+#   --server-name    Human-readable server name
+#   --backend-base-url Public backend URL, for example http://10.0.0.21:8000
+#   --backend-port   Backend port exposed on the server (default: 8000)
+#   --environment    Environment label, for example production
+#   --capabilities   Comma-separated capabilities
 #   --repo           Git repo for build method (default: https://github.com/markush0f/IRANet)
 #   --branch         Git branch for build method (default: main)
 # =============================================================================
@@ -19,13 +24,18 @@
 set -e
 
 INSTALL_DIR="/opt/ira"
-SERVICE_NAME="ira-agent"
+SERVICE_NAME="iranet-backend"
 METHOD=""
 IMAGE_URL=""
 REPO_URL="https://github.com/markush0f/IRANet"
 BRANCH="main"
 SERVER_ID=""
 DATABASE_DSN=""
+SERVER_NAME=""
+BACKEND_BASE_URL=""
+BACKEND_PORT="8000"
+ENVIRONMENT=""
+CAPABILITIES=""
 
 usage() {
     echo "Usage: $0 --server-id <id> --database-dsn <dsn> [options]"
@@ -37,7 +47,12 @@ usage() {
     echo "Options:"
     echo "  --method         Installation method: pull|build  (default: pull)"
     echo "  --image          Docker image for pull method"
-    echo "                   (default: ghcr.io/markush0f/iranet/ira-agent:latest)"
+    echo "                   (default: ghcr.io/markush0f/iranet/ira-backend:latest)"
+    echo "  --server-name    Human-readable server name"
+    echo "  --backend-base-url Public backend URL, for example http://10.0.0.21:8000"
+    echo "  --backend-port   Backend port exposed on the server (default: 8000)"
+    echo "  --environment    Environment label"
+    echo "  --capabilities   Comma-separated capabilities"
     echo "  --repo           Git repo URL for build method"
     echo "  --branch         Git branch for build method"
     exit 1
@@ -53,6 +68,16 @@ while [[ $# -gt 0 ]]; do
             METHOD="$2"; shift 2 ;;
         --image)
             IMAGE_URL="$2"; shift 2 ;;
+        --server-name)
+            SERVER_NAME="$2"; shift 2 ;;
+        --backend-base-url)
+            BACKEND_BASE_URL="$2"; shift 2 ;;
+        --backend-port)
+            BACKEND_PORT="$2"; shift 2 ;;
+        --environment)
+            ENVIRONMENT="$2"; shift 2 ;;
+        --capabilities)
+            CAPABILITIES="$2"; shift 2 ;;
         --repo)
             REPO_URL="$2"; shift 2 ;;
         --branch)
@@ -63,14 +88,12 @@ done
 
 [[ -z "$SERVER_ID" ]] || [[ -z "$DATABASE_DSN" ]] && usage
 
-# Detect Docker availability
 if command -v docker &> /dev/null; then
     DOCKER_AVAILABLE=true
 else
     DOCKER_AVAILABLE=false
 fi
 
-# Default method
 if [[ -z "$METHOD" ]]; then
     if $DOCKER_AVAILABLE; then
         METHOD="pull"
@@ -79,13 +102,13 @@ if [[ -z "$METHOD" ]]; then
     fi
 fi
 
-# Default image
-IMAGE_URL="${IMAGE_URL:-ghcr.io/markush0f/iranet/ira-agent:latest}"
+IMAGE_URL="${IMAGE_URL:-ghcr.io/markush0f/iranet/ira-backend:latest}"
 
-echo "==> IRA Agent Installer"
+echo "==> IRANet Backend Installer"
 echo "==> Server ID: ${SERVER_ID}"
 echo "==> Method: ${METHOD}"
 [[ "$METHOD" == "pull" ]] && echo "==> Image: ${IMAGE_URL}"
+[[ -n "$BACKEND_BASE_URL" ]] && echo "==> Backend URL: ${BACKEND_BASE_URL}"
 echo ""
 
 install_docker_pull() {
@@ -95,20 +118,25 @@ install_docker_pull() {
     echo "==> Creating systemd service..."
     sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
 [Unit]
-Description=IRA Agent - Infrastructure Runtime Analyzer
+Description=IRANet Backend - Infrastructure Runtime Analyzer
 After=network.target
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=5
-ExecStart=/usr/bin/docker run --rm \\
-    --network host \\
-    --name ira-agent-${SERVER_ID} \\
-    -e IRA_SERVER_ID=${SERVER_ID} \\
-    -e IRA_DATABASE_DSN=${DATABASE_DSN} \\
-    -v /proc:/host/proc:ro \\
-    -v /var/log:/host/logs:ro \\
+ExecStart=/usr/bin/docker run --rm \
+    --network host \
+    --name iranet-backend-${SERVER_ID} \
+    -e IRA_SERVER_ID=${SERVER_ID} \
+    -e IRA_DATABASE_DSN=${DATABASE_DSN} \
+    -e IRA_SERVER_NAME=${SERVER_NAME} \
+    -e IRA_AGENT_BASE_URL=${BACKEND_BASE_URL} \
+    -e IRA_AGENT_PORT=${BACKEND_PORT} \
+    -e IRA_SERVER_ENVIRONMENT=${ENVIRONMENT} \
+    -e IRA_SERVER_CAPABILITIES=${CAPABILITIES} \
+    -v /proc:/host/proc:ro \
+    -v /var/log:/host/logs:ro \
     ${IMAGE_URL}
 
 [Install]
@@ -132,26 +160,31 @@ install_docker_build() {
     fi
 
     echo "==> Building Docker image..."
-    docker build -t "ira-agent:${SERVER_ID}" .
+    docker build -t "iranet-backend:${SERVER_ID}" .
 
     echo "==> Creating systemd service..."
     sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
 [Unit]
-Description=IRA Agent - Infrastructure Runtime Analyzer
+Description=IRANet Backend - Infrastructure Runtime Analyzer
 After=network.target
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=5
-ExecStart=/usr/bin/docker run --rm \\
-    --network host \\
-    --name ira-agent-${SERVER_ID} \\
-    -e IRA_SERVER_ID=${SERVER_ID} \\
-    -e IRA_DATABASE_DSN=${DATABASE_DSN} \\
-    -v /proc:/host/proc:ro \\
-    -v /var/log:/host/logs:ro \\
-    ira-agent:${SERVER_ID}
+ExecStart=/usr/bin/docker run --rm \
+    --network host \
+    --name iranet-backend-${SERVER_ID} \
+    -e IRA_SERVER_ID=${SERVER_ID} \
+    -e IRA_DATABASE_DSN=${DATABASE_DSN} \
+    -e IRA_SERVER_NAME=${SERVER_NAME} \
+    -e IRA_AGENT_BASE_URL=${BACKEND_BASE_URL} \
+    -e IRA_AGENT_PORT=${BACKEND_PORT} \
+    -e IRA_SERVER_ENVIRONMENT=${ENVIRONMENT} \
+    -e IRA_SERVER_CAPABILITIES=${CAPABILITIES} \
+    -v /proc:/host/proc:ro \
+    -v /var/log:/host/logs:ro \
+    iranet-backend:${SERVER_ID}
 
 [Install]
 WantedBy=multi-user.target
@@ -180,7 +213,7 @@ install_python() {
     echo "==> Creating systemd service..."
     sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
 [Unit]
-Description=IRA Agent - Infrastructure Runtime Analyzer
+Description=IRANet Backend - Infrastructure Runtime Analyzer
 After=network.target
 
 [Service]
@@ -190,6 +223,11 @@ RestartSec=5
 WorkingDirectory=${INSTALL_DIR}
 Environment="IRA_SERVER_ID=${SERVER_ID}"
 Environment="IRA_DATABASE_DSN=${DATABASE_DSN}"
+Environment="IRA_SERVER_NAME=${SERVER_NAME}"
+Environment="IRA_AGENT_BASE_URL=${BACKEND_BASE_URL}"
+Environment="IRA_AGENT_PORT=${BACKEND_PORT}"
+Environment="IRA_SERVER_ENVIRONMENT=${ENVIRONMENT}"
+Environment="IRA_SERVER_CAPABILITIES=${CAPABILITIES}"
 ExecStart=uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 [Install]
@@ -237,4 +275,4 @@ echo ""
 echo "==> View logs:"
 echo "    sudo journalctl -u ${SERVICE_NAME} -f"
 echo ""
-echo "==> The agent will register with IRA within 10 seconds."
+echo "==> The backend will register with IRANet within 10 seconds."
