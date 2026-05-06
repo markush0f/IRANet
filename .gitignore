@@ -1,0 +1,7 @@
+# Environment files (keep examples)
+.env
+.env.*
+!.env.example
+!.env.db.example
+!.env.backend.example
+!.env.frontend.example
