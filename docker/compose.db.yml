@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${IRA_DB_CONTAINER_NAME:-iranet-postgres}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${IRA_DB_USER:-iranet}
+      POSTGRES_PASSWORD: ${IRA_DB_PASSWORD:-iranetpass}
+      POSTGRES_DB: ${IRA_DB_NAME:-iranet}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../ira/docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${IRA_DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${IRA_DB_USER:-iranet} -d ${IRA_DB_NAME:-iranet}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

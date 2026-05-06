@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: ${IRA_BACKEND_CONTAINER_NAME:-iranet-backend}
+    restart: unless-stopped
+    pid: host
+    environment:
+      IRA_DATABASE_DSN: ${IRA_DATABASE_DSN:-postgresql+asyncpg://iranet:iranetpass@postgres:5432/iranet}
+      IRA_SERVER_ID: ${IRA_SERVER_ID:?Set IRA_SERVER_ID}
+      IRA_SERVER_NAME: ${IRA_SERVER_NAME:-}
+      IRA_AGENT_BASE_URL: ${IRA_AGENT_BASE_URL:-}
+      IRA_AGENT_PORT: ${IRA_AGENT_PORT:-8000}
+      IRA_SERVER_ENVIRONMENT: ${IRA_SERVER_ENVIRONMENT:-production}
+      IRA_SERVER_CAPABILITIES: ${IRA_SERVER_CAPABILITIES:-system,processes,services,logs,packages,users,metrics}
+      IRA_AGENT_SHARED_TOKEN: ${IRA_AGENT_SHARED_TOKEN:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "${IRA_AGENT_PORT:-8000}:8000"
